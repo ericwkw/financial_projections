@@ -7,7 +7,7 @@ export const calculateFinancials = (
   expenses: OperatingExpense[],
   params: ScenarioParams
 ): Financials => {
-  // 1. Current MRR, COGS, Subscriber Count
+  // 1. Current MRR, COGS (Variable), Subscriber Count
   let mrr = 0;
   let totalCogs = 0;
   let totalSubscribers = 0;
@@ -15,6 +15,7 @@ export const calculateFinancials = (
   plans.forEach(plan => {
     const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
     mrr += priceMonthly * plan.subscribers;
+    // Variable Cost logic: This scales 1:1 with subscribers
     totalCogs += plan.unitCost * plan.subscribers;
     totalSubscribers += plan.subscribers;
   });
@@ -23,14 +24,14 @@ export const calculateFinancials = (
   const grossProfit = mrr - totalCogs;
   const grossMarginPercent = mrr > 0 ? (grossProfit / mrr) : 0;
 
-  // 2. Payroll (Loaded)
+  // 2. Payroll (Fixed Operating Expense - Loaded)
   let annualBaseSalary = 0;
   employees.forEach(emp => {
     annualBaseSalary += emp.salary * emp.count;
   });
   const payrollMonthly = (annualBaseSalary * (1 + params.payrollTax / 100)) / 12;
 
-  // 3. Operating Expenses & CAC Separation
+  // 3. Operating Expenses & CAC Separation (Fixed Operating Expenses)
   const opexMonthly = expenses.reduce((acc, exp) => acc + exp.amount, 0);
   const acquisitionCosts = expenses
     .filter(e => e.isAcquisition)

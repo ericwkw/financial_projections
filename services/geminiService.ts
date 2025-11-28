@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { SimulationState } from "../types";
 import { GEMINI_MODEL, SYSTEM_INSTRUCTION } from "../constants";
 
@@ -65,3 +65,60 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     return "Error generating analysis. Please check your API key and try again.";
   }
 };
+
+export interface CostEstimation {
+  estimatedCost: number;
+  breakdown: string;
+}
+
+export const estimateUnitCost = async (description: string): Promise<CostEstimation> => {
+   try {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      throw new Error("API Key is missing");
+    }
+    
+    const ai = new GoogleGenAI({ apiKey });
+    
+    const prompt = `
+    You are a SaaS Solutions Architect and Cloud Cost Estimator.
+    Estimate the MONTHLY Variable Cost of Goods Sold (COGS) PER USER based on this technical description:
+    
+    "${description}"
+
+    Consider:
+    1. Compute (AWS/GCP/Azure)
+    2. Database/Storage per user
+    3. Third-party API fees (OpenAI, Twilio, SendGrid, etc.)
+    4. Payment Processing (e.g. Stripe ~2.9% + 30c)
+
+    Return a JSON object with:
+    - estimatedCost: number (The total estimated monthly cost per user in USD)
+    - breakdown: string (A markdown formatted list explaining the cost components)
+    
+    Be conservative but realistic. If information is missing, make reasonable standard assumptions for a SaaS MVP.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            estimatedCost: { type: Type.NUMBER },
+            breakdown: { type: Type.STRING }
+          }
+        }
+      }
+    });
+    
+    const jsonStr = response.text || "{}";
+    return JSON.parse(jsonStr) as CostEstimation;
+
+   } catch (error) {
+     console.error("Estimation failed", error);
+     throw new Error("Failed to estimate costs.");
+   }
+}

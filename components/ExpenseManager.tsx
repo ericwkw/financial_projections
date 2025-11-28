@@ -15,10 +15,10 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
       <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Operating Expenses</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Fixed Operating Expenses</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
-            Fixed monthly costs. Flag marketing spend for CAC calc.
-            <Tooltip content="Toggle the 'CAC' button for expenses related to Marketing or Sales (e.g., Ads, Sponsorships). This allows the app to calculate your Customer Acquisition Cost correctly." />
+            Costs that don't scale automatically per user.
+            <Tooltip content="Fixed monthly costs (e.g. Base Server Fees, Rent, Software Subscriptions). Do NOT put variable per-user costs here. Toggle 'CAC' for Marketing spend." />
           </p>
         </div>
         <button
@@ -43,7 +43,7 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
                 value={expense.name}
                 onChange={(e) => onUpdate(expense.id, 'name', e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950 font-medium"
-                placeholder="e.g. AWS Bill"
+                placeholder="e.g. AWS Base Instance"
               />
             </div>
 

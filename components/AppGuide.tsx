@@ -71,6 +71,69 @@ const AppGuide: React.FC = () => {
         </div>
       </div>
 
+      {/* Benchmarks Cheat Sheet (New) */}
+      <div className="bg-indigo-50 dark:bg-indigo-900/10 p-8 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800/30">
+        <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-400 mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5" /> Variable Cost Benchmarks Cheat Sheet
+        </h3>
+        <p className="text-indigo-800 dark:text-indigo-200/80 mb-6 text-sm">
+          Use these industry standard numbers to estimate your <strong>Variable Cost / User</strong>.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">Payment Processing</h4>
+                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li className="flex justify-between"><span>Stripe / PayPal</span> <span className="font-mono text-slate-500">2.9% + 30¢</span></li>
+                    <li className="flex justify-between"><span>App Store</span> <span className="font-mono text-slate-500">15% - 30%</span></li>
+                </ul>
+            </div>
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">AI / LLM Costs</h4>
+                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li className="flex justify-between"><span>GPT-4o (Input)</span> <span className="font-mono text-slate-500">$5.00 / 1M tokens</span></li>
+                    <li className="flex justify-between"><span>GPT-4o (Output)</span> <span className="font-mono text-slate-500">$15.00 / 1M tokens</span></li>
+                    <li className="flex justify-between"><span>Gemini 1.5 Flash</span> <span className="font-mono text-slate-500">~$0.35 / 1M tokens</span></li>
+                </ul>
+            </div>
+             <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">Infrastructure</h4>
+                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+                    <li className="flex justify-between"><span>Storage (S3)</span> <span className="font-mono text-slate-500">$0.023 / GB</span></li>
+                    <li className="flex justify-between"><span>Data Transfer</span> <span className="font-mono text-slate-500">$0.09 / GB</span></li>
+                </ul>
+            </div>
+        </div>
+      </div>
+
+      {/* Concept Clarification */}
+      <div className="bg-amber-50 dark:bg-amber-900/10 p-8 rounded-xl shadow-sm border border-amber-100 dark:border-amber-800/30">
+        <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5" /> Understanding Costs: Variable vs. Fixed
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div>
+             <h4 className="font-bold text-amber-900 dark:text-amber-300 text-sm mb-2">Variable Cost / User (Input)</h4>
+             <p className="text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed">
+               These are costs that go up <strong>automatically</strong> every time you get a new customer.
+               <br/><br/>
+               <em>Examples:</em> Stripe Fees (2.9%), AI Tokens ($1/user), SMS credits.
+               <br/>
+               <strong>Why it's an input:</strong> You estimate the cost *per unit*, and the model calculates the total based on your user count.
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-amber-900 dark:text-amber-300 text-sm mb-2">Fixed Operating Expenses</h4>
+             <p className="text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed">
+               These are costs that stay roughly the <strong>same</strong> regardless of whether you add 1 or 100 users today.
+               <br/><br/>
+               <em>Examples:</em> Base Database Hosting ($500/mo), Rent, Employee Salaries, Marketing Retainer.
+               <br/>
+               <strong>Where to put them:</strong> In the "Fixed Operating Expenses" section.
+             </p>
+           </div>
+        </div>
+      </div>
+
       {/* Glossary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
@@ -87,7 +150,7 @@ const AppGuide: React.FC = () => {
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">COGS (Cost of Goods Sold)</dt>
               <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Direct costs to serve a customer (e.g., server hosting, LLM API fees, payment processing). 
+                Direct costs to serve a customer (Variable Costs). 
                 <em>Revenue - COGS = Gross Profit.</em> Investors look for >70% Gross Margin.
               </dd>
             </div>
