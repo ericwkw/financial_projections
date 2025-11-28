@@ -26,26 +26,26 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state }) => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-xl shadow-lg border border-indigo-800 text-white overflow-hidden">
-      <div className="p-6 border-b border-indigo-800/50 flex justify-between items-center">
+    <div className="bg-white dark:bg-gradient-to-br dark:from-indigo-900 dark:to-slate-900 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800 overflow-hidden transition-colors duration-300 h-full flex flex-col">
+      <div className="p-6 border-b border-indigo-50 dark:border-indigo-800/50 flex justify-between items-center bg-indigo-50/50 dark:bg-transparent">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-indigo-500/20 rounded-lg">
-            <BrainCircuit className="w-6 h-6 text-indigo-300" />
+          <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg">
+            <BrainCircuit className="w-6 h-6 text-indigo-600 dark:text-indigo-300" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white">Gemini CFO</h2>
-            <p className="text-xs text-indigo-300">AI-Powered Financial Analysis</p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Gemini CFO</h2>
+            <p className="text-xs text-indigo-600 dark:text-indigo-300 font-medium">AI Financial Strategy</p>
           </div>
         </div>
         <button
           onClick={handleAnalyze}
           disabled={loading}
-          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all flex items-center space-x-2"
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 disabled:bg-indigo-300 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all flex items-center space-x-2 shadow-sm"
         >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4" />
-              <span>Analyzing Model...</span>
+              <span>Thinking...</span>
             </>
           ) : (
             <span>Run Analysis</span>
@@ -53,16 +53,16 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state }) => {
         </button>
       </div>
       
-      <div className="p-6 min-h-[200px] max-h-[500px] overflow-y-auto bg-slate-900/50">
+      <div className="p-6 flex-grow bg-white dark:bg-slate-900/50 min-h-[300px] overflow-y-auto">
         {analysis ? (
-          <div className="prose prose-invert prose-sm max-w-none">
+          <div className="prose prose-sm max-w-none text-slate-600 dark:text-slate-300 prose-headings:text-slate-900 dark:prose-headings:text-white prose-strong:text-slate-900 dark:prose-strong:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400">
             <ReactMarkdown>{analysis}</ReactMarkdown>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-indigo-300/50 space-y-4 py-10">
-            <BrainCircuit className="w-12 h-12 opacity-20" />
-            <p className="text-sm text-center max-w-xs">
-              Click "Run Analysis" to let Gemini evaluate your pricing tiers, burn rate, and profit margins.
+          <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-indigo-300/50 space-y-4 py-10">
+            <BrainCircuit className="w-16 h-16 opacity-10 dark:opacity-20" />
+            <p className="text-sm text-center max-w-xs text-slate-500 dark:text-slate-400">
+              Click "Run Analysis" to let Gemini evaluate your pricing tiers, unit economics, and burn rate structure.
             </p>
           </div>
         )}

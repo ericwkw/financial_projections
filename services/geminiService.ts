@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { SimulationState } from "../types";
 import { GEMINI_MODEL, SYSTEM_INSTRUCTION } from "../constants";
@@ -11,16 +12,33 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
 
     const ai = new GoogleGenAI({ apiKey });
 
+    // We extract the key metrics to pass clearly to the LLM
+    const metrics = {
+      MRR: state.financials.mrr,
+      BurnRate: state.financials.burnRate,
+      RunwayMonths: state.financials.runwayMonths,
+      LTV: state.financials.ltv,
+      CAC: state.financials.cac,
+      LTV_CAC_Ratio: state.financials.ltvCacRatio,
+      RuleOf40: state.financials.ruleOf40
+    };
+
     const prompt = `
-    Here is the current SaaS financial snapshot:
+    Here is the detailed SaaS financial model for analysis:
+
+    **Key Investor Metrics:**
+    ${JSON.stringify(metrics, null, 2)}
     
-    Plans:
-    ${JSON.stringify(state.plans, null, 2)}
+    **Plans (Pricing & Unit Economics):**
+    ${JSON.stringify(state.plans.map(p => ({ name: p.name, price: p.price, unitCost: p.unitCost, subscribers: p.subscribers })), null, 2)}
     
-    Employees:
+    **Staffing (Cost Base):**
     ${JSON.stringify(state.employees, null, 2)}
+
+    **Operating Expenses:**
+    ${JSON.stringify(state.expenses, null, 2)}
     
-    Please analyze this model.
+    Please provide a critical investment memo analysis. Highlight red flags in runway or unit economics.
     `;
 
     const response = await ai.models.generateContent({

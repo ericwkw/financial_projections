@@ -1,10 +1,12 @@
-import { Plan, Employee } from './types';
+
+import { Plan, Employee, OperatingExpense, ScenarioParams } from './types';
 
 export const INITIAL_PLANS: Plan[] = [
   {
     id: '1',
     name: 'Basic',
     price: 9,
+    unitCost: 1, // e.g. Basic server load
     interval: 'monthly',
     subscribers: 100,
   },
@@ -12,6 +14,7 @@ export const INITIAL_PLANS: Plan[] = [
     id: '2',
     name: 'Pro',
     price: 29,
+    unitCost: 5, // e.g. Higher LLM limits
     interval: 'monthly',
     subscribers: 50,
   },
@@ -19,6 +22,7 @@ export const INITIAL_PLANS: Plan[] = [
     id: '3',
     name: 'Enterprise',
     price: 499,
+    unitCost: 50, // Dedicated resources
     interval: 'yearly',
     subscribers: 5,
   },
@@ -45,16 +49,57 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   },
 ];
 
+export const INITIAL_EXPENSES: OperatingExpense[] = [
+  {
+    id: '1',
+    name: 'Cloud Hosting (AWS/GCP)',
+    amount: 500,
+    category: 'Tech',
+    isAcquisition: false,
+  },
+  {
+    id: '2',
+    name: 'LLM API Credits (Base)',
+    amount: 200,
+    category: 'Tech',
+    isAcquisition: false,
+  },
+  {
+    id: '3',
+    name: 'SaaS Subscriptions (Slack/Jira)',
+    amount: 300,
+    category: 'Operations',
+    isAcquisition: false,
+  },
+  {
+    id: '4',
+    name: 'Google Ads',
+    amount: 2000,
+    category: 'Marketing',
+    isAcquisition: true, // Marked as CAC
+  },
+];
+
+export const DEFAULT_SCENARIO: ScenarioParams = {
+  startingCash: 50000, // $50k initial funding
+  growthRate: 5, // 5% MoM
+  churnRate: 2, // 2% MoM
+  payrollTax: 20, // 20% benefits/tax load
+  valuationMultiple: 6, // 6x ARR
+};
+
 export const GEMINI_MODEL = 'gemini-2.5-flash';
 
 export const SYSTEM_INSTRUCTION = `
-You are an expert SaaS CFO and Strategic Business Advisor. 
-Your role is to analyze the user's financial model (subscription plans and employee costs).
-Provide a concise, actionable analysis focusing on:
-1. Profitability and Run Rate.
-2. Pricing Strategy anomalies (e.g., is the gap between tiers too large?).
-3. Team composition risks (e.g., high revenue but low support staff).
-4. Suggestions for increasing ARR.
+You are an expert Venture Capital Analyst and SaaS CFO. 
+Your role is to analyze the user's financial model for INVESTMENT READINESS.
 
-Format your response in Markdown with clear headers. Use bold text for key metrics.
+Focus on:
+1. **Unit Economics**: Is the LTV/CAC ratio healthy (>3.0)? If not, warn them immediately.
+2. **Runway**: Are they running out of cash too fast?
+3. **Efficiency**: Check the 'Rule of 40' (Growth + Profit Margin).
+4. **Valuation**: Is their valuation realistic given their ARR?
+
+Be direct, critical, and strategic. Don't just summarize the numbers—tell them if they are fundable.
+Format your response in Markdown. Use bold for warnings.
 `;
