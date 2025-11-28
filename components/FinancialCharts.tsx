@@ -54,6 +54,12 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
   };
 
+  const formatCurrencyAxis = (val: number) => {
+    if (Math.abs(val) >= 1000000) return `$${(val/1000000).toFixed(1)}M`;
+    if (Math.abs(val) >= 1000) return `$${(val/1000).toFixed(0)}k`;
+    return `$${val}`;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
@@ -75,7 +81,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
             >
               <CartesianGrid stroke={gridColor} vertical={false} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={(m) => `M${m}`} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={formatCurrencyAxis} />
               <Tooltip 
                 formatter={(value: number) => [`$${Math.round(value).toLocaleString()}`, '']}
                 labelFormatter={(l) => `Month ${l}`}

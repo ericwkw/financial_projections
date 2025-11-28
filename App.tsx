@@ -8,9 +8,7 @@ import EmployeeManager from './components/EmployeeManager';
 import ExpenseManager from './components/ExpenseManager';
 import ScenarioControls from './components/ScenarioControls';
 import KPICard from './components/KPICard';
-import FinancialCharts from './components/FinancialCharts';
-import PnLTable from './components/PnLTable';
-import GeminiAdvisor from './components/GeminiAdvisor';
+import InvestorDashboard from './components/InvestorDashboard'; // New
 import AppGuide from './components/AppGuide';
 import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen } from './components/Icons';
 
@@ -37,6 +35,10 @@ const App: React.FC = () => {
   // --- Handlers ---
   const handleScenarioChange = (field: keyof ScenarioParams, value: number) => {
     setScenarioParams(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleResetScenarios = () => {
+    setScenarioParams(DEFAULT_SCENARIO);
   };
 
   // Generic Update Helper
@@ -137,11 +139,17 @@ const App: React.FC = () => {
         </header>
 
         {/* Scenario Controls (Sticky) - Hidden on Guide Tab for cleanliness */}
-        {activeTab !== 'guide' && <ScenarioControls params={scenarioParams} onChange={handleScenarioChange} />}
+        {activeTab !== 'guide' && (
+          <ScenarioControls 
+            params={scenarioParams} 
+            onChange={handleScenarioChange} 
+            onReset={handleResetScenarios}
+          />
+        )}
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
           
-          {/* KPI Grid (Advanced SaaS Metrics) - Hidden on Guide Tab */}
+          {/* North Star KPIs (Visible on both Input and Analysis, but we can keep it consistent) */}
           {activeTab !== 'guide' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KPICard 
@@ -262,17 +270,13 @@ const App: React.FC = () => {
           )}
 
           {activeTab === 'analysis' && (
-             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2">
-                       <FinancialCharts financials={financials} plans={plans} projections={projections} darkMode={darkMode} />
-                    </div>
-                    <div className="lg:col-span-1">
-                       <GeminiAdvisor state={{ plans, employees, expenses, params: scenarioParams, financials }} />
-                    </div>
-                </div>
-                <PnLTable projections={projections} />
-             </div>
+             <InvestorDashboard 
+               financials={financials} 
+               plans={plans} 
+               projections={projections} 
+               state={{ plans, employees, expenses, params: scenarioParams, financials }}
+               darkMode={darkMode}
+             />
           )}
 
         </main>

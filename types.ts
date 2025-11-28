@@ -52,6 +52,12 @@ export interface Financials {
   burnRate: number;
   runwayMonths: number; // Months until cashout
   ruleOf40: number; // Growth % + Profit %
+  
+  // Efficiency Metrics (New)
+  cacPaybackMonths: number; // Months to recover CAC
+  magicNumber: number; // Sales Efficiency
+  netNewArr: number; // Net New ARR generated this month
+  burnMultiplier: number; // Burn per $1 of Net New ARR
 }
 
 export interface MonthlyProjection {

@@ -48,18 +48,41 @@ export const calculateFinancials = (
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
   
   // CAC: Cost to Acquire / New Customers
-  // We approximate New Customers based on the Monthly Growth Rate
   // New Subs = Total Subs * (GrowthRate/100)
   const impliedNewCustomers = Math.max(1, totalSubscribers * (params.growthRate / 100)); 
   const cac = impliedNewCustomers > 0 ? acquisitionCosts / impliedNewCustomers : 0;
 
   // LTV: (ARPU * GrossMargin%) / Churn%
-  // Churn must be > 0 to avoid Infinity. If 0, assume 1% for calculation safety or cap it.
   const safeChurn = Math.max(0.5, params.churnRate); 
   const ltv = safeChurn > 0 ? (arpu * grossMarginPercent) / (safeChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
-  const ruleOf40 = params.growthRate + profitMargin; // Monthly growth * 12 approx? No, Rule of 40 usually uses annual growth, but monthly proxy is ok for now.
+  const ruleOf40 = params.growthRate + profitMargin; 
+
+  // 6. Efficiency Metrics (New)
+  
+  // CAC Payback: CAC / (ARPU * GM%)
+  // How many months of gross profit to pay back the acquisition cost?
+  const grossProfitPerUser = arpu * grossMarginPercent;
+  const cacPaybackMonths = grossProfitPerUser > 0 ? cac / grossProfitPerUser : 0;
+
+  // Net New ARR: ARR added this month minus ARR lost
+  const netGrowthRate = (params.growthRate - params.churnRate) / 100;
+  const netNewArr = arr * netGrowthRate;
+
+  // SaaS Magic Number: Net New ARR / Annualized Marketing Spend
+  // (Net New Monthly ARR * 12) / (Monthly Marketing * 12) -> Simplified: Net New Monthly ARR / Monthly Marketing
+  // Wait, standard is: (Change in Quarterly Rev * 4) / Previous Q Sales&Marketing.
+  // We will use: Annualized Net New Revenue / Annualized Marketing Spend
+  const annualizedMarketing = acquisitionCosts * 12;
+  const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;
+
+  // Burn Multiplier: Burn / Net New ARR
+  // How much cash do we burn to add $1 of ARR?
+  // Only relevant if burning cash.
+  const burnMultiplier = (burnRate > 0 && netNewArr > 0) 
+    ? (burnRate * 12) / netNewArr 
+    : 0;
 
   return {
     mrr,
@@ -80,7 +103,12 @@ export const calculateFinancials = (
     ltvCacRatio,
     burnRate,
     runwayMonths,
-    ruleOf40
+    ruleOf40,
+    // Efficiency
+    cacPaybackMonths,
+    magicNumber,
+    netNewArr,
+    burnMultiplier
   };
 };
 

@@ -15,12 +15,16 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     // We extract the key metrics to pass clearly to the LLM
     const metrics = {
       MRR: state.financials.mrr,
+      ARR: state.financials.arr,
       BurnRate: state.financials.burnRate,
       RunwayMonths: state.financials.runwayMonths,
       LTV: state.financials.ltv,
       CAC: state.financials.cac,
       LTV_CAC_Ratio: state.financials.ltvCacRatio,
-      RuleOf40: state.financials.ruleOf40
+      RuleOf40: state.financials.ruleOf40,
+      MagicNumber: state.financials.magicNumber,
+      CAC_Payback_Months: state.financials.cacPaybackMonths,
+      BurnMultiplier: state.financials.burnMultiplier
     };
 
     const prompt = `
@@ -38,7 +42,12 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     **Operating Expenses:**
     ${JSON.stringify(state.expenses, null, 2)}
     
-    Please provide a critical investment memo analysis. Highlight red flags in runway or unit economics.
+    Please provide a critical investment memo analysis. 
+    1. Evaluate the **Efficiency** (Magic Number, Burn Multiplier).
+    2. Evaluate the **Unit Economics** (LTV/CAC, Payback Period).
+    3. Evaluate the **Runway & Survival**.
+    
+    Be harsh if the numbers don't add up. Investors hate inefficiency.
     `;
 
     const response = await ai.models.generateContent({

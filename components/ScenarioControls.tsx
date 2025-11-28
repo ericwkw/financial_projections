@@ -1,17 +1,19 @@
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
+import { RotateCcw } from './Icons';
 
 interface ScenarioControlsProps {
   params: ScenarioParams;
   onChange: (field: keyof ScenarioParams, value: number) => void;
+  onReset: () => void;
 }
 
-const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange }) => {
+const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, onReset }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-4 shadow-sm sticky top-16 z-20 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 items-center">
           
           <div className="space-y-1">
              <div className="flex items-center">
@@ -103,6 +105,16 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange })
                   className="w-full pl-5 pr-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 />
              </div>
+          </div>
+
+          <div className="flex justify-end md:justify-center">
+             <button
+               onClick={onReset}
+               className="p-2 text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+               title="Reset Scenarios to Default"
+             >
+               <RotateCcw className="w-5 h-5" />
+             </button>
           </div>
 
         </div>

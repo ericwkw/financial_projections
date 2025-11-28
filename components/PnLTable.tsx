@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { MonthlyProjection } from '../types';
+import { Download } from './Icons';
 
 interface PnLTableProps {
   projections: MonthlyProjection[];
@@ -12,10 +12,46 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
 
   const fmt = (n: number) => Math.round(n).toLocaleString();
 
+  const downloadCSV = () => {
+    const headers = ["Month", "Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Cash Balance"];
+    const rows = projections.map(p => [
+      p.month,
+      p.revenue.toFixed(2),
+      p.cogs.toFixed(2),
+      p.grossProfit.toFixed(2),
+      p.payroll.toFixed(2),
+      p.opex.toFixed(2),
+      p.netIncome.toFixed(2),
+      p.cashBalance.toFixed(2)
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "saas_projections.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Projected Income Statement & Cash Flow (Year 1)</h2>
+      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Projected Income Statement (Year 1)</h2>
+        <button 
+          onClick={downloadCSV}
+          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-right">
