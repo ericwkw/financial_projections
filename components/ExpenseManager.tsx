@@ -12,13 +12,13 @@ interface ExpenseManagerProps {
 
 const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpdate, onDelete }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Operating Expenses</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
             Fixed monthly costs. Flag marketing spend for CAC calc.
-            <Tooltip content="Toggle 'CAC' for expenses related to Marketing or Sales. This ensures accurate Customer Acquisition Cost calculations." />
+            <Tooltip content="Toggle the 'CAC' button for expenses related to Marketing or Sales (e.g., Ads, Sponsorships). This allows the app to calculate your Customer Acquisition Cost correctly." />
           </p>
         </div>
         <button
@@ -29,9 +29,12 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
           <span>Add Expense</span>
         </button>
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {expenses.map((expense) => (
-          <div key={expense.id} className="p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-b-xl">
+        {expenses.map((expense, index) => (
+          <div 
+            key={expense.id} 
+            className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${index === expenses.length - 1 ? 'rounded-b-xl' : ''}`}
+          >
             
             <div className="md:col-span-4 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Expense Item</label>
@@ -100,7 +103,7 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
           </div>
         ))}
         {expenses.length === 0 && (
-          <div className="p-12 text-center">
+          <div className="p-12 text-center rounded-b-xl">
              <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                 <DollarSign className="w-8 h-8 text-slate-300 dark:text-slate-600" />
              </div>

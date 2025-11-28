@@ -3,27 +3,70 @@ import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase } from './Icons'
 
 const AppGuide: React.FC = () => {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
       {/* Introduction */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Welcome to SaaS Scenario Architect</h2>
         <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-          This application is designed to help founders and CFOs model the financial future of a subscription-based (SaaS) business.
-          It allows you to test pricing strategies, staffing plans, and growth assumptions to see how they impact your company's value and survival.
+          This comprehensive financial modeling tool is designed for SaaS founders and CFOs. 
+          It allows you to simulate your startup's financial future over the next 5 years by experimenting with pricing, staffing, expenses, and growth assumptions.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">1. Input Your Data</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Define your subscription tiers, hire your team, and list your monthly expenses.</p>
+
+        <h3 className="font-bold text-slate-900 dark:text-white mt-8 mb-4">How to Use This Model</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Users className="w-16 h-16" />
+            </div>
+            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">1</span>
+              Model Inputs
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Go to the <strong>Model Inputs</strong> tab.
+            </p>
+            <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
+              <li>Add <strong>Subscription Plans</strong> (Price & Unit Cost).</li>
+              <li>Hire your <strong>Team</strong> and set salaries.</li>
+              <li>List monthly <strong>Operating Expenses</strong>.</li>
+            </ul>
           </div>
-          <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">2. Adjust Scenarios</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Use the sliders to test "What if?" scenarios. What if growth slows? What if churn spikes?</p>
+
+          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <TrendingUp className="w-16 h-16" />
+            </div>
+            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">2</span>
+              Adjust Scenarios
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Use the <strong>Top Bar Sliders</strong> (visible on other tabs).
+            </p>
+            <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
+              <li>Set <strong>Starting Cash</strong> for runway calc.</li>
+              <li>Adjust <strong>Growth Rate</strong> vs <strong>Churn Rate</strong>.</li>
+              <li>See how Valuation changes instantly.</li>
+            </ul>
           </div>
-          <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2">3. Analyze Health</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Review investor-grade metrics (LTV/CAC, Rule of 40) and get AI advice on your strategy.</p>
+
+          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <BrainCircuit className="w-16 h-16" />
+            </div>
+            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">3</span>
+              Analyze & Export
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Go to <strong>Analysis & P&L</strong>.
+            </p>
+             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
+              <li>Check <strong>LTV/CAC</strong> & <strong>Burn Multiplier</strong>.</li>
+              <li>Ask the <strong>Gemini CFO</strong> for advice.</li>
+              <li><strong>Export CSV</strong> for investors.</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -34,26 +77,34 @@ const AppGuide: React.FC = () => {
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-600" /> Key Metrics Glossary
           </h3>
-          <dl className="space-y-4">
+          <dl className="space-y-6">
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">MRR / ARR</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">Monthly Recurring Revenue and Annual Recurring Revenue. The predictability of this revenue is why SaaS companies are valued highly.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <strong>Monthly / Annual Recurring Revenue.</strong> This is the lifeblood of SaaS. It represents predictable revenue from subscriptions, excluding one-time fees.
+              </dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">COGS (Cost of Goods Sold)</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">Direct costs to serve a customer (e.g., server hosting, LLM API fees). This is separate from Operating Expenses (OpEx) like rent or marketing.</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">LTV (Lifetime Value)</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">The total profit you expect from a single customer before they cancel (Churn).</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">CAC (Customer Acquisition Cost)</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">Total marketing/sales spend divided by the number of new customers acquired.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Direct costs to serve a customer (e.g., server hosting, LLM API fees, payment processing). 
+                <em>Revenue - COGS = Gross Profit.</em> Investors look for >70% Gross Margin.
+              </dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">LTV:CAC Ratio</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">The "God Metric" for investors. It measures efficiency. &gt;3:1 is good. &gt;5:1 is excellent. &lt;1:1 means you lose money on every customer.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <strong>Lifetime Value divided by Customer Acquisition Cost.</strong>
+                It measures if you make more money from a customer than it costs to find them.
+                <br/><span className="text-emerald-600 dark:text-emerald-400 font-medium">> 3:1 is good.</span> <span className="text-red-500 font-medium">&lt; 1:1 is fatal.</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Magic Number</dt>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Measures sales efficiency. <em>"For every $1 I spend on marketing, how much recurring revenue do I create?"</em>
+                Target > 0.75.
+              </dd>
             </div>
           </dl>
         </div>
@@ -62,22 +113,33 @@ const AppGuide: React.FC = () => {
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-emerald-600" /> Survival & Strategy
           </h3>
-          <dl className="space-y-4">
+          <dl className="space-y-6">
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">Burn Rate</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">How much cash you are losing each month. If you are profitable, your burn rate is zero.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                How much cash you are losing each month (Revenue - Expenses). If you are profitable, your burn rate is zero.
+              </dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">Cash Runway</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">How many months until your bank account reaches $0. Calculated as: <em>Cash on Hand / Burn Rate</em>.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Time until death. <em>Cash on Hand / Burn Rate</em>. Investors typically want to see 18-24 months of runway after a funding round.
+              </dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">Rule of 40</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">A principle that states your Growth Rate % + Profit Margin % should equal 40 or higher. High growth can justify high losses.</dd>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                A balance between Growth and Profitability. 
+                <em>Growth Rate % + Profit Margin %</em> should be > 40.
+                (e.g., 100% growth with -60% margin = 40).
+              </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Valuation Multiple</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1">SaaS companies are often valued at a multiple of their revenue (ARR), not just profit. Typical multiples range from 3x to 10x depending on growth speed.</dd>
+              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Burn Multiplier</dt>
+              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                How much cash do you burn to add $1 of Net New ARR? 
+                <br/>Target &lt; 2. (Burning $2 to add $1 of ARR is okay in early stages, but must improve).
+              </dd>
             </div>
           </dl>
         </div>

@@ -60,13 +60,20 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
     return `$${val}`;
   };
 
+  const formatMonthAxis = (month: number) => {
+    // Show Years on the axis to reduce clutter for 60-month view
+    if (month % 12 === 0) return `Year ${month / 12}`;
+    if (month === 1) return 'Start';
+    return ''; 
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       {/* 24-Month Projection */}
       <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 lg:col-span-2 transition-colors">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">24-Month Financial Projection</h3>
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">5-Year Financial Projection</h3>
           <div className="flex gap-4 text-xs text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div>Profit</div>
             <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div>Loss</div>
@@ -80,7 +87,14 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
               margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
             >
               <CartesianGrid stroke={gridColor} vertical={false} />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={(m) => `M${m}`} />
+              <XAxis 
+                dataKey="month" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: axisColor, fontSize: 12}} 
+                tickFormatter={formatMonthAxis} 
+                interval={5} // Show fewer ticks
+              />
               <YAxis axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={formatCurrencyAxis} />
               <Tooltip 
                 formatter={(value: number) => [`$${Math.round(value).toLocaleString()}`, '']}

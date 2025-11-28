@@ -56,7 +56,8 @@ const App: React.FC = () => {
   );
 
   const { projections, breakEvenMonth } = useMemo(() => 
-    generateProjections(plans, financials, scenarioParams),
+    // Generate 60 months (5 years) for long-term strategic view
+    generateProjections(plans, financials, scenarioParams, 60),
     [plans, financials, scenarioParams]
   );
 

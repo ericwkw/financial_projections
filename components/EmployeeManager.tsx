@@ -13,15 +13,15 @@ interface EmployeeManagerProps {
 
 const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax, onAdd, onUpdate, onDelete }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">
         <div>
            <div className="flex items-center">
              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Team Structure</h2>
            </div>
            <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
              Salaries exclude {payrollTax}% tax/benefits load.
-             <Tooltip content={`An additional ${payrollTax}% is added to every salary to account for health insurance, taxes, and benefits. You can adjust this in the settings bar.`} />
+             <Tooltip content={`An additional ${payrollTax}% is added to every salary in the P&L to account for health insurance, payroll taxes, and benefits. You can adjust this percentage in the settings bar above.`} />
            </p>
         </div>
         <button
@@ -32,9 +32,12 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
           <span>Add Role</span>
         </button>
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
-        {employees.map((emp) => (
-          <div key={emp.id} className="p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-end hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-b-xl">
+        {employees.map((emp, index) => (
+          <div 
+            key={emp.id} 
+            className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-end hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${index === employees.length - 1 ? 'rounded-b-xl' : ''}`}
+          >
             
             <div className="md:col-span-5 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
@@ -89,7 +92,7 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
           </div>
         ))}
         {employees.length === 0 && (
-          <div className="p-12 text-center">
+          <div className="p-12 text-center rounded-b-xl">
             <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
                <Briefcase className="w-8 h-8 text-slate-300 dark:text-slate-600" />
             </div>

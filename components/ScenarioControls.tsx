@@ -18,7 +18,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           <div className="space-y-1">
              <div className="flex items-center">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase block mb-1">Starting Cash</label>
-                <Tooltip content="The amount of money currently in your bank account. Used to calculate Runway." className="mb-1" />
+                <Tooltip position="bottom" content="The amount of money currently in your bank account. Used to calculate Runway." className="mb-1" />
              </div>
              <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
@@ -36,7 +36,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Monthly Growth</label>
-                 <Tooltip content="Compound monthly growth rate of new subscribers." />
+                 <Tooltip position="bottom" content="Compound monthly growth rate of new subscribers. 5% monthly growth = ~80% annual growth." />
               </div>
               <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.growthRate}%</span>
             </div>
@@ -55,7 +55,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Monthly Churn</label>
-                <Tooltip content="The percentage of customers who cancel every month." />
+                <Tooltip position="bottom" content="The percentage of customers who cancel every month. > 5% is dangerous." />
               </div>
               <span className="text-xs font-bold text-red-500 dark:text-red-400">{params.churnRate}%</span>
             </div>
@@ -74,7 +74,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Payroll Tax</label>
-                 <Tooltip content="Percentage added to salaries for benefits/taxes (Load)." />
+                 <Tooltip position="bottom" content="Percentage added to salaries for benefits, insurance, and taxes (Load). Typically 20-30%." />
               </div>
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{params.payrollTax}%</span>
             </div>
@@ -92,7 +92,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           <div className="space-y-1">
              <div className="flex items-center">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase block mb-1">Valuation (x ARR)</label>
-                <Tooltip content="Company Valuation = Annual Recurring Revenue (ARR) * This Multiple." className="mb-1" />
+                <Tooltip position="bottom" content="Company Valuation = Annual Recurring Revenue (ARR) * This Multiple." className="mb-1" />
              </div>
              <div className="relative">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">x</span>
