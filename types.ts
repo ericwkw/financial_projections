@@ -45,8 +45,9 @@ export interface Financials {
   valuation: number;
   
   // Advanced SaaS Metrics
-  arpu: number; // Average Revenue Per User
-  cac: number; // Customer Acquisition Cost
+  arpu: number; // Average Revenue Per User (Blended)
+  arppu: number; // Average Revenue Per PAYING User
+  cac: number; // Customer Acquisition Cost (Per PAYING user)
   ltv: number; // Lifetime Value
   ltvCacRatio: number;
   burnRate: number;
@@ -58,6 +59,11 @@ export interface Financials {
   magicNumber: number; // Sales Efficiency
   netNewArr: number; // Net New ARR generated this month
   burnMultiplier: number; // Burn per $1 of Net New ARR
+  
+  // User Metrics
+  totalSubscribers: number;
+  payingSubscribers: number;
+  conversionRate: number; // % of users who pay
 }
 
 export interface MonthlyProjection {

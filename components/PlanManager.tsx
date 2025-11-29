@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plan } from '../types';
 import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2 } from './Icons';
@@ -48,14 +49,19 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
         </button>
       </div>
       <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-b-xl">
-        {plans.map((plan, index) => (
+        {plans.map((plan, index) => {
+          const isFree = plan.price === 0;
+          return (
           <div 
             key={plan.id} 
             className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-end hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${index === plans.length - 1 ? 'rounded-b-xl' : ''}`}
           >
             
             <div className="md:col-span-3 space-y-2">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Plan Name</label>
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-2">
+                Plan Name
+                {isFree && <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] px-1.5 py-0.5 rounded font-bold">FREE TIER</span>}
+              </label>
               <input
                 type="text"
                 value={plan.name}
@@ -76,7 +82,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
                   min="0"
                   value={plan.price}
                   onChange={(e) => onUpdate(plan.id, 'price', parseFloat(e.target.value) || 0)}
-                  className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
+                  className={`w-full pl-7 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                 />
               </div>
             </div>
@@ -86,7 +92,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1 text-slate-600 dark:text-slate-300">
                   <BrainCircuit className="w-3 h-3" /> Variable Cost <span className="text-[9px] ml-1 opacity-70">(COGS)</span>
                 </label>
-                <Tooltip position="top" content="The Marginal Cost to serve ONE extra user (e.g. Stripe fees 2.9%, API tokens per user). Do NOT include fixed costs like salaries or base server hosting here." />
+                <Tooltip position="top" content={isFree ? "WARNING: For free plans, this cost is a pure loss per user. Be careful!" : "The Marginal Cost to serve ONE extra user (e.g. Stripe fees, API tokens)."} />
               </div>
               <div className="flex gap-2">
                   <div className="relative flex-grow">
@@ -96,7 +102,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
                       min="0"
                       value={plan.unitCost}
                       onChange={(e) => onUpdate(plan.id, 'unitCost', parseFloat(e.target.value) || 0)}
-                      className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                      className={`w-full pl-7 pr-3 py-2 border bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isFree && plan.unitCost > 0 ? 'border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                     />
                   </div>
                   <button 
@@ -114,7 +120,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
               <select
                 value={plan.interval}
                 onChange={(e) => onUpdate(plan.id, 'interval', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
+                disabled={isFree}
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950 disabled:opacity-50"
               >
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
@@ -145,7 +152,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
             </div>
 
           </div>
-        ))}
+        )}})
+        }
         {plans.length === 0 && (
           <div className="p-12 text-center rounded-b-xl">
              <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">

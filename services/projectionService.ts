@@ -11,11 +11,19 @@ export const calculateFinancials = (
   let mrr = 0;
   let totalCogs = 0;
   let totalSubscribers = 0;
+  let payingSubscribers = 0;
 
   plans.forEach(plan => {
+    const isPaid = plan.price > 0;
     const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
-    mrr += priceMonthly * plan.subscribers;
-    // Variable Cost logic: This scales 1:1 with subscribers
+    
+    // Revenue only from paid plans
+    if (isPaid) {
+      mrr += priceMonthly * plan.subscribers;
+      payingSubscribers += plan.subscribers;
+    }
+    
+    // Costs apply to ALL plans (Free + Paid)
     totalCogs += plan.unitCost * plan.subscribers;
     totalSubscribers += plan.subscribers;
   });
@@ -46,41 +54,44 @@ export const calculateFinancials = (
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
   // 5. SaaS Advanced Metrics
+  // Blended ARPU: Revenue / All Users (Shows dilution by free users)
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
   
-  // CAC: Cost to Acquire / New Customers
-  // New Subs = Total Subs * (GrowthRate/100)
-  const impliedNewCustomers = Math.max(1, totalSubscribers * (params.growthRate / 100)); 
-  const cac = impliedNewCustomers > 0 ? acquisitionCosts / impliedNewCustomers : 0;
+  // ARPPU: Revenue / Paying Users (Shows pricing power)
+  const arppu = payingSubscribers > 0 ? mrr / payingSubscribers : 0;
+  
+  const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
+  
+  // CAC: Cost to Acquire / New PAYING Customers
+  // If we calculate CAC based on free users, it looks artificially cheap.
+  // Investors care about the cost to acquire REVENUE.
+  const impliedNewPayingCustomers = Math.max(0.1, payingSubscribers * (params.growthRate / 100)); 
+  const cac = impliedNewPayingCustomers > 0 ? acquisitionCosts / impliedNewPayingCustomers : 0;
 
-  // LTV: (ARPU * GrossMargin%) / Churn%
+  // LTV: (ARPPU * GrossMargin%) / Churn%
+  // We use ARPPU (Paying User Rev) but apply the Overall Gross Margin %
+  // This penalizes LTV if free users drag down margins (which is accurate).
   const safeChurn = Math.max(0.5, params.churnRate); 
-  const ltv = safeChurn > 0 ? (arpu * grossMarginPercent) / (safeChurn / 100) : 0;
+  const ltv = safeChurn > 0 ? (arppu * grossMarginPercent) / (safeChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   const ruleOf40 = params.growthRate + profitMargin; 
 
   // 6. Efficiency Metrics (New)
   
-  // CAC Payback: CAC / (ARPU * GM%)
-  // How many months of gross profit to pay back the acquisition cost?
-  const grossProfitPerUser = arpu * grossMarginPercent;
-  const cacPaybackMonths = grossProfitPerUser > 0 ? cac / grossProfitPerUser : 0;
+  // CAC Payback: CAC / (ARPPU * GM%)
+  // How many months of gross profit from a PAYING user to pay back their CAC?
+  const grossProfitPerPayingUser = arppu * grossMarginPercent;
+  const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
-  // Net New ARR: ARR added this month minus ARR lost
+  // Net New ARR
   const netGrowthRate = (params.growthRate - params.churnRate) / 100;
   const netNewArr = arr * netGrowthRate;
 
-  // SaaS Magic Number: Net New ARR / Annualized Marketing Spend
-  // (Net New Monthly ARR * 12) / (Monthly Marketing * 12) -> Simplified: Net New Monthly ARR / Monthly Marketing
-  // Wait, standard is: (Change in Quarterly Rev * 4) / Previous Q Sales&Marketing.
-  // We will use: Annualized Net New Revenue / Annualized Marketing Spend
+  // Magic Number: Net New ARR / Annualized Marketing
   const annualizedMarketing = acquisitionCosts * 12;
   const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;
 
-  // Burn Multiplier: Burn / Net New ARR
-  // How much cash do we burn to add $1 of ARR?
-  // Only relevant if burning cash.
   const burnMultiplier = (burnRate > 0 && netNewArr > 0) 
     ? (burnRate * 12) / netNewArr 
     : 0;
@@ -99,6 +110,7 @@ export const calculateFinancials = (
     valuation,
     // Metrics
     arpu,
+    arppu,
     cac,
     ltv,
     ltvCacRatio,
@@ -109,7 +121,11 @@ export const calculateFinancials = (
     cacPaybackMonths,
     magicNumber,
     netNewArr,
-    burnMultiplier
+    burnMultiplier,
+    // Users
+    totalSubscribers,
+    payingSubscribers,
+    conversionRate
   };
 };
 
@@ -127,7 +143,6 @@ export const generateProjections = (
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
 
   for (let i = 1; i <= months; i++) {
-    // Apply Growth & Churn to subscribers
     let monthlyRevenue = 0;
     let monthlyCogs = 0;
     let totalSubs = 0;
@@ -140,7 +155,7 @@ export const generateProjections = (
       const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
       
       monthlyRevenue += priceMonthly * newSubs;
-      monthlyCogs += plan.unitCost * newSubs;
+      monthlyCogs += plan.unitCost * newSubs; // COGS apply to free users too
       totalSubs += newSubs;
 
       return { ...plan, subscribers: newSubs };
@@ -148,8 +163,7 @@ export const generateProjections = (
 
     const grossProfit = monthlyRevenue - monthlyCogs;
     
-    // Fixed costs (Simplified: assuming constant OpEx/Payroll, 
-    // in reality these step up with revenue, but good enough for estimation)
+    // Fixed costs (Simplified linear projection)
     const payroll = baseFinancials.payrollMonthly; 
     const opex = baseFinancials.opexMonthly;
     const netIncome = grossProfit - payroll - opex;
