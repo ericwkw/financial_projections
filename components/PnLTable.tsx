@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { MonthlyProjection } from '../types';
 import { Download } from './Icons';
@@ -29,6 +30,7 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
       const aggregated = yearData.reduce((acc, curr) => ({
         month: year,
         revenue: acc.revenue + curr.revenue,
+        oneTimeRevenue: acc.oneTimeRevenue + curr.oneTimeRevenue,
         cogs: acc.cogs + curr.cogs,
         grossProfit: acc.grossProfit + curr.grossProfit,
         payroll: acc.payroll + curr.payroll,
@@ -36,7 +38,7 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
         netIncome: acc.netIncome + curr.netIncome,
         cashBalance: curr.cashBalance // Take end of year balance
       }), { 
-        month: year, revenue: 0, cogs: 0, grossProfit: 0, payroll: 0, opex: 0, netIncome: 0, cashBalance: 0 
+        month: year, revenue: 0, oneTimeRevenue: 0, cogs: 0, grossProfit: 0, payroll: 0, opex: 0, netIncome: 0, cashBalance: 0 
       });
 
       displayData.push(aggregated);
@@ -46,10 +48,11 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
 
   const downloadCSV = () => {
     // Export ALL data (60 months) regardless of view
-    const csvHeaders = ["Month", "Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Cash Balance"];
+    const csvHeaders = ["Month", "Recurring Revenue", "One-Time Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Cash Balance"];
     const rows = projections.map(p => [
       p.month,
-      p.revenue.toFixed(2),
+      (p.revenue - p.oneTimeRevenue).toFixed(2),
+      p.oneTimeRevenue.toFixed(2),
       p.cogs.toFixed(2),
       p.grossProfit.toFixed(2),
       p.payroll.toFixed(2),
@@ -121,9 +124,21 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {/* Revenue Section */}
             <tr>
-              <td className="px-4 py-3 text-left font-medium text-slate-900 dark:text-slate-200 sticky left-0 bg-white dark:bg-slate-900">Revenue</td>
+              <td className="px-4 py-3 text-left font-medium text-slate-900 dark:text-slate-200 sticky left-0 bg-white dark:bg-slate-900">Total Revenue</td>
               {displayData.map((d, i) => (
                 <td key={i} className="px-4 py-3 text-slate-900 dark:text-slate-200 font-medium">${fmt(d.revenue)}</td>
+              ))}
+            </tr>
+             <tr>
+              <td className="px-4 py-3 text-left text-slate-500 dark:text-slate-400 sticky left-0 bg-white dark:bg-slate-900 pl-8 text-xs">Recurring (MRR)</td>
+              {displayData.map((d, i) => (
+                <td key={i} className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">${fmt(d.revenue - d.oneTimeRevenue)}</td>
+              ))}
+            </tr>
+             <tr>
+              <td className="px-4 py-3 text-left text-slate-500 dark:text-slate-400 sticky left-0 bg-white dark:bg-slate-900 pl-8 text-xs">One-Time (Setup)</td>
+              {displayData.map((d, i) => (
+                <td key={i} className="px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">${fmt(d.oneTimeRevenue)}</td>
               ))}
             </tr>
             <tr>

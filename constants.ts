@@ -6,6 +6,7 @@ export const INITIAL_PLANS: Plan[] = [
     id: '1',
     name: 'Basic',
     price: 9,
+    setupFee: 0,
     unitCost: 1, // e.g. Basic server load
     interval: 'monthly',
     subscribers: 100,
@@ -14,6 +15,7 @@ export const INITIAL_PLANS: Plan[] = [
     id: '2',
     name: 'Pro',
     price: 29,
+    setupFee: 0,
     unitCost: 5, // e.g. Higher LLM limits
     interval: 'monthly',
     subscribers: 50,
@@ -22,6 +24,7 @@ export const INITIAL_PLANS: Plan[] = [
     id: '3',
     name: 'Enterprise',
     price: 499,
+    setupFee: 1000, // One-time onboarding fee
     unitCost: 50, // Dedicated resources
     interval: 'yearly',
     subscribers: 5,
@@ -84,8 +87,10 @@ export const DEFAULT_SCENARIO: ScenarioParams = {
   startingCash: 50000, // $50k initial funding
   growthRate: 5, // 5% MoM
   churnRate: 2, // 2% MoM
+  expansionRate: 0.5, // 0.5% Expansion MoM
   payrollTax: 20, // 20% benefits/tax load
   valuationMultiple: 6, // 6x ARR
+  founderEquity: 80, // 80% ownership
 };
 
 export const GEMINI_MODEL = 'gemini-2.5-flash';

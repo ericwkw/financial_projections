@@ -90,7 +90,26 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
             <div className="md:col-span-2 space-y-2">
               <div className="flex items-center justify-between">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                  <BrainCircuit className="w-3 h-3" /> Variable Cost <span className="text-[9px] ml-1 opacity-70">(COGS)</span>
+                   Setup Fee
+                </label>
+                <Tooltip position="top" content="One-time fee charged to new customers (Implementation). Boosts cash flow but not MRR." />
+              </div>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={plan.setupFee || 0}
+                  onChange={(e) => onUpdate(plan.id, 'setupFee', parseFloat(e.target.value) || 0)}
+                  className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white bg-white dark:bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex items-center justify-between">
+                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1 text-slate-600 dark:text-slate-300">
+                  <BrainCircuit className="w-3 h-3" /> Var. Cost <span className="text-[9px] ml-1 opacity-70">(COGS)</span>
                 </label>
                 <Tooltip position="top" content={isFree ? "WARNING: For free plans, this cost is a pure loss per user. Be careful!" : "The Marginal Cost to serve ONE extra user (e.g. Stripe fees, API tokens)."} />
               </div>
@@ -113,19 +132,6 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
                     <Wand2 className="w-5 h-5" />
                   </button>
               </div>
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Billing</label>
-              <select
-                value={plan.interval}
-                onChange={(e) => onUpdate(plan.id, 'interval', e.target.value)}
-                disabled={isFree}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950 disabled:opacity-50"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
             </div>
 
             <div className="md:col-span-2 space-y-2">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase } from './Icons';
 
@@ -27,7 +28,7 @@ const AppGuide: React.FC = () => {
               Go to the <strong>Model Inputs</strong> tab.
             </p>
             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Add <strong>Subscription Plans</strong> (Price & Unit Cost).</li>
+              <li>Add <strong>Subscription Plans</strong> (Price, Setup Fees & Unit Cost).</li>
               <li>Hire your <strong>Team</strong> and set salaries.</li>
               <li>List monthly <strong>Operating Expenses</strong>.</li>
             </ul>
@@ -46,8 +47,8 @@ const AppGuide: React.FC = () => {
             </p>
             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
               <li>Set <strong>Starting Cash</strong> for runway calc.</li>
-              <li>Adjust <strong>Growth Rate</strong> vs <strong>Churn Rate</strong>.</li>
-              <li>See how Valuation changes instantly.</li>
+              <li>Adjust <strong>Growth</strong>, <strong>Churn</strong>, and <strong>Upsell (Expansion)</strong>.</li>
+              <li>Set your <strong>Equity %</strong> to see personal value.</li>
             </ul>
           </div>
 
@@ -63,7 +64,7 @@ const AppGuide: React.FC = () => {
               Go to <strong>Analysis & P&L</strong>.
             </p>
              <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Check <strong>LTV/CAC</strong> & <strong>Burn Multiplier</strong>.</li>
+              <li>Check <strong>NRR</strong> & <strong>Burn Multiplier</strong>.</li>
               <li>Ask the <strong>Gemini CFO</strong> for advice.</li>
               <li><strong>Export CSV</strong> for investors.</li>
             </ul>
@@ -142,16 +143,17 @@ const AppGuide: React.FC = () => {
           </h3>
           <dl className="space-y-6">
             <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">MRR / ARR</dt>
+              <dt className="font-semibold text-slate-900 dark:text-white text-sm">NRR (Net Revenue Retention)</dt>
               <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                <strong>Monthly / Annual Recurring Revenue.</strong> This is the lifeblood of SaaS. It represents predictable revenue from subscriptions, excluding one-time fees.
+                The percentage of revenue you retain from existing customers, including upsells and churn. 
+                <br/>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">> 100% means you are growing even without new sales (Negative Churn).</span>
               </dd>
             </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">COGS (Cost of Goods Sold)</dt>
+             <div>
+              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Implementation / Setup Fee</dt>
               <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Direct costs to serve a customer (Variable Costs). 
-                <em>Revenue - COGS = Gross Profit.</em> Investors look for >70% Gross Margin.
+                One-time fees charged to onboard new customers. These boost cash flow and help recover CAC instantly, but do not contribute to MRR (Valuation).
               </dd>
             </div>
             <div>

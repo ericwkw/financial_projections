@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -13,7 +14,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
   return (
     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-4 shadow-sm sticky top-16 z-20 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-6 items-center">
           
           <div className="space-y-1">
              <div className="flex items-center">
@@ -35,7 +36,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Monthly Growth</label>
+                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Growth Rate</label>
                  <Tooltip position="bottom" content="Compound monthly growth rate of new subscribers. 5% monthly growth = ~80% annual growth." />
               </div>
               <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.growthRate}%</span>
@@ -54,7 +55,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Monthly Churn</label>
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Churn Rate</label>
                 <Tooltip position="bottom" content="The percentage of customers who cancel every month. > 5% is dangerous." />
               </div>
               <span className="text-xs font-bold text-red-500 dark:text-red-400">{params.churnRate}%</span>
@@ -67,6 +68,25 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
               value={params.churnRate}
               onChange={(e) => onChange('churnRate', parseFloat(e.target.value))}
               className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+            />
+          </div>
+
+           <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Upsell / Exp.</label>
+                <Tooltip position="bottom" content="Expansion Revenue. Monthly % increase in revenue from existing customers (e.g. Upgrading)." />
+              </div>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{params.expansionRate}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="0.1"
+              value={params.expansionRate}
+              onChange={(e) => onChange('expansionRate', parseFloat(e.target.value))}
+              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
             />
           </div>
 
@@ -90,20 +110,35 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           </div>
 
           <div className="space-y-1">
-             <div className="flex items-center">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase block mb-1">Valuation (x ARR)</label>
-                <Tooltip position="bottom" content="Company Valuation = Annual Recurring Revenue (ARR) * This Multiple." className="mb-1" />
+             <div className="flex items-center gap-2 mb-1">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Valuation</label>
+                 <Tooltip position="bottom" content="Set multiple (x ARR) and your Founder Ownership %." />
              </div>
-             <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">x</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={params.valuationMultiple}
-                  onChange={(e) => onChange('valuationMultiple', parseFloat(e.target.value))}
-                  className="w-full pl-5 pr-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
-                />
+             <div className="flex gap-2">
+                 <div className="relative w-1/2">
+                    <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">x</span>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={params.valuationMultiple}
+                        onChange={(e) => onChange('valuationMultiple', parseFloat(e.target.value))}
+                        className="w-full pl-3.5 pr-1 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                        placeholder="Mult"
+                    />
+                 </div>
+                 <div className="relative w-1/2">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">%</span>
+                    <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={params.founderEquity}
+                        onChange={(e) => onChange('founderEquity', parseFloat(e.target.value))}
+                        className="w-full pl-1 pr-4 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                        placeholder="Eq"
+                    />
+                 </div>
              </div>
           </div>
 

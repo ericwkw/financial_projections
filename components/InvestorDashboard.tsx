@@ -6,6 +6,7 @@ import PnLTable from './PnLTable';
 import GeminiAdvisor from './GeminiAdvisor';
 import MetricTile from './MetricTile';
 import { TrendingUp, DollarSign, BrainCircuit } from './Icons';
+import KPICard from './KPICard';
 
 interface InvestorDashboardProps {
   financials: Financials;
@@ -22,18 +23,44 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      {/* 1. The Efficiency Matrix (VC Metrics) */}
+      {/* 1. North Star - Valuation & Equity Context */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <KPICard 
+            title="Company Valuation" 
+            value={fmtCurrency(financials.valuation)} 
+            icon={<BrainCircuit className="w-5 h-5" />} 
+            subtext={`Based on ${fmtNum(state.params.valuationMultiple)}x ARR`}
+            tooltip="Estimated market value of the company."
+        />
+        <KPICard 
+            title="Founder's Stake Value" 
+            value={fmtCurrency(financials.founderValue)} 
+            icon={<DollarSign className="w-5 h-5" />} 
+            subtext={`At ${state.params.founderEquity}% Ownership`}
+            color="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
+            tooltip="The theoretical value of your personal equity in an exit scenario."
+        />
+      </div>
+
+      {/* 2. The Efficiency Matrix (VC Metrics) */}
       <div>
         <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Unit Economics & Efficiency
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <MetricTile 
             label="LTV / CAC"
             value={`${fmtNum(financials.ltvCacRatio)}x`}
             target="> 3.0x"
             status={financials.ltvCacRatio >= 3 ? 'good' : financials.ltvCacRatio >= 1 ? 'warning' : 'bad'}
             tooltip="Lifetime Value divided by Customer Acquisition Cost. The primary measure of unit profitability."
+          />
+           <MetricTile 
+            label="Net Rev Retention"
+            value={`${fmtNum(financials.nrr)}%`}
+            target="> 100%"
+            status={financials.nrr >= 100 ? 'good' : financials.nrr >= 90 ? 'warning' : 'bad'}
+            tooltip="NRR. Revenue retained from existing customers including upsells and churn. >100% means you grow without new sales."
           />
           <MetricTile 
             label="CAC Payback"
@@ -59,7 +86,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
         </div>
       </div>
 
-      {/* 2. Visual Analysis & AI Strategy */}
+      {/* 3. Visual Analysis & AI Strategy */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div className="xl:col-span-2 space-y-8">
            <FinancialCharts financials={financials} plans={plans} projections={projections} darkMode={darkMode} />
@@ -69,7 +96,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
         </div>
       </div>
 
-      {/* 3. Detailed P&L */}
+      {/* 4. Detailed P&L */}
       <PnLTable projections={projections} />
 
     </div>

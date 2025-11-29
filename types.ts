@@ -3,6 +3,7 @@ export interface Plan {
   id: string;
   name: string;
   price: number; // Price to customer
+  setupFee: number; // One-time implementation fee
   unitCost: number; // COGS per user (e.g. LLM tokens)
   interval: 'monthly' | 'yearly';
   subscribers: number;
@@ -27,13 +28,16 @@ export interface ScenarioParams {
   startingCash: number; // Cash in bank
   growthRate: number; // Monthly growth %
   churnRate: number; // Monthly churn %
+  expansionRate: number; // Monthly upsell % (Expansion Revenue)
   payrollTax: number; // % overhead on salaries (e.g. 20%)
   valuationMultiple: number; // x ARR
+  founderEquity: number; // % Ownership
 }
 
 export interface Financials {
   mrr: number;
   arr: number;
+  oneTimeRevenueMonthly: number; // From setup fees based on current growth
   cogs: number; // Monthly Cost of Goods Sold
   grossProfit: number;
   grossMarginPercent: number;
@@ -43,6 +47,7 @@ export interface Financials {
   netMonthly: number;
   profitMargin: number;
   valuation: number;
+  founderValue: number; // Value of founder's equity
   
   // Advanced SaaS Metrics
   arpu: number; // Average Revenue Per User (Blended)
@@ -53,6 +58,7 @@ export interface Financials {
   burnRate: number;
   runwayMonths: number; // Months until cashout
   ruleOf40: number; // Growth % + Profit %
+  nrr: number; // Net Revenue Retention %
   
   // Efficiency Metrics (New)
   cacPaybackMonths: number; // Months to recover CAC
@@ -69,6 +75,7 @@ export interface Financials {
 export interface MonthlyProjection {
   month: number;
   revenue: number;
+  oneTimeRevenue: number;
   cogs: number;
   grossProfit: number;
   payroll: number;
