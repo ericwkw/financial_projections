@@ -52,7 +52,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     - Sales Commission Rate: ${state.params.commissionRate}% (Of new Bookings)
     - Scenario_Growth_Multiplier: ${state.params.marketingEfficiency}x (Input Slider for Projection Speed)
     
-    **Key Investor Metrics:**
+    **Key Investor Metrics (SOURCE OF TRUTH):**
     ${JSON.stringify(metrics, null, 2)}
     
     **Plans (Pricing & Unit Economics):**
@@ -75,7 +75,9 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     2. Evaluate the **Unit Economics** (LTV/CAC, Payback Period, Gross Margin).
     3. Evaluate the **Runway & Survival** (Gross Burn vs Net Burn).
     
-    Be harsh if the numbers don't add up. Investors hate inefficiency.
+    **IMPORTANT:** TRUST the 'Key Investor Metrics' object as the calculated truth. Do not attempt to re-calculate MRR/Burn from the raw lists, as the raw lists exclude Tax Loads and Commissions which are accounted for in the Metrics. Focus on analyzing the *health* of the business based on these metrics.
+    
+    Be direct. Investors hate inefficiency.
     `;
 
     const response = await ai.models.generateContent({
