@@ -42,7 +42,7 @@ export const calculateFinancials = (
     const growth = plan.monthlyGrowth || 0;
     const churn = plan.monthlyChurn || 0;
     
-    // Effective Growth = Plan Growth * Marketing Multiplier + Viral Rate
+    // Effective Growth = Plan Growth * Marketing Efficiency + Viral Rate
     const effectiveGrowthRate = (growth * params.marketingEfficiency) + params.viralRate;
     const effectiveChurnRate = churn;
 
@@ -65,7 +65,6 @@ export const calculateFinancials = (
         impliedNewArrMonthly += newUsers * planArrValue;
 
         // For Efficiency Metrics (Net New ARR - Dollar based)
-        // This fixes the issue where low-price viral plans skew the growth % of high-price plans
         netNewArrReal += netAddedUsers * planArrValue;
     }
 
@@ -87,13 +86,15 @@ export const calculateFinancials = (
 
   const arr = mrr * 12;
   
-  // FIXED: Gross Profit includes One-Time Revenue. 
-  // Setup Fees are high margin (usually labor is in OpEx).
+  // Gross Profit includes One-Time Revenue for P&L
   const totalRevenue = mrr + oneTimeRevenueMonthly;
   const grossProfit = totalRevenue - totalCogs; 
-  
-  // FIXED: Margin % should divide by Total Revenue, not just MRR.
   const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
+
+  // Recurring Gross Margin (Strictly for LTV/Payback)
+  // This isolates the margin of the subscription product itself, ignoring one-time fees
+  const recurringGrossProfit = mrr - totalCogs;
+  const recurringGrossMarginPercent = mrr > 0 ? (recurringGrossProfit / mrr) : 0;
 
   // 2. Payroll (Fixed Operating Expense - Loaded)
   let annualBaseSalary = 0;
@@ -109,27 +110,25 @@ export const calculateFinancials = (
     .reduce((acc, exp) => acc + exp.amount, 0);
 
   // 4. Commissions (Snapshot Estimation)
-  // We include expansion revenue in commission base too
-  const impliedExpansionArr = arr * (params.expansionRate / 100); // New Expansion ARR this month
+  const impliedExpansionArr = arr * (params.expansionRate / 100); 
   const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
   const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
 
-  // Add Expansion to Net New ARR (Expansion - Churn was already handled in plan loop, now adding Expansion)
+  // Add Expansion to Net New ARR
   const netNewArr = netNewArrReal + impliedExpansionArr;
 
   // 5. Totals
   const totalExpenses = totalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
   const netMonthly = totalRevenue - totalExpenses;
   
-  // FIXED: Profit Margin uses Total Revenue denominator
   const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
   
   const valuation = arr * params.valuationMultiple;
   const founderValue = valuation * (params.founderEquity / 100);
 
-  // BURN CALCULATIONS (Explicitly Separated)
-  const grossBurn = totalExpenses; // Monthly Cash Outflow (Now Includes Commissions)
-  const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0; // Net Cash Burn
+  // BURN CALCULATIONS
+  const grossBurn = totalExpenses;
+  const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0; 
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
   // 6. SaaS Advanced Metrics
@@ -140,17 +139,17 @@ export const calculateFinancials = (
   // CAC: Cost to Acquire / New PAYING Customers (Strict Definition)
   const cac = totalNewPayingSubscribers > 0.1 ? acquisitionCosts / totalNewPayingSubscribers : (acquisitionCosts > 0 ? 99999 : 0);
 
-  // LTV: Use Paid Churn Only
+  // LTV: Use Paid Churn Only & Recurring Gross Margin
   const safePaidChurn = Math.max(0.5, paidChurnRate); 
-  const ltv = safePaidChurn > 0 ? (arppu * grossMarginPercent) / (safePaidChurn / 100) : 0;
+  const ltv = safePaidChurn > 0 ? (arppu * recurringGrossMarginPercent) / (safePaidChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
   // Rule of 40: Annualized REVENUE Growth + Profit Margin
-  const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0; // Approximate monthly growth
+  const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0;
   const annualizedRevenueGrowthRate = (Math.pow(1 + monthlyRevenueGrowthRate, 12) - 1) * 100;
   
-  // Fallback: If ARR is 0, use paid growth rate
+  // Fallback if ARR is 0
   const finalGrowthRate = arr > 0 ? annualizedRevenueGrowthRate : (Math.pow(1 + (paidGrowthRate / 100), 12) - 1) * 100;
   
   const ruleOf40 = finalGrowthRate + profitMargin; 
@@ -160,47 +159,39 @@ export const calculateFinancials = (
 
   // 7. Efficiency Metrics
   
-  // Setup Fees Allocation
+  // Setup Fees Allocation for Payback
   const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? oneTimeRevenueMonthly / totalNewPayingSubscribers : 0;
   
   // Adjusted CAC = CAC - Setup Fee
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
   
   // Payback Denominator: Gross Profit from RECURRING revenue only per user
-  const monthlyRecurringGrossProfitPerUser = arppu * grossMarginPercent;
+  // CRITICAL FIX: Must use recurringGrossMarginPercent, not blended grossMarginPercent.
+  // Blended margin is inflated by Setup Fees, which would double-count the benefit (once in numerator, once in denominator).
+  const monthlyRecurringGrossProfitPerUser = arppu * recurringGrossMarginPercent;
   
-  // Fix: If Margin is <= 0, Payback is Infinite (999), not 0 (Instant)
   let cacPaybackMonths = 0;
   if (monthlyRecurringGrossProfitPerUser > 0) {
       cacPaybackMonths = adjustedCac / monthlyRecurringGrossProfitPerUser;
   } else {
-      // If we lose money per user, we never pay back. 
-      // Return 999 as sentinel for "Never"
+      // If we lose money per user (Recurring COGS > Price), we never pay back. 
       cacPaybackMonths = 999;
   }
 
-  // Magic Number = Annualized Net New ARR / Monthly Marketing Spend
-  // Metric > 1.0 means you make more recurring revenue in a year than you spent to get it.
+  // Magic Number = Net New ARR / Monthly Marketing Spend
   const monthlyMarketing = acquisitionCosts;
   const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
 
-  // Burn Multiplier = Monthly Net Burn / Annualized Net New ARR
-  // Wait, standard is Monthly Net Burn / Monthly Net New ARR? 
-  // No, usually Net Burn / Net New ARR. 
-  // Let's use Monthly Net Burn / Net New ARR (Annualized value added this month).
-  // This tells us: "How much cash did I burn this month to generate $X of annual value?"
-  // If I burn $200k to add $100k of ARR, my multiplier is 2.0x.
+  // Burn Multiplier = Monthly Net Burn / Net New ARR
   let burnMultiplier = 0;
   if (burnRate > 0) {
       if (netNewArr > 0) {
           const monthlyBurn = burnRate;
           burnMultiplier = monthlyBurn / netNewArr;
       } else {
-          // Burning cash + Zero/Neg Growth = Disaster
           burnMultiplier = 999;
       }
   } else {
-      // Profitable (No burn) = 0 (Excellent)
       burnMultiplier = 0;
   }
 
@@ -271,7 +262,7 @@ export const generateProjections = (
        const newExpansion = prevRevenue * (params.expansionRate / 100);
        expansionRevenueAccumulated += newExpansion;
 
-       // 2. Churn Existing Expansion (CRITICAL FIX)
+       // 2. Churn Existing Expansion
        expansionRevenueAccumulated *= (1 - (baseFinancials.paidChurnRate / 100));
 
        // Expansion counts as New ARR for commissions
@@ -317,7 +308,6 @@ export const generateProjections = (
       }
 
       // Commission Base (Gross New Annualized Bookings)
-      // Salespeople get paid for closing deals (newUsers), not Net Growth.
       if (plan.price > 0 && newUsers > 0) {
         newArrForCommissions += newUsers * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
       }
