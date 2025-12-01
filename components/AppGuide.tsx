@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase, BookOpen } from './Icons';
+import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase, BookOpen, Info } from './Icons';
 
 const AppGuide: React.FC = () => {
   return (
@@ -94,7 +94,44 @@ const AppGuide: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. The Dictionary (Simple Terms) */}
+      {/* 3. Common Questions (FAQ) - NEW SECTION */}
+      <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+          <Info className="w-6 h-6 text-blue-500" />
+          Common Questions
+        </h3>
+        <div className="space-y-6">
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: Do I input numbers for today, or for my future goals?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: Input numbers for TODAY (Start).</strong><br/>
+               Think of the "Model Inputs" tab as your starting line (Month 0). The charts will then calculate the future based on the Growth Rates you set in the top slider bar.
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: How does CAC work if I don't have a Free Plan?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: It attributes 100% of costs to your Paid Users.</strong><br/>
+               The app calculates CAC as <code>Marketing Spend / New PAYING Users</code>. If you only have paid plans, this is simple. If you add a Free Plan later, the system is smart enough to <em>ignore</em> the free users in the math, so your CAC remains accurate (Cost per Paying Customer).
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: Why is my "Burn Rate" higher than my "Expenses"?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: Hidden Costs.</strong><br/>
+               The dashboard automatically adds <strong>Payroll Taxes</strong> (defaults to 20%) and estimated <strong>Sales Commissions</strong> on top of your raw salary numbers. This is to prevent you from running out of cash unexpectedly.
+             </p>
+           </div>
+        </div>
+      </div>
+
+      {/* 4. The Dictionary (Simple Terms) */}
       <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
           <Briefcase className="w-6 h-6 text-indigo-500" />
@@ -153,7 +190,7 @@ const AppGuide: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. Controls Explained */}
+      {/* 5. Controls Explained */}
       <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-8 border border-indigo-100 dark:border-indigo-800/50">
          <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-200 mb-6 flex items-center gap-2">
           <TrendingUp className="w-6 h-6" />
@@ -168,7 +205,7 @@ const AppGuide: React.FC = () => {
              </p>
            </div>
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
-             <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Market Efficiency</div>
+             <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Growth Speed Dial</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
                <strong>A "Good Luck" Multiplier.</strong> 
                <br/>1.0x = Normal. 
