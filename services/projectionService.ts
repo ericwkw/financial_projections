@@ -23,6 +23,9 @@ export const calculateFinancials = (
   let weightedPaidChurnSum = 0;
   let totalNewPayingSubscribers = 0;
 
+  // Track New ARR for Commission Estimation
+  let impliedNewArrMonthly = 0;
+
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
     const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
@@ -53,6 +56,10 @@ export const calculateFinancials = (
         weightedPaidGrowthSum += effectiveGrowthRate * plan.subscribers;
         weightedPaidChurnSum += effectiveChurnRate * plan.subscribers;
         totalNewPayingSubscribers += newUsers;
+        
+        // Estimate New ARR generated this month for Commissions
+        const planArrValue = plan.interval === 'yearly' ? plan.price : plan.price * 12;
+        impliedNewArrMonthly += newUsers * planArrValue;
     }
 
     // One-time revenue applies to all new users who have a setup fee
@@ -88,8 +95,14 @@ export const calculateFinancials = (
     .filter(e => e.isAcquisition)
     .reduce((acc, exp) => acc + exp.amount, 0);
 
-  // 4. Totals
-  const totalExpenses = totalCogs + payrollMonthly + opexMonthly;
+  // 4. Commissions (Snapshot Estimation)
+  // We include expansion revenue in commission base too
+  const impliedExpansionArr = arr * (params.expansionRate / 100); // New Expansion ARR this month
+  const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
+  const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
+
+  // 5. Totals
+  const totalExpenses = totalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
   const netMonthly = (mrr + oneTimeRevenueMonthly) - totalExpenses;
   const profitMargin = mrr > 0 ? (netMonthly / mrr) * 100 : 0;
   
@@ -97,11 +110,11 @@ export const calculateFinancials = (
   const founderValue = valuation * (params.founderEquity / 100);
 
   // BURN CALCULATIONS (Explicitly Separated)
-  const grossBurn = totalExpenses; // Monthly Cash Outflow (Pre-Commission)
+  const grossBurn = totalExpenses; // Monthly Cash Outflow (Now Includes Commissions)
   const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0; // Net Cash Burn
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
-  // 5. SaaS Advanced Metrics
+  // 6. SaaS Advanced Metrics
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
   const arppu = payingSubscribers > 0 ? mrr / payingSubscribers : 0;
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
@@ -122,7 +135,7 @@ export const calculateFinancials = (
   // NRR = 100 + Expansion - Churn
   const nrr = 100 + params.expansionRate - paidChurnRate;
 
-  // 6. Efficiency Metrics
+  // 7. Efficiency Metrics
   const weightedSetupFee = totalNewPayingSubscribers > 0 ? 
     (oneTimeRevenueMonthly * (totalNewPayingSubscribers / (Math.max(1, totalSubscribers * (blendedGrowthRate/100))))) : 0; 
   
