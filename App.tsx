@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Plan, Employee, OperatingExpense, ScenarioParams } from './types';
 import { INITIAL_PLANS, INITIAL_EMPLOYEES, INITIAL_EXPENSES, DEFAULT_SCENARIO } from './constants';
 import { calculateFinancials, generateProjections } from './services/projectionService';
@@ -12,7 +12,7 @@ import KPICard from './components/KPICard';
 import InvestorDashboard from './components/InvestorDashboard';
 import AppGuide from './components/AppGuide';
 import MathDeepDive from './components/MathDeepDive';
-import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable } from './components/Icons';
+import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable, Save, Upload } from './components/Icons';
 
 const App: React.FC = () => {
   // --- State Management ---
@@ -24,6 +24,9 @@ const App: React.FC = () => {
   
   // Theme State
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  
+  // File Input Ref for Import
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync Theme with DOM
   useEffect(() => {
@@ -51,6 +54,61 @@ const App: React.FC = () => {
     setter(prev => prev.filter(item => item.id !== id));
   };
 
+  // --- Import / Export Logic ---
+  const handleExportScenario = () => {
+    const dataToExport = {
+      plans,
+      employees,
+      expenses,
+      scenarioParams
+    };
+    
+    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `saas_scenario_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportScenario = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+        
+        // Basic validation
+        if (json.plans && Array.isArray(json.plans)) setPlans(json.plans);
+        if (json.employees && Array.isArray(json.employees)) setEmployees(json.employees);
+        if (json.expenses && Array.isArray(json.expenses)) setExpenses(json.expenses);
+        if (json.scenarioParams && typeof json.scenarioParams === 'object') {
+            // Merge with default to ensure no missing keys if schema updated
+            setScenarioParams({ ...DEFAULT_SCENARIO, ...json.scenarioParams });
+        }
+        
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        alert("Scenario imported successfully!");
+      } catch (error) {
+        console.error("Import failed:", error);
+        alert("Failed to import scenario. Invalid JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const triggerImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
   // --- Financial Calculations ---
   const financials = useMemo(() => 
     calculateFinancials(plans, employees, expenses, scenarioParams),
@@ -69,6 +127,15 @@ const App: React.FC = () => {
   return (
     <div>
       <div className="min-h-screen pb-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+        {/* Hidden Input for Import */}
+        <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImportScenario} 
+            accept=".json" 
+            className="hidden" 
+        />
+
         {/* Header */}
         <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-300">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -140,6 +207,28 @@ const App: React.FC = () => {
                    <option value="guide">Guide</option>
                  </select>
               </div>
+
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+              {/* Import/Export Actions */}
+              <div className="flex items-center space-x-2">
+                <button
+                    onClick={handleExportScenario}
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-slate-600"
+                    title="Export Scenario to JSON"
+                >
+                    <Save className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={triggerImportClick}
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-slate-600"
+                    title="Import Scenario from JSON"
+                >
+                    <Upload className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
 
               <button
                 onClick={() => setDarkMode(!darkMode)}
