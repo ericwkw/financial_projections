@@ -59,7 +59,8 @@ export interface Financials {
   cac: number; // Customer Acquisition Cost (Per PAYING user)
   ltv: number; // Lifetime Value
   ltvCacRatio: number;
-  burnRate: number;
+  grossBurn: number; // Total Monthly Cash Outflow
+  burnRate: number; // Net Monthly Cash Burn (Gross Burn - Revenue)
   runwayMonths: number; // Months until cashout
   ruleOf40: number; // Growth % + Profit %
   nrr: number; // Net Revenue Retention %

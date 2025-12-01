@@ -96,7 +96,9 @@ export const calculateFinancials = (
   const valuation = arr * params.valuationMultiple;
   const founderValue = valuation * (params.founderEquity / 100);
 
-  const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0;
+  // BURN CALCULATIONS (Explicitly Separated)
+  const grossBurn = totalExpenses; // Monthly Cash Outflow (Pre-Commission)
+  const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0; // Net Cash Burn
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
   // 5. SaaS Advanced Metrics
@@ -105,35 +107,29 @@ export const calculateFinancials = (
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
   
   // CAC: Cost to Acquire / New PAYING Customers (Strict Definition)
-  // If we have 0 new paying users, but we spent money, CAC is effectively infinite (or maxed).
-  // We use a safe floor to avoid Infinity.
   const cac = totalNewPayingSubscribers > 0.1 ? acquisitionCosts / totalNewPayingSubscribers : (acquisitionCosts > 0 ? 99999 : 0);
 
   // LTV: Use Paid Churn Only
-  // Free users churning shouldn't hurt the LTV of a paid enterprise customer.
   const safePaidChurn = Math.max(0.5, paidChurnRate); 
   const ltv = safePaidChurn > 0 ? (arppu * grossMarginPercent) / (safePaidChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
   // Rule of 40: Annualized Growth + Profit Margin
-  // FIX: Previously used monthly growth (e.g. 5%), which fails Rule of 40. 
-  // Should use Annualized Growth Rate (e.g. 80%).
   const annualizedGrowthRate = (Math.pow(1 + (blendedGrowthRate / 100), 12) - 1) * 100;
   const ruleOf40 = annualizedGrowthRate + profitMargin; 
   
-  // NRR = 100 + Expansion - Churn (Paid Churn only? Usually NRR is on revenue, so Paid Churn is correct)
+  // NRR = 100 + Expansion - Churn
   const nrr = 100 + params.expansionRate - paidChurnRate;
 
   // 6. Efficiency Metrics
   const weightedSetupFee = totalNewPayingSubscribers > 0 ? 
     (oneTimeRevenueMonthly * (totalNewPayingSubscribers / (Math.max(1, totalSubscribers * (blendedGrowthRate/100))))) : 0; 
-  // Simplified Setup Fee allocation: assume setup fees roughly align with paying user mix.
   
   const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
-  // Net New ARR - Use PAID growth, not blended (free users don't add ARR)
+  // Net New ARR - Use PAID growth
   const netGrowthRate = (paidGrowthRate + params.expansionRate - paidChurnRate) / 100;
   const netNewArr = arr * netGrowthRate;
 
@@ -163,6 +159,7 @@ export const calculateFinancials = (
     cac,
     ltv,
     ltvCacRatio,
+    grossBurn,
     burnRate,
     runwayMonths,
     ruleOf40,
@@ -211,15 +208,11 @@ export const generateProjections = (
        expansionRevenueAccumulated += newExpansion;
 
        // 2. Churn Existing Expansion (CRITICAL FIX)
-       // Upsell revenue churns at roughly the same rate as the paying customer base.
-       // We use the paid churn rate to depreciate the expansion bucket.
-       // Formula: OldBucket * (1 - ChurnRate)
        expansionRevenueAccumulated *= (1 - (baseFinancials.paidChurnRate / 100));
 
        // Expansion counts as New ARR for commissions
        newArrForCommissions += newExpansion * 12;
        
-       // Expansion is usually recognized monthly, cash matches revenue for expansion
        monthlyCashInflow += newExpansion;
     }
 
@@ -248,26 +241,18 @@ export const generateProjections = (
       totalSubs += currentSubs;
       
       // -- CASH FLOW (Bank) --
-      // Setup fees are cash upfront
       monthlyCashInflow += newUsers * plan.setupFee;
 
       if (plan.interval === 'yearly') {
         // Annual Plans:
-        // 1. New Users pay 100% Upfront
         monthlyCashInflow += newUsers * plan.price;
-        
-        // 2. Existing Users (Renewals)
-        // Assumption: Renewals are spread evenly over the year.
         const existingUsers = Math.max(0, plan.subscribers - churnedUsers); 
         monthlyCashInflow += (existingUsers / 12) * plan.price;
-
       } else {
-        // Monthly Plans: Cash = Revenue
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base (Gross New Annualized Bookings)
-      // Salespeople get paid on new deals, regardless of churn
+      // Commission Base
       if (plan.price > 0 && newUsers > 0) {
         newArrForCommissions += newUsers * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
       }
@@ -276,7 +261,6 @@ export const generateProjections = (
     });
 
     monthlyRecurringRevenue += expansionRevenueAccumulated;
-    // Add accumulated expansion to cash flow (after the decay/addition logic)
     monthlyCashInflow += expansionRevenueAccumulated;
 
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
@@ -298,7 +282,6 @@ export const generateProjections = (
     const netIncome = grossProfit - payroll - opex - commissions;
 
     // Net Cash Flow (Bank P&L)
-    // Commissions are paid cash immediately
     const cashOutflow = monthlyCogs + payroll + opex + commissions;
     const netCashFlow = monthlyCashInflow - cashOutflow;
 

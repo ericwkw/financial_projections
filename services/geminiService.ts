@@ -16,7 +16,9 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     const metrics = {
       MRR: state.financials.mrr,
       ARR: state.financials.arr,
-      BurnRate: state.financials.burnRate,
+      GrossMarginPercent: (state.financials.grossMarginPercent * 100).toFixed(1) + "%",
+      GrossBurn: state.financials.grossBurn, // Total Cash Out
+      NetBurn: state.financials.burnRate,   // Cash Out - Cash In
       RunwayMonths: state.financials.runwayMonths,
       LTV: state.financials.ltv,
       CAC: state.financials.cac,
@@ -43,9 +45,9 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     ${JSON.stringify(state.expenses, null, 2)}
     
     Please provide a critical investment memo analysis. 
-    1. Evaluate the **Efficiency** (Magic Number, Burn Multiplier).
-    2. Evaluate the **Unit Economics** (LTV/CAC, Payback Period).
-    3. Evaluate the **Runway & Survival**.
+    1. Evaluate the **Efficiency** (Magic Number, Burn Multiplier, Rule of 40).
+    2. Evaluate the **Unit Economics** (LTV/CAC, Payback Period, Gross Margin).
+    3. Evaluate the **Runway & Survival** (Gross Burn vs Net Burn).
     
     Be harsh if the numbers don't add up. Investors hate inefficiency.
     `;
