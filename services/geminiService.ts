@@ -12,8 +12,9 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Calculate the estimated commission amount for the breakdown
+    // Calculate the estimated commission amount for the breakdown transparency
     const otherExpenses = state.financials.payrollMonthly + state.financials.opexMonthly + state.financials.cogs;
+    // Ensure we don't show negative commissions due to rounding
     const estCommissions = Math.max(0, state.financials.grossBurn - otherExpenses);
 
     // We extract the key metrics to pass clearly to the LLM
@@ -24,7 +25,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
       ARR: state.financials.arr,
       GrossMarginPercent: (state.financials.grossMarginPercent * 100).toFixed(1) + "%",
       
-      // Explicit Burn Breakdown
+      // Explicit Burn Breakdown to prevent "Hidden Cost" hallucinations
       GrossBurn_Total: state.financials.grossBurn,
       GrossBurn_Breakdown: {
         Payroll_Loaded: state.financials.payrollMonthly,
@@ -45,11 +46,14 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     };
 
     const prompt = `
-    Here is the detailed SaaS financial model for analysis:
+    Here is the detailed SaaS financial model for analysis. 
+    
+    **CRITICAL INSTRUCTION**: Use the 'Key Investor Metrics' object below as the SINGLE SOURCE OF TRUTH for your math. 
+    Do NOT attempt to re-calculate MRR or Burn from the raw lists, as the raw lists exclude Tax Loads, Commission Estimates, and Billing Intervals which are already accounted for in the Metrics.
 
     **Context & Assumptions:**
     - Payroll Tax Load: ${state.params.payrollTax}% (Included in Payroll figures)
-    - Sales Commission Rate: ${state.params.commissionRate}% (Of new Bookings)
+    - Sales Commission Rate: ${state.params.commissionRate}% (Of new Gross Bookings)
     - Scenario_Growth_Multiplier: ${state.params.marketingEfficiency}x (Input Slider for Projection Speed)
     
     **Key Investor Metrics (SOURCE OF TRUTH):**
@@ -59,7 +63,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     ${JSON.stringify(state.plans.map(p => ({ 
       name: p.name, 
       price: p.price, 
-      interval: p.interval, // Critical for AI to calc MRR correcty
+      interval: p.interval, // NOTE: 'yearly' price means MRR = price / 12.
       unitCost: p.unitCost, 
       subscribers: p.subscribers 
     })), null, 2)}
@@ -74,8 +78,6 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     1. Evaluate the **Efficiency** (Magic Number, Burn Multiplier, Rule of 40).
     2. Evaluate the **Unit Economics** (LTV/CAC, Payback Period, Gross Margin).
     3. Evaluate the **Runway & Survival** (Gross Burn vs Net Burn).
-    
-    **IMPORTANT:** TRUST the 'Key Investor Metrics' object as the calculated truth. Do not attempt to re-calculate MRR/Burn from the raw lists, as the raw lists exclude Tax Loads and Commissions which are accounted for in the Metrics. Focus on analyzing the *health* of the business based on these metrics.
     
     Be direct. Investors hate inefficiency.
     `;
