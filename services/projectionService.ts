@@ -311,7 +311,8 @@ export const generateProjections = (
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base
+      // Commission Base (Gross New Annualized Bookings)
+      // Salespeople get paid for closing deals (newUsers), not Net Growth.
       if (plan.price > 0 && newUsers > 0) {
         newArrForCommissions += newUsers * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
       }
