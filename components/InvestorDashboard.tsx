@@ -25,7 +25,14 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* 1. North Star - Valuation & Equity Context */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <KPICard 
+            title="Current ARR" 
+            value={fmtCurrency(financials.arr)} 
+            icon={<DollarSign className="w-5 h-5" />} 
+            subtext={`Monthly Rev: ${fmtCurrency(financials.mrr)}`}
+            tooltip="Annual Recurring Revenue (MRR x 12). The standard measure of scale."
+        />
         <KPICard 
             title="Company Valuation" 
             value={fmtCurrency(financials.valuation)} 
@@ -36,7 +43,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
         <KPICard 
             title="Founder's Stake Value" 
             value={fmtCurrency(financials.founderValue)} 
-            icon={<DollarSign className="w-5 h-5" />} 
+            icon={<TrendingUp className="w-5 h-5" />} 
             subtext={`At ${state.params.founderEquity}% Ownership`}
             color="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
             tooltip="The theoretical value of your personal equity in an exit scenario."

@@ -11,7 +11,7 @@ import ScenarioControls from './components/ScenarioControls';
 import KPICard from './components/KPICard';
 import InvestorDashboard from './components/InvestorDashboard'; // New
 import AppGuide from './components/AppGuide';
-import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen } from './components/Icons';
+import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign } from './components/Icons';
 
 const App: React.FC = () => {
   // --- State Management ---
@@ -181,11 +181,11 @@ const App: React.FC = () => {
                 tooltip="Growth % + Profit % should be > 40 for healthy SaaS companies."
               />
                <KPICard 
-                title="Valuation Estimate" 
-                value={fmt(financials.valuation)} 
-                icon={<BrainCircuit className="w-5 h-5" />} 
-                subtext={`MRR: ${fmt(financials.mrr)} (${fmtNum(scenarioParams.valuationMultiple)}x ARR)`}
-                tooltip="Estimated company value based on ARR multiple."
+                title="Current ARR" 
+                value={fmt(financials.arr)} 
+                icon={<DollarSign className="w-5 h-5" />} 
+                subtext={`MRR: ${fmt(financials.mrr)} • Val: ${fmt(financials.valuation)}`}
+                tooltip="Annual Recurring Revenue (MRR x 12). The primary measure of SaaS scale."
               />
             </div>
           )}
