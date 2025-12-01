@@ -203,11 +203,22 @@ export const generateProjections = (
 
     if (i > 1) {
        const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
-       expansionRevenueAccumulated += prevRevenue * (params.expansionRate / 100);
+       
+       // 1. Add New Expansion Revenue
+       const newExpansion = prevRevenue * (params.expansionRate / 100);
+       expansionRevenueAccumulated += newExpansion;
+
+       // 2. Churn Existing Expansion (CRITICAL FIX)
+       // Upsell revenue churns at roughly the same rate as the paying customer base.
+       // We use the paid churn rate to depreciate the expansion bucket.
+       // Formula: OldBucket * (1 - ChurnRate)
+       expansionRevenueAccumulated *= (1 - (baseFinancials.paidChurnRate / 100));
+
        // Expansion counts as New ARR for commissions
-       newArrForCommissions += prevRevenue * (params.expansionRate / 100) * 12;
+       newArrForCommissions += newExpansion * 12;
+       
        // Expansion is usually recognized monthly, cash matches revenue for expansion
-       monthlyCashInflow += prevRevenue * (params.expansionRate / 100);
+       monthlyCashInflow += newExpansion;
     }
 
     currentSubscribersByPlan = currentSubscribersByPlan.map(plan => {
@@ -263,7 +274,7 @@ export const generateProjections = (
     });
 
     monthlyRecurringRevenue += expansionRevenueAccumulated;
-    // Add expansion revenue to cash (assuming monthly billing for expansion)
+    // Add accumulated expansion to cash flow (after the decay/addition logic)
     monthlyCashInflow += expansionRevenueAccumulated;
 
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
