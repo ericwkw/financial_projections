@@ -35,11 +35,13 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
     if (plan.price === 0) return { months: -1, label: "Free" };
     if (margin <= 0) return { months: -1, label: "Never" };
     
-    // Payback = CAC / Monthly Margin
-    // We treat globalCac as the cost.
-    if (globalCac <= 0) return { months: 0, label: "Instant" };
+    // Payback = (CAC - Setup Fee) / Monthly Margin
+    // We treat globalCac as the base cost.
+    const effectiveCac = Math.max(0, globalCac - (plan.setupFee || 0));
     
-    const months = globalCac / margin;
+    if (effectiveCac === 0) return { months: 0, label: "Instant" };
+    
+    const months = effectiveCac / margin;
     return { months, label: `${months.toFixed(1)} mo` };
   };
 
@@ -101,7 +103,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                    <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
                       <Clock className="w-3 h-3" />
                       <span>{payback.label}</span>
-                      <Tooltip position="top" content="Months to recover CAC. Calculated using Global Avg CAC / Plan Margin." width="w-48"/>
+                      <Tooltip position="top" content="Months to recover Global Avg CAC, factoring in this plan's Setup Fee." width="w-48"/>
                    </div>
                 )}
               </div>
