@@ -50,6 +50,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     
     **CRITICAL INSTRUCTION**: Use the 'Key Investor Metrics' object below as the SINGLE SOURCE OF TRUTH for your math. 
     Do NOT attempt to re-calculate MRR or Burn from the raw lists, as the raw lists exclude Tax Loads, Commission Estimates, and Billing Intervals which are already accounted for in the Metrics.
+    NOTE: All currency figures are in **HKD (Hong Kong Dollar)**.
 
     **Context & Assumptions:**
     - Payroll Tax Load: ${state.params.payrollTax}% (Included in Payroll figures)
@@ -113,8 +114,8 @@ export const estimateUnitCost = async (description: string): Promise<CostEstimat
     const ai = new GoogleGenAI({ apiKey });
     
     const prompt = `
-    You are a SaaS Solutions Architect and Cloud Cost Estimator.
-    Estimate the MONTHLY Variable Cost of Goods Sold (COGS) PER USER based on this technical description:
+    You are a SaaS Solutions Architect and Cloud Cost Estimator based in Hong Kong.
+    Estimate the MONTHLY Variable Cost of Goods Sold (COGS) PER USER in **HKD (Hong Kong Dollar)** based on this technical description:
     
     "${description}"
 
@@ -122,10 +123,10 @@ export const estimateUnitCost = async (description: string): Promise<CostEstimat
     1. Compute (AWS/GCP/Azure)
     2. Database/Storage per user
     3. Third-party API fees (OpenAI, Twilio, SendGrid, etc.)
-    4. Payment Processing (e.g. Stripe ~2.9% + 30c)
+    4. Payment Processing (e.g. Stripe HK ~3.4% + HK$2.35)
 
     Return a JSON object with:
-    - estimatedCost: number (The total estimated monthly cost per user in USD)
+    - estimatedCost: number (The total estimated monthly cost per user in HKD)
     - breakdown: string (A markdown formatted list explaining the cost components)
     
     Be conservative but realistic. If information is missing, make reasonable standard assumptions for a SaaS MVP.

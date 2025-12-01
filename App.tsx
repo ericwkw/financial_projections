@@ -141,8 +141,8 @@ const App: React.FC = () => {
     [plans, financials, scenarioParams]
   );
 
-  const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
-  const fmtNum = (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(n);
+  const fmt = (n: number) => new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD', maximumFractionDigits: 0 }).format(n);
+  const fmtNum = (n: number) => new Intl.NumberFormat('en-HK', { maximumFractionDigits: 1 }).format(n);
 
   return (
     <div>

@@ -104,4 +104,4 @@ export interface SimulationState {
   financials: Financials; 
 }
 
-export type Currency = 'USD' | 'EUR' | 'GBP';
+export type Currency = 'HKD' | 'USD' | 'EUR' | 'GBP';

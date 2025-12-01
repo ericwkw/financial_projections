@@ -5,9 +5,9 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '1',
     name: 'Basic',
-    price: 9,
+    price: 78, // ~10 USD
     setupFee: 0,
-    unitCost: 1, 
+    unitCost: 8, // ~1 USD
     interval: 'monthly',
     subscribers: 100,
     monthlyGrowth: 8, // Fast growth
@@ -16,9 +16,9 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '2',
     name: 'Pro',
-    price: 29,
+    price: 238, // ~30 USD
     setupFee: 0,
-    unitCost: 5, 
+    unitCost: 40, // ~5 USD
     interval: 'monthly',
     subscribers: 50,
     monthlyGrowth: 5,
@@ -27,9 +27,9 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '3',
     name: 'Enterprise',
-    price: 499,
-    setupFee: 1000, 
-    unitCost: 50, 
+    price: 3888, // ~500 USD
+    setupFee: 8000, // ~1000 USD
+    unitCost: 400, // ~50 USD
     interval: 'yearly',
     subscribers: 5,
     monthlyGrowth: 2, // Slow sales cycle
@@ -47,13 +47,13 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: '2',
     role: 'Senior Engineer',
-    salary: 120000, 
+    salary: 960000, // ~120k USD
     count: 1,
   },
   {
     id: '3',
     role: 'Customer Support',
-    salary: 48000, 
+    salary: 380000, // ~48k USD
     count: 1,
   },
 ];
@@ -62,39 +62,39 @@ export const INITIAL_EXPENSES: OperatingExpense[] = [
   {
     id: '1',
     name: 'Cloud Hosting (AWS/GCP)',
-    amount: 500,
+    amount: 4000, // ~500 USD
     category: 'Tech',
     isAcquisition: false,
   },
   {
     id: '2',
     name: 'LLM API Credits (Base)',
-    amount: 200,
+    amount: 1500, // ~200 USD
     category: 'Tech',
     isAcquisition: false,
   },
   {
     id: '3',
     name: 'SaaS Subscriptions (Slack/Jira)',
-    amount: 300,
+    amount: 2500, // ~300 USD
     category: 'Operations',
     isAcquisition: false,
   },
   {
     id: '4',
     name: 'Google Ads',
-    amount: 2000,
+    amount: 15000, // ~2000 USD
     category: 'Marketing',
     isAcquisition: true, 
   },
 ];
 
 export const DEFAULT_SCENARIO: ScenarioParams = {
-  startingCash: 50000, 
+  startingCash: 400000, // ~50k USD
   marketingEfficiency: 1.0, // Baseline multiplier
   viralRate: 0.5, // 0.5% of users invite a friend per month
   expansionRate: 0.5, 
-  payrollTax: 20, 
+  payrollTax: 5, // MPF is lower in HK (~5% cap) but let's keep it configurable
   salaryGrowthRate: 3,
   commissionRate: 10,
   valuationMultiple: 6, 
