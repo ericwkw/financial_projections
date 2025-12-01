@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -99,11 +100,12 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                    </div>
                    <div className="relative">
                       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">HK$</span>
+                      {/* Increased padding from pl-8 to pl-12 to accommodate HK$ prefix */}
                       <input
                         type="number" min="0"
                         value={params.startingCash}
                         onChange={(e) => onChange('startingCash', parseFloat(e.target.value))}
-                        className="w-full pl-8 pr-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+                        className="w-full pl-12 pr-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                       />
                    </div>
                 </div>
