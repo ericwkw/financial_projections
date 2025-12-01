@@ -102,7 +102,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
             <div className="md:col-span-3 space-y-2">
               <div className="flex justify-between">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                  <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
+                  <DollarSign className="w-3 h-3" /> Price (HKD)
                 </label>
                 {/* Payback Badge */}
                 <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
@@ -113,14 +113,12 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
               </div>
               <div className="flex gap-2">
                   <div className="relative w-2/3">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">HK$</span>
-                    {/* Increased padding from pl-8 to pl-11 to accommodate HK$ width */}
                     <input
                       type="number"
                       min="0"
                       value={plan.price}
                       onChange={(e) => onUpdate(plan.id, 'price', parseFloat(e.target.value) || 0)}
-                      className={`w-full pl-11 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                      className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                     />
                      {plan.interval === 'yearly' && plan.price > 0 && (
                         <div className="absolute top-full left-0 text-[9px] text-slate-400 mt-0.5 ml-1">
@@ -144,17 +142,15 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
              {/* Setup - Col Span 1 */}
              <div className="md:col-span-1 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                 Setup <Tooltip position="top" content="One-time fee" width="w-24" />
+                 Setup <Tooltip position="top" content="One-time fee (HKD)" width="w-24" />
               </label>
               <div className="relative">
-                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-slate-400 text-xs">HK$</span>
-                {/* Increased padding from pl-7 to pl-10 to accommodate HK$ width */}
                 <input
                   type="number"
                   min="0"
                   value={plan.setupFee || 0}
                   onChange={(e) => onUpdate(plan.id, 'setupFee', parseFloat(e.target.value) || 0)}
-                  className="w-full pl-10 px-2 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white bg-white dark:bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-2 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white bg-white dark:bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
             </div>
@@ -191,19 +187,17 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
             <div className="md:col-span-2 space-y-2">
               <div className="flex items-center justify-between">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                  <BrainCircuit className="w-3 h-3" /> COGS
+                  <BrainCircuit className="w-3 h-3" /> COGS (HKD)
                 </label>
               </div>
               <div className="flex gap-1">
                   <div className="relative flex-grow">
-                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-slate-400 text-xs">HK$</span>
-                    {/* Increased padding from pl-7 to pl-10 to accommodate HK$ width */}
                     <input
                       type="number"
                       min="0"
                       value={plan.unitCost}
                       onChange={(e) => onUpdate(plan.id, 'unitCost', parseFloat(e.target.value) || 0)}
-                      className={`w-full pl-10 px-2 py-2 border bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isFree && plan.unitCost > 0 ? 'border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                      className={`w-full px-2 py-2 border bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isFree && plan.unitCost > 0 ? 'border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                     />
                   </div>
                   <button 
