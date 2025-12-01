@@ -86,15 +86,27 @@ export const calculateFinancials = (
 
   const arr = mrr * 12;
   
+  // -- Expansion Revenue Logic (Snapshot) --
+  const impliedExpansionArr = arr * (params.expansionRate / 100); 
+  const impliedExpansionMrr = impliedExpansionArr / 12;
+  
+  // -- COGS on Expansion (Logical Fix) --
+  // Assume Expansion Revenue carries the same Gross Margin profile as Base Revenue
+  const baseCogsRatio = mrr > 0 ? totalCogs / mrr : 0;
+  const expansionCogs = impliedExpansionMrr * baseCogsRatio;
+  
+  const finalTotalCogs = totalCogs + expansionCogs;
+
   // Gross Profit includes One-Time Revenue for P&L
-  const totalRevenue = mrr + oneTimeRevenueMonthly;
-  const grossProfit = totalRevenue - totalCogs; 
+  // Note: We currently assume 100% margin on One-Time Revenue (Setup Fees) as it's usually labor/service
+  const totalRevenue = mrr + oneTimeRevenueMonthly + impliedExpansionMrr;
+  const grossProfit = totalRevenue - finalTotalCogs; 
   const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
 
   // Recurring Gross Margin (Strictly for LTV/Payback)
-  // This isolates the margin of the subscription product itself, ignoring one-time fees
-  const recurringGrossProfit = mrr - totalCogs;
-  const recurringGrossMarginPercent = mrr > 0 ? (recurringGrossProfit / mrr) : 0;
+  // Isolates the margin of the subscription product itself
+  const recurringGrossProfit = (mrr + impliedExpansionMrr) - finalTotalCogs;
+  const recurringGrossMarginPercent = (mrr + impliedExpansionMrr) > 0 ? (recurringGrossProfit / (mrr + impliedExpansionMrr)) : 0;
 
   // 2. Payroll (Fixed Operating Expense - Loaded)
   let annualBaseSalary = 0;
@@ -110,15 +122,14 @@ export const calculateFinancials = (
     .reduce((acc, exp) => acc + exp.amount, 0);
 
   // 4. Commissions (Snapshot Estimation)
-  const impliedExpansionArr = arr * (params.expansionRate / 100); 
   const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
   const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
 
-  // Add Expansion to Net New ARR
+  // Add Expansion to Net New ARR for Efficiency Metrics
   const netNewArr = netNewArrReal + impliedExpansionArr;
 
   // 5. Totals
-  const totalExpenses = totalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
+  const totalExpenses = finalTotalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
   const netMonthly = totalRevenue - totalExpenses;
   
   const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
@@ -166,15 +177,12 @@ export const calculateFinancials = (
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
   
   // Payback Denominator: Gross Profit from RECURRING revenue only per user
-  // CRITICAL FIX: Must use recurringGrossMarginPercent, not blended grossMarginPercent.
-  // Blended margin is inflated by Setup Fees, which would double-count the benefit (once in numerator, once in denominator).
   const monthlyRecurringGrossProfitPerUser = arppu * recurringGrossMarginPercent;
   
   let cacPaybackMonths = 0;
   if (monthlyRecurringGrossProfitPerUser > 0) {
       cacPaybackMonths = adjustedCac / monthlyRecurringGrossProfitPerUser;
   } else {
-      // If we lose money per user (Recurring COGS > Price), we never pay back. 
       cacPaybackMonths = 999;
   }
 
@@ -199,7 +207,7 @@ export const calculateFinancials = (
     mrr,
     arr,
     oneTimeRevenueMonthly,
-    cogs: totalCogs,
+    cogs: finalTotalCogs, // Using COGS including expansion costs
     grossProfit,
     grossMarginPercent,
     payrollMonthly,
@@ -246,6 +254,11 @@ export const generateProjections = (
   // Initial State
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
   let expansionRevenueAccumulated = 0; 
+  
+  // Calculate Base COGS Ratio for determining Expansion Costs
+  const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : p.price) * p.subscribers, 0);
+  const baseCogs = plans.reduce((sum, p) => sum + p.unitCost * p.subscribers, 0);
+  const baseCogsRatio = baseMrr > 0 ? baseCogs / baseMrr : 0;
 
   for (let i = 1; i <= months; i++) {
     let monthlyRecurringRevenue = 0; // Accrual
@@ -317,6 +330,11 @@ export const generateProjections = (
 
     monthlyRecurringRevenue += expansionRevenueAccumulated;
     monthlyCashInflow += expansionRevenueAccumulated;
+    
+    // -- COGS Adjustment for Expansion Revenue --
+    // We assume expansion revenue has the same margin profile as the base business
+    const expansionCogs = expansionRevenueAccumulated * baseCogsRatio;
+    monthlyCogs += expansionCogs;
 
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
     const grossProfit = totalRevenue - monthlyCogs;

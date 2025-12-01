@@ -159,12 +159,13 @@ const MathDeepDive: React.FC = () => {
                 </div>
               </div>
               <div className="col-span-1 md:col-span-2 mt-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-100 dark:border-amber-800/30">
-                 <h5 className="font-bold text-sm text-amber-800 dark:text-amber-400 mb-2">Churn-Adjusted Expansion Revenue</h5>
+                 <h5 className="font-bold text-sm text-amber-800 dark:text-amber-400 mb-2">Churn-Adjusted Expansion Revenue & COGS</h5>
                  <p className="font-mono text-xs text-amber-900/80 dark:text-amber-300/80">
-                   MonthlyExpansionBucket = (PreviousBucket + NewUpsell) × (1 - PaidChurn%)
+                   1. Expansion Revenue decays by PaidChurn% monthly.<br/>
+                   2. COGS on Expansion = Expansion Revenue × Base COGS Ratio.
                  </p>
                  <p className="text-[10px] text-amber-800/60 dark:text-amber-400/60 mt-2">
-                   <strong>Why?</strong> Upsold revenue isn't permanent. If a customer churns, their expansion revenue disappears too. We depreciate the accumulated expansion revenue by the paid churn rate every month to prevent unrealistic "infinite growth" in long-term projections.
+                   <strong>Why?</strong> Upsold revenue isn't permanent or free. If a customer churns, their expansion revenue disappears. And selling more usage usually incurs more cost (Server/AI fees). We apply the base margin profile to all upsells to prevent unrealistic 100% margin assumptions.
                  </p>
               </div>
            </div>
