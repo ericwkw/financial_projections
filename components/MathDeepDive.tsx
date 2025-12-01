@@ -66,10 +66,10 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">Rule of 40</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Score = Annualized <span className="font-bold">PAID</span> Growth % + Profit Margin %
+                 Score = Annualized <span className="font-bold">REVENUE</span> Growth % + Profit Margin %
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *We use <strong>Paid Growth Rate</strong> (not Total User Growth) to prevent viral free users from inflating this score.
+                 *We use <strong>Paid Revenue Growth</strong> (not User Growth) to prevent viral free users from inflating this score.
                  <br/>*We compound monthly growth to an annual rate `((1+r)^12 - 1)` for industry benchmarking.
                </p>
              </div>
@@ -77,7 +77,7 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-2">Magic Number</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Magic Number = Net New ARR / Annualized Marketing Spend
+                 Magic Number = Net New ARR / Monthly Marketing Spend
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  Measures marketing efficiency. If > 1.0, you are making more recurring revenue than you spend on ads.
@@ -87,7 +87,7 @@ const MathDeepDive: React.FC = () => {
               <div>
                <h4 className="font-semibold text-red-600 dark:text-red-400 mb-2">Burn Multiplier</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Multiplier = Net Burn / Net New ARR
+                 Multiplier = Net Monthly Burn / Net New ARR
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  Measures capital efficiency. How much cash do you burn to generate $1 of growth? Lower is better.

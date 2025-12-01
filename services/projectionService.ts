@@ -159,11 +159,15 @@ export const calculateFinancials = (
   const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
-  const annualizedMarketing = acquisitionCosts * 12;
-  const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;
+  // Magic Number = Net New ARR / Marketing Spend (Current Month)
+  // FIX: Previously we multiplied marketing by 12, which artificially lowered the score by 12x.
+  const monthlyMarketing = acquisitionCosts;
+  const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
 
+  // Burn Multiplier = Net Burn / Net New ARR
+  // FIX: Previously we multiplied burn by 12, artificially raising the score by 12x.
   const burnMultiplier = (burnRate > 0 && netNewArr > 0) 
-    ? (burnRate * 12) / netNewArr 
+    ? burnRate / netNewArr 
     : 0;
 
   return {
