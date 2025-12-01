@@ -253,9 +253,10 @@ export const generateProjections = (
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base (New Annualized Bookings)
-      if (plan.price > 0 && netSubsChange > 0) {
-        newArrForCommissions += netSubsChange * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
+      // Commission Base (Gross New Annualized Bookings)
+      // Salespeople get paid on new deals, regardless of churn
+      if (plan.price > 0 && newUsers > 0) {
+        newArrForCommissions += newUsers * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
       }
 
       return { ...plan, subscribers: currentSubs };

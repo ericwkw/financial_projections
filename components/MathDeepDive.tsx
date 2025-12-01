@@ -100,33 +100,47 @@ const MathDeepDive: React.FC = () => {
            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
              Core P&L Logic
            </h3>
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-                 <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Gross Profit</h5>
-                 <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                   Revenue - COGS
-                 </p>
-                 <p className="text-[10px] text-slate-400 mt-2">
-                   COGS includes variable costs for BOTH free and paid users.
-                 </p>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
+                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Gross Profit</h5>
+                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                     Revenue - COGS
+                   </p>
+                   <p className="text-[10px] text-slate-400 mt-2">
+                     COGS includes variable costs for BOTH free and paid users.
+                   </p>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
+                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Operating Expenses</h5>
+                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                     (Salaries × (1 + TaxLoad)) + Fixed Expenses
+                   </p>
+                   <p className="text-[10px] text-slate-400 mt-2">
+                     Salaries are fully loaded with benefits/taxes.
+                   </p>
+                </div>
               </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-                 <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Operating Expenses</h5>
-                 <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                   (Salaries × (1 + TaxLoad)) + Fixed Expenses
-                 </p>
-                 <p className="text-[10px] text-slate-400 mt-2">
-                   Salaries are fully loaded with benefits/taxes.
-                 </p>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-                 <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Cash Balance</h5>
-                 <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                   Previous Cash + (Cash In - Cash Out)
-                 </p>
-                 <p className="text-[10px] text-slate-400 mt-2">
-                   Includes upfront payments from Annual plans.
-                 </p>
+              <div className="space-y-6">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
+                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Cash Flow (Annual vs Monthly)</h5>
+                   <div className="font-mono text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                     <p>• Monthly Plans: Cash = Revenue</p>
+                     <p>• Yearly Plans: Cash = 12 months Upfront</p>
+                   </div>
+                   <p className="text-[10px] text-slate-400 mt-2">
+                     We differentiate between "Revenue" (Accrual) and "Cash Balance" (Bank).
+                   </p>
+                </div>
+                 <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
+                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Sales Commissions</h5>
+                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                     Commission Rate × Gross New ARR
+                   </p>
+                   <p className="text-[10px] text-slate-400 mt-2">
+                     Calculated on <span className="font-bold">Gross New Bookings</span> (New Customers). We do not penalize sales commissions for churn from existing customers.
+                   </p>
+                </div>
               </div>
            </div>
         </div>
