@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Plan, Employee, OperatingExpense, ScenarioParams } from './types';
 import { INITIAL_PLANS, INITIAL_EMPLOYEES, INITIAL_EXPENSES, DEFAULT_SCENARIO } from './constants';
@@ -12,7 +11,7 @@ import KPICard from './components/KPICard';
 import InvestorDashboard from './components/InvestorDashboard';
 import AppGuide from './components/AppGuide';
 import MathDeepDive from './components/MathDeepDive';
-import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable, Save, Upload } from './components/Icons';
+import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable, Save, Upload, FileText } from './components/Icons';
 
 const App: React.FC = () => {
   // --- State Management ---
@@ -69,7 +68,7 @@ const App: React.FC = () => {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `saas_scenario_${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `saas_vision_scenario_${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -103,6 +102,27 @@ const App: React.FC = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleDownloadSample = () => {
+    // Basic sample data structure
+    const sampleData = {
+        plans: INITIAL_PLANS,
+        employees: INITIAL_EMPLOYEES,
+        expenses: INITIAL_EXPENSES,
+        scenarioParams: DEFAULT_SCENARIO
+    };
+    const jsonString = JSON.stringify(sampleData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sample_scenario.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const triggerImportClick = () => {
@@ -145,7 +165,7 @@ const App: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">
-                  SaaS Scenario Architect <span className="text-blue-600 dark:text-blue-400 font-light">v3</span>
+                  SaaS Vision AI
                 </h1>
               </div>
             </div>
@@ -213,6 +233,13 @@ const App: React.FC = () => {
               {/* Import/Export Actions */}
               <div className="flex items-center space-x-2">
                 <button
+                    onClick={handleDownloadSample}
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-slate-600"
+                    title="Download Sample JSON"
+                >
+                    <FileText className="w-5 h-5" />
+                </button>
+                <button
                     onClick={handleExportScenario}
                     className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-slate-600"
                     title="Export Scenario to JSON"
@@ -262,7 +289,7 @@ const App: React.FC = () => {
                 trend={financials.ltvCacRatio > 3 ? 'positive' : 'negative'}
                 subtext={`LTV: ${fmt(financials.ltv)} | CAC: ${fmt(financials.cac)}`}
                 color={financials.ltvCacRatio < 3 && financials.ltvCacRatio > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : undefined}
-                tooltip="Lifetime Value per Customer divided by Cost to Acquire them. Target > 3x."
+                tooltip="Profit from a customer vs. Cost to find them. Goal: Make $3 for every $1 spent."
               />
               <KPICard 
                 title="Cash Runway" 
