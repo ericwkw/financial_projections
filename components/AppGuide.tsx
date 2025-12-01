@@ -1,214 +1,185 @@
-
 import React from 'react';
-import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase } from './Icons';
+import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase, BookOpen } from './Icons';
 
 const AppGuide: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
-      {/* Introduction */}
-      <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Welcome to SaaS Scenario Architect</h2>
-        <div className="max-w-4xl">
-          <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-            This comprehensive financial modeling tool is designed for SaaS founders and CFOs. 
-            It allows you to simulate your startup's financial future over the next 5 years by experimenting with pricing, staffing, expenses, and growth assumptions.
+      {/* 1. Introduction Hero */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg">
+        <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+          <BookOpen className="w-8 h-8 text-blue-200" />
+          Quick Start Guide
+        </h2>
+        <div className="max-w-3xl">
+          <p className="text-blue-50 text-lg leading-relaxed">
+            Welcome! This tool helps you predict the future of your software business. 
+            It answers the big question: <strong>"Can I make money with this pricing model?"</strong>
+            <br/><br/>
+            You don't need a finance degree to use it. Just follow the 3 steps below.
           </p>
         </div>
+      </div>
 
-        <h3 className="font-bold text-slate-900 dark:text-white mt-8 mb-4">How to Use This Model</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Users className="w-16 h-16" />
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">1</span>
-              Model Inputs
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Go to the <strong>Model Inputs</strong> tab.
-            </p>
-            <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Add Plans: Define <strong>Growth %</strong> and <strong>Churn %</strong> for each tier individually.</li>
-              <li>Hire your <strong>Team</strong> and set salaries.</li>
-              <li>List monthly <strong>Operating Expenses</strong>.</li>
-            </ul>
-          </div>
+      {/* 2. Three Step Tutorial */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Step 1 */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">1</div>
+          <h3 className="font-bold text-slate-900 dark:text-white mb-2">Build Your Model</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Go to the <strong>Model Inputs</strong> tab. This is where you describe your business.
+          </p>
+          <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <li className="flex gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span><strong>Plans:</strong> Create a "Basic" plan for $10 and a "Pro" plan for $50.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span><strong>Team:</strong> Who do you need to hire? Add yourself and maybe a developer.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-blue-500 font-bold">•</span>
+              <span><strong>Expenses:</strong> Add bills like Server Costs, Software subscriptions, or Rent.</span>
+            </li>
+          </ul>
+        </div>
 
-          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
-             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingUp className="w-16 h-16" />
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">2</span>
-              Adjust Scenarios
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Use the <strong>Scenario Bar</strong> (Grouped Controls).
-            </p>
-            <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li><strong>Growth:</strong> Viral Rate, Global Growth Factor, Expansion.</li>
-              <li><strong>Ops & Cash:</strong> Starting Cash, Salary Growth (Inflation), Commissions.</li>
-              <li><strong>Valuation:</strong> Exit Multiple & Equity.</li>
-            </ul>
-          </div>
+        {/* Step 2 */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+           <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">2</div>
+          <h3 className="font-bold text-slate-900 dark:text-white mb-2">Tweak the Scenarios</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Use the <strong>Sliders</strong> at the top of the screen to test "What If" scenarios.
+          </p>
+          <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <li className="flex gap-2">
+              <span className="text-amber-500 font-bold">•</span>
+              <span><strong>Growth:</strong> What if users tell their friends? (Viral Rate)</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-amber-500 font-bold">•</span>
+              <span><strong>Cash:</strong> Do you have $10k or $100k in the bank right now?</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-amber-500 font-bold">•</span>
+              <span><strong>Valuation:</strong> How much equity do you own?</span>
+            </li>
+          </ul>
+        </div>
 
-          <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl relative overflow-hidden group">
-             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <BrainCircuit className="w-16 h-16" />
-            </div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs">3</span>
-              Analyze & Export
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Go to <strong>Analysis & P&L</strong>.
-            </p>
-             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Check <strong>NRR</strong> & <strong>Burn Multiplier</strong>.</li>
-              <li>Ask the <strong>Gemini CFO</strong> for advice.</li>
-              <li><strong>Export CSV</strong> for investors.</li>
-            </ul>
-          </div>
+        {/* Step 3 */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+           <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">3</div>
+          <h3 className="font-bold text-slate-900 dark:text-white mb-2">Check the Health</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            Go to <strong>Analysis & P&L</strong> to see if you survive.
+          </p>
+          <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <li className="flex gap-2">
+              <span className="text-emerald-500 font-bold">•</span>
+              <span><strong>Runway:</strong> How many months until you run out of money?</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-emerald-500 font-bold">•</span>
+              <span><strong>Profit:</strong> When do you break even?</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-emerald-500 font-bold">•</span>
+              <span><strong>Gemini CFO:</strong> Ask AI for advice on your numbers.</span>
+            </li>
+          </ul>
         </div>
       </div>
 
-      {/* Benchmarks Cheat Sheet */}
-      <div className="bg-indigo-50 dark:bg-indigo-900/10 p-8 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800/30">
-        <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-400 mb-4 flex items-center gap-2">
-          <DollarSign className="w-5 h-5" /> Variable Cost Benchmarks Cheat Sheet
+      {/* 3. The Dictionary (Simple Terms) */}
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+          <Briefcase className="w-6 h-6 text-indigo-500" />
+          The "Plain English" Dictionary
         </h3>
-        <p className="text-indigo-800 dark:text-indigo-200/80 mb-6 text-sm">
-          Use these industry standard numbers to estimate your <strong>Variable Cost / User</strong>.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">Payment Processing</h4>
-                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li className="flex justify-between"><span>Stripe / PayPal</span> <span className="font-mono text-slate-500">2.9% + 30¢</span></li>
-                    <li className="flex justify-between"><span>App Store</span> <span className="font-mono text-slate-500">15% - 30%</span></li>
-                </ul>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">AI / LLM Costs</h4>
-                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li className="flex justify-between"><span>GPT-4o (Input)</span> <span className="font-mono text-slate-500">$5.00 / 1M tokens</span></li>
-                    <li className="flex justify-between"><span>GPT-4o (Output)</span> <span className="font-mono text-slate-500">$15.00 / 1M tokens</span></li>
-                    <li className="flex justify-between"><span>Gemini 1.5 Flash</span> <span className="font-mono text-slate-500">~$0.35 / 1M tokens</span></li>
-                </ul>
-            </div>
-             <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm">
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-2 border-b pb-2 dark:border-slate-700">Infrastructure</h4>
-                <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                    <li className="flex justify-between"><span>Storage (S3)</span> <span className="font-mono text-slate-500">$0.023 / GB</span></li>
-                    <li className="flex justify-between"><span>Data Transfer</span> <span className="font-mono text-slate-500">$0.09 / GB</span></li>
-                </ul>
-            </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+          
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">ARR (Annual Recurring Revenue)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              The total amount of subscription money you make in a year. 
+              <br/><span className="italic text-slate-500">Formula: Monthly Revenue x 12.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Churn (The Leaky Bucket)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              The percentage of customers who cancel their subscription every month. 
+              <br/><span className="text-red-500 font-medium">High churn kills businesses. Keep it under 5%.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">CAC (Customer Acquisition Cost)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              How much money you spend on ads or sales to get <strong>ONE</strong> new customer.
+              <br/><span className="italic text-slate-500">Example: You spend $100 on ads and get 1 customer. Your CAC is $100.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">LTV (Lifetime Value)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              The total profit you make from a single customer before they cancel.
+              <br/><span className="text-emerald-600 font-medium">Target: You want LTV to be 3x higher than CAC.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Runway</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              How much time you have left before your bank account hits $0. 
+              <br/><span className="italic text-slate-500">If you have $10k and lose $1k/month, your runway is 10 months.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Burn Rate</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              The amount of cash your company "burns" (loses) every month to keep the lights on.
+            </p>
+          </div>
+
         </div>
       </div>
 
-      {/* Concept Clarification */}
-      <div className="bg-amber-50 dark:bg-amber-900/10 p-8 rounded-xl shadow-sm border border-amber-100 dark:border-amber-800/30">
-        <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-4 flex items-center gap-2">
-          <DollarSign className="w-5 h-5" /> Understanding Costs: Variable vs. Fixed
+      {/* 4. Controls Explained */}
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-8 border border-indigo-100 dark:border-indigo-800/50">
+         <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-200 mb-6 flex items-center gap-2">
+          <TrendingUp className="w-6 h-6" />
+          What do the sliders do?
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div>
-             <h4 className="font-bold text-amber-900 dark:text-amber-300 text-sm mb-2">Variable Cost / User (Input)</h4>
-             <p className="text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed">
-               These are costs that go up <strong>automatically</strong> every time you get a new customer.
-               <br/><br/>
-               <em>Examples:</em> Stripe Fees (2.9%), AI Tokens ($1/user), SMS credits.
-               <br/>
-               <strong>Why it's an input:</strong> You estimate the cost *per unit*, and the model calculates the total based on your user count.
+        <div className="space-y-4">
+           <div className="flex gap-4 items-start">
+             <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Viral Referral</div>
+             <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
+               Free growth. If set to 1%, it means for every 100 users you have, they bring in 1 new user for free every month.
              </p>
            </div>
-           <div>
-             <h4 className="font-bold text-amber-900 dark:text-amber-300 text-sm mb-2">Fixed Operating Expenses</h4>
-             <p className="text-sm text-amber-800 dark:text-amber-200/80 leading-relaxed">
-               These are costs that stay roughly the <strong>same</strong> regardless of whether you add 1 or 100 users today.
-               <br/><br/>
-               <em>Examples:</em> Base Database Hosting ($500/mo), Rent, Employee Salaries, Marketing Retainer.
-               <br/>
-               <strong>Where to put them:</strong> In the "Fixed Operating Expenses" section.
+           <div className="flex gap-4 items-start">
+             <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Market Efficiency</div>
+             <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
+               A global multiplier for your growth. 
+               <br/><strong>1.0x</strong> = Normal. 
+               <br/><strong>1.5x</strong> = Your ads are working great (Growth is 50% faster).
+               <br/><strong>0.5x</strong> = Hard times (Growth is half of what you expected).
              </p>
            </div>
-        </div>
-      </div>
-
-      {/* Glossary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-600" /> Key Metrics Glossary
-          </h3>
-          <dl className="space-y-6">
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">NRR (Net Revenue Retention)</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                The percentage of revenue you retain from existing customers, including upsells and churn. 
-                <br/>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">> 100% means you are growing even without new sales (Negative Churn).</span>
-              </dd>
-            </div>
-             <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Implementation / Setup Fee</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                One-time fees charged to onboard new customers. These boost cash flow and help recover CAC instantly, but do not contribute to MRR (Valuation).
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">LTV:CAC Ratio</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                <strong>Lifetime Value divided by Customer Acquisition Cost.</strong>
-                It measures if you make more money from a customer than it costs to find them.
-                <br/><span className="text-emerald-600 dark:text-emerald-400 font-medium">> 3:1 is good.</span> <span className="text-red-500 font-medium">&lt; 1:1 is fatal.</span>
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Magic Number</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Measures sales efficiency. <em>"For every $1 of marketing spend, how much recurring revenue do I create?"</em>
-                Target > 0.75.
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-emerald-600" /> Survival & Strategy
-          </h3>
-          <dl className="space-y-6">
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Burn Rate</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                How much cash you are losing each month (Revenue - Expenses). If you are profitable, your burn rate is zero.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Cash Runway</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Time until death. <em>Cash on Hand / Burn Rate</em>. Investors typically want to see 18-24 months of runway after a funding round.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Rule of 40</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                A balance between Growth and Profitability. 
-                <em>Growth Rate % + Profit Margin %</em> should be > 40.
-                (e.g., 100% growth with -60% margin = 40).
-              </dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900 dark:text-white text-sm">Burn Multiplier</dt>
-              <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                How much cash are you burning to add $1 of Net New ARR? 
-                <br/>Target &lt; 2. (Burning $2 to add $1 of ARR is okay in early stages, but must improve).
-              </dd>
-            </div>
-          </dl>
+           <div className="flex gap-4 items-start">
+             <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Expansion Rate</div>
+             <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
+               Upselling. The percentage of extra revenue you get from existing customers each month (e.g., they upgrade from Basic to Pro).
+             </p>
+           </div>
         </div>
       </div>
 
