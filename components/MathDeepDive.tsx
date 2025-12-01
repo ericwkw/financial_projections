@@ -93,7 +93,7 @@ const MathDeepDive: React.FC = () => {
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  Measures marketing efficiency. If > 1.0, you are making more recurring revenue in a year than you spent to get it.
-                 <br/>*Acquisition Spend = Ads + Sales Commissions.
+                 <br/>*Acquisition Spend = Ads + <span className="font-bold">Total Sales Commissions</span> (New + Expansion).
                </p>
              </div>
 

@@ -191,8 +191,9 @@ export const calculateFinancials = (
       cacPaybackMonths = 999;
   }
 
-  // Magic Number = Net New ARR / Monthly Acquisition Spend (Marketing + Sales Comm)
-  const monthlyAcquisitionTotal = totalCacSpend;
+  // Magic Number = Net New ARR / Monthly Acquisition Spend
+  // Correct Logic: Include Total Commissions (New + Expansion) in Cost if Net New ARR includes Expansion Revenue
+  const monthlyAcquisitionTotal = acquisitionCosts + estimatedTotalCommissions;
   const magicNumber = monthlyAcquisitionTotal > 0 ? netNewArr / monthlyAcquisitionTotal : 0;
 
   // Burn Multiplier = Monthly Net Burn / Net New ARR
