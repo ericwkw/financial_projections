@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase, BookOpen } from './Icons';
 

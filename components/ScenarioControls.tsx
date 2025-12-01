@@ -57,13 +57,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Growth Speed Dial</label>
                       <Tooltip position="bottom" content="1.0 is normal. 1.2 means your marketing is working 20% better than expected." />
                     </div>
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.marketingEfficiency}x</span>
+                    <span className="text-xs font-bold text-blue-500 dark:text-blue-400">{params.marketingEfficiency}x</span>
                   </div>
                   <input
                     type="range" min="0.5" max="2.0" step="0.1"
                     value={params.marketingEfficiency}
                     onChange={(e) => onChange('marketingEfficiency', parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
                   />
                 </div>
 
