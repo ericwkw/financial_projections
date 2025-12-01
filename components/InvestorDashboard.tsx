@@ -31,14 +31,14 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={fmtCurrency(financials.arr)} 
             icon={<DollarSign className="w-5 h-5" />} 
             subtext={`Monthly Rev: ${fmtCurrency(financials.mrr)}`}
-            tooltip="Annual Recurring Revenue (MRR x 12). The standard measure of scale."
+            tooltip="Annual Recurring Revenue. This is how much money you make in a year from subscriptions."
         />
         <KPICard 
             title="Company Valuation" 
             value={fmtCurrency(financials.valuation)} 
             icon={<BrainCircuit className="w-5 h-5" />} 
             subtext={`Based on ${fmtNum(state.params.valuationMultiple)}x ARR`}
-            tooltip="Estimated market value of the company."
+            tooltip="A rough estimate of what your company might be worth to investors."
         />
         <KPICard 
             title="Founder's Stake Value" 
@@ -46,7 +46,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             icon={<TrendingUp className="w-5 h-5" />} 
             subtext={`At ${state.params.founderEquity}% Ownership`}
             color="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
-            tooltip="The theoretical value of your personal equity in an exit scenario."
+            tooltip="The potential value of your personal shares if you sold the company."
         />
       </div>
 
@@ -62,49 +62,49 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={`${fmtNum(financials.ltvCacRatio)}x`}
             target="> 3.0x"
             status={financials.ltvCacRatio >= 3 ? 'good' : financials.ltvCacRatio >= 1 ? 'warning' : 'bad'}
-            tooltip="Lifetime Value (Paid Cohort) divided by CAC (Paid Cohort). Strict calculation ignoring free users."
+            tooltip="Profit from a customer vs. Cost to find them. Goal: Make $3 for every $1 spent."
           />
            <MetricTile 
             label="Net Rev Retention"
             value={`${fmtNum(financials.nrr)}%`}
             target="> 100%"
             status={financials.nrr >= 100 ? 'good' : financials.nrr >= 90 ? 'warning' : 'bad'}
-            tooltip="NRR. Revenue retained from existing customers including upsells and churn. >100% means you grow without new sales."
+            tooltip="Are you keeping your money? > 100% means upgrades are earning you more than people quitting."
           />
           <MetricTile 
             label="CAC Payback"
             value={financials.cacPaybackMonths === 0 ? "Instant" : `${fmtNum(financials.cacPaybackMonths)} mo`}
             target="< 12 mo"
             status={financials.cacPaybackMonths <= 12 ? 'good' : financials.cacPaybackMonths <= 18 ? 'warning' : 'bad'}
-            tooltip="How many months of gross profit it takes to earn back the marketing spend for a new customer."
+            tooltip="How many months it takes to earn back the money you spent on ads for a new customer."
           />
           <MetricTile 
             label="Magic Number"
             value={`${fmtNum(financials.magicNumber)}`}
             target="> 0.75"
             status={financials.magicNumber >= 0.75 ? 'good' : financials.magicNumber >= 0.5 ? 'warning' : 'bad'}
-            tooltip="Measures sales efficiency. For every $1 of marketing spend, how much new annual revenue did you create?"
+            tooltip="Marketing Efficiency. If you put $1 into ads, do you get more than $1 of yearly revenue back?"
           />
           <MetricTile 
             label="Burn Multiplier"
             value={`${fmtNum(financials.burnMultiplier)}x`}
             target="< 2.0x"
             status={financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
-            tooltip="How much cash are you burning to add $1 of Net New ARR? Lower is better. < 1 is excellent."
+            tooltip="Capital Efficiency. How much cash do you burn to grow? Lower is better."
           />
           <MetricTile 
             label="Time to Profit"
             value={breakEvenMonth ? `Month ${breakEvenMonth}` : "Never"}
             target="< 24 mo"
             status={breakEvenMonth && breakEvenMonth < 24 ? 'good' : breakEvenMonth ? 'warning' : 'bad'}
-            tooltip="The month when your Net Income becomes positive."
+            tooltip="The specific month when your company finally makes more money than it spends."
           />
           <MetricTile 
             label="Free-to-Paid Conv."
             value={`${fmtNum(financials.conversionRate * 100)}%`}
             target="> 5%"
             status={financials.conversionRate >= 0.05 ? 'good' : financials.conversionRate >= 0.02 ? 'warning' : 'neutral'}
-            tooltip="Percentage of Total Users who are Paying Subscribers. Crucial for Freemium models."
+            tooltip="Percentage of Total Users who actually pay you. Crucial for free-tier apps."
           />
         </div>
       </div>

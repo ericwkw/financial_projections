@@ -39,7 +39,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Viral Referral Rate</label>
-                      <Tooltip position="bottom" content="% of users who invite a new user each month. Critical for PLG/Freemium growth." />
+                      <Tooltip position="bottom" content="Free growth. Imagine if every 100 users brought in 1 friend." />
                     </div>
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.viralRate}%</span>
                   </div>
@@ -54,8 +54,8 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Market Efficiency</label>
-                      <Tooltip position="bottom" content="Global Multiplier (1.2x = 20% faster). Simulates 'Good Market Conditions' or 'Better Marketing'." />
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Growth Speed Dial</label>
+                      <Tooltip position="bottom" content="1.0 is normal. 1.2 means your marketing is working 20% better than expected." />
                     </div>
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.marketingEfficiency}x</span>
                   </div>
@@ -71,7 +71,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Expansion / Upsell</label>
-                      <Tooltip position="bottom" content="Monthly % revenue increase from existing customers. Drives Net Revenue Retention (NRR)." />
+                      <Tooltip position="bottom" content="How much extra money you make from existing customers each month (upgrades)." />
                     </div>
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{params.expansionRate}%</span>
                   </div>
@@ -96,7 +96,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                 <div className="space-y-1">
                    <div className="flex items-center mb-1">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Starting Cash</label>
-                      <Tooltip position="bottom" content="Bank balance at Month 0." />
+                      <Tooltip position="bottom" content="Money in the bank right now." />
                    </div>
                    <div className="relative">
                       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
@@ -113,7 +113,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Payroll Tax</label>
-                       <Tooltip position="bottom" content="Benefits/Tax Load added to base salaries." />
+                       <Tooltip position="bottom" content="Hidden costs like insurance and taxes added on top of every salary." />
                     </div>
                     <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{params.payrollTax}%</span>
                   </div>
@@ -129,7 +129,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Salary Growth</label>
-                       <Tooltip position="bottom" content="Annual % raise for employees (Inflation)." />
+                       <Tooltip position="bottom" content="Yearly raises for employees (Inflation)." />
                     </div>
                     <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{params.salaryGrowthRate}% / yr</span>
                   </div>
@@ -145,7 +145,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Sales Comm.</label>
-                       <Tooltip position="bottom" content="% of First Year Revenue paid to sales team." />
+                       <Tooltip position="bottom" content="Cash bonus paid to sales team for closing new deals." />
                     </div>
                     <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{params.commissionRate}%</span>
                   </div>

@@ -133,7 +133,8 @@ export const calculateFinancials = (
   const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
-  const netGrowthRate = (blendedGrowthRate + params.expansionRate - blendedChurnRate) / 100;
+  // Net New ARR - Use PAID growth, not blended (free users don't add ARR)
+  const netGrowthRate = (paidGrowthRate + params.expansionRate - paidChurnRate) / 100;
   const netNewArr = arr * netGrowthRate;
 
   const annualizedMarketing = acquisitionCosts * 12;
