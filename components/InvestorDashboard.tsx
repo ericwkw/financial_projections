@@ -73,9 +73,13 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
           />
           <MetricTile 
             label="CAC Payback"
-            value={financials.cacPaybackMonths === 0 ? "Instant" : `${fmtNum(financials.cacPaybackMonths)} mo`}
+            value={
+                financials.cacPaybackMonths >= 999 ? "Never" :
+                financials.cacPaybackMonths === 0 ? "Instant" : 
+                `${fmtNum(financials.cacPaybackMonths)} mo`
+            }
             target="< 12 mo"
-            status={financials.cacPaybackMonths <= 12 ? 'good' : financials.cacPaybackMonths <= 18 ? 'warning' : 'bad'}
+            status={financials.cacPaybackMonths >= 999 ? 'bad' : financials.cacPaybackMonths <= 12 ? 'good' : financials.cacPaybackMonths <= 18 ? 'warning' : 'bad'}
             tooltip="How many months it takes to earn back the money you spent on ads for a new customer."
           />
           <MetricTile 
@@ -87,9 +91,9 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
           />
           <MetricTile 
             label="Burn Multiplier"
-            value={`${fmtNum(financials.burnMultiplier)}x`}
+            value={financials.burnMultiplier >= 999 ? "Neg. Growth" : `${fmtNum(financials.burnMultiplier)}x`}
             target="< 2.0x"
-            status={financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
+            status={financials.burnMultiplier >= 999 ? 'bad' : financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
             tooltip="Capital Efficiency. How much cash do you burn to grow? Lower is better."
           />
           <MetricTile 

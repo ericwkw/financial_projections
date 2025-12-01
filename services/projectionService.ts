@@ -152,27 +152,44 @@ export const calculateFinancials = (
 
   // 7. Efficiency Metrics
   
-  // Setup Fees: We must allocate the setup revenue to new paying users to find the "Average Setup Fee"
-  // Logic: Weighted Setup Fee per New User = Total Setup Revenue / Total New Paying Users
+  // Setup Fees Allocation
   const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? oneTimeRevenueMonthly / totalNewPayingSubscribers : 0;
   
-  // Adjusted CAC = CAC - Setup Fee (One-time reimbursement)
-  // If Setup Fee > CAC, Adjusted CAC is 0 (Instant Payback)
+  // Adjusted CAC = CAC - Setup Fee
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
   
   // Payback Denominator: Gross Profit from RECURRING revenue only per user
   const monthlyRecurringGrossProfitPerUser = arppu * grossMarginPercent;
   
-  const cacPaybackMonths = monthlyRecurringGrossProfitPerUser > 0 ? adjustedCac / monthlyRecurringGrossProfitPerUser : 0;
+  // Fix: If Margin is <= 0, Payback is Infinite (999), not 0 (Instant)
+  let cacPaybackMonths = 0;
+  if (monthlyRecurringGrossProfitPerUser > 0) {
+      cacPaybackMonths = adjustedCac / monthlyRecurringGrossProfitPerUser;
+  } else {
+      // If we lose money per user, we never pay back. 
+      // Return 999 as sentinel for "Never"
+      cacPaybackMonths = 999;
+  }
 
   // Magic Number = Net New ARR / Marketing Spend (Current Month)
   const monthlyMarketing = acquisitionCosts;
   const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
 
   // Burn Multiplier = Net Burn / Net New ARR
-  const burnMultiplier = (burnRate > 0 && netNewArr > 0) 
-    ? burnRate / netNewArr 
-    : 0;
+  // Fix: If we are burning cash but not growing (or shrinking), the multiplier is Bad (Infinite).
+  // 0 is typically "Good" (Profitable). So we need a sentinel for "Bad".
+  let burnMultiplier = 0;
+  if (burnRate > 0) {
+      if (netNewArr > 0) {
+          burnMultiplier = burnRate / netNewArr;
+      } else {
+          // Burning cash + Zero/Neg Growth = Disaster
+          burnMultiplier = 999;
+      }
+  } else {
+      // Profitable (No burn) = 0 (Excellent)
+      burnMultiplier = 0;
+  }
 
   return {
     mrr,
