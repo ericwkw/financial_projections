@@ -46,6 +46,7 @@ export const calculateFinancials = (
     weightedChurnSum += effectiveChurnRate * plan.subscribers;
 
     // Weighting for Paying Users Only
+    // Gross Adds (New Users) calculation
     const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
     
     if (isPaid) {
@@ -204,7 +205,7 @@ export const generateProjections = (
     if (i > 1) {
        const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
        
-       // 1. Add New Expansion Revenue
+       // 1. Add New Expansion Revenue (Monthly % of previous MRR)
        const newExpansion = prevRevenue * (params.expansionRate / 100);
        expansionRevenueAccumulated += newExpansion;
 
