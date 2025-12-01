@@ -62,7 +62,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={`${fmtNum(financials.ltvCacRatio)}x`}
             target="> 3.0x"
             status={financials.ltvCacRatio >= 3 ? 'good' : financials.ltvCacRatio >= 1 ? 'warning' : 'bad'}
-            tooltip="Lifetime Value divided by Customer Acquisition Cost. The primary measure of unit profitability."
+            tooltip="Lifetime Value (Paid Cohort) divided by CAC (Paid Cohort). Strict calculation ignoring free users."
           />
            <MetricTile 
             label="Net Rev Retention"

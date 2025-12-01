@@ -74,8 +74,10 @@ export interface Financials {
   totalSubscribers: number;
   payingSubscribers: number;
   conversionRate: number; // % of users who pay
-  blendedGrowthRate: number; // Weighted average growth
-  blendedChurnRate: number; // Weighted average churn
+  blendedGrowthRate: number; // Weighted average growth (All Users)
+  blendedChurnRate: number; // Weighted average churn (All Users)
+  paidGrowthRate: number; // Weighted average growth (Paying Users Only)
+  paidChurnRate: number; // Weighted average churn (Paying Users Only)
 }
 
 export interface MonthlyProjection {

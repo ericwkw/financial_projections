@@ -14,9 +14,14 @@ export const calculateFinancials = (
   let payingSubscribers = 0;
   let oneTimeRevenueMonthly = 0;
 
-  // Track weighted averages for blended metrics
+  // Track weighted averages for blended metrics (All Users)
   let weightedGrowthSum = 0;
   let weightedChurnSum = 0;
+
+  // Track weighted averages for Paying Users Only (For LTV/CAC)
+  let weightedPaidGrowthSum = 0;
+  let weightedPaidChurnSum = 0;
+  let totalNewPayingSubscribers = 0;
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
@@ -29,19 +34,27 @@ export const calculateFinancials = (
     }
     
     // Growth Logic for Snapshot
-    // Base Plan Growth * Marketing Efficiency Multiplier + Viral Boost
     const growth = plan.monthlyGrowth || 0;
     const churn = plan.monthlyChurn || 0;
     
+    // Effective Growth = Plan Growth * Marketing Multiplier + Viral Rate
     const effectiveGrowthRate = (growth * params.marketingEfficiency) + params.viralRate;
     const effectiveChurnRate = churn;
 
-    // Weighting by subscribers for an accurate "Blended" view
+    // Weighting for All Users
     weightedGrowthSum += effectiveGrowthRate * plan.subscribers;
     weightedChurnSum += effectiveChurnRate * plan.subscribers;
 
-    // Estimate new users this month for setup fees
+    // Weighting for Paying Users Only
     const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
+    
+    if (isPaid) {
+        weightedPaidGrowthSum += effectiveGrowthRate * plan.subscribers;
+        weightedPaidChurnSum += effectiveChurnRate * plan.subscribers;
+        totalNewPayingSubscribers += newUsers;
+    }
+
+    // One-time revenue applies to all new users who have a setup fee
     oneTimeRevenueMonthly += newUsers * plan.setupFee;
 
     // Costs apply to ALL plans (Free + Paid)
@@ -49,9 +62,13 @@ export const calculateFinancials = (
     totalSubscribers += plan.subscribers;
   });
 
-  // Calculate Blended Rates
+  // Calculate Blended Rates (All Users)
   const blendedGrowthRate = totalSubscribers > 0 ? weightedGrowthSum / totalSubscribers : 0;
   const blendedChurnRate = totalSubscribers > 0 ? weightedChurnSum / totalSubscribers : 0;
+
+  // Calculate Paid-Only Rates (For Unit Economics)
+  const paidGrowthRate = payingSubscribers > 0 ? weightedPaidGrowthSum / payingSubscribers : 0;
+  const paidChurnRate = payingSubscribers > 0 ? weightedPaidChurnSum / payingSubscribers : 0;
 
   const arr = mrr * 12;
   const grossProfit = mrr - totalCogs; 
@@ -86,25 +103,30 @@ export const calculateFinancials = (
   const arppu = payingSubscribers > 0 ? mrr / payingSubscribers : 0;
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
   
-  // CAC: Cost to Acquire / New PAYING Customers
-  const impliedNewPayingCustomers = Math.max(0.1, payingSubscribers * (blendedGrowthRate / 100)); 
-  const cac = impliedNewPayingCustomers > 0 ? acquisitionCosts / impliedNewPayingCustomers : 0;
+  // CAC: Cost to Acquire / New PAYING Customers (Strict Definition)
+  // If we have 0 new paying users, but we spent money, CAC is effectively infinite (or maxed).
+  // We use a safe floor to avoid Infinity.
+  const cac = totalNewPayingSubscribers > 0.1 ? acquisitionCosts / totalNewPayingSubscribers : (acquisitionCosts > 0 ? 99999 : 0);
 
-  // LTV: Use Blended Churn
-  const safeChurn = Math.max(0.5, blendedChurnRate); 
-  const ltv = safeChurn > 0 ? (arppu * grossMarginPercent) / (safeChurn / 100) : 0;
+  // LTV: Use Paid Churn Only
+  // Free users churning shouldn't hurt the LTV of a paid enterprise customer.
+  const safePaidChurn = Math.max(0.5, paidChurnRate); 
+  const ltv = safePaidChurn > 0 ? (arppu * grossMarginPercent) / (safePaidChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
   // Rule of 40: Blended Growth + Profit Margin
   const ruleOf40 = blendedGrowthRate + profitMargin; 
   
-  // NRR = 100 + Expansion - Churn
-  const nrr = 100 + params.expansionRate - blendedChurnRate;
+  // NRR = 100 + Expansion - Churn (Paid Churn only? Usually NRR is on revenue, so Paid Churn is correct)
+  const nrr = 100 + params.expansionRate - paidChurnRate;
 
   // 6. Efficiency Metrics
-  const weightedSetupFee = payingSubscribers > 0 ? oneTimeRevenueMonthly / impliedNewPayingCustomers : 0;
-  const grossProfitPerPayingUser = (arppu * grossMarginPercent) + weightedSetupFee;
+  const weightedSetupFee = totalNewPayingSubscribers > 0 ? 
+    (oneTimeRevenueMonthly * (totalNewPayingSubscribers / (Math.max(1, totalSubscribers * (blendedGrowthRate/100))))) : 0; 
+  // Simplified Setup Fee allocation: assume setup fees roughly align with paying user mix.
+  
+  const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
   const netGrowthRate = (blendedGrowthRate + params.expansionRate - blendedChurnRate) / 100;
@@ -148,7 +170,9 @@ export const calculateFinancials = (
     payingSubscribers,
     conversionRate,
     blendedGrowthRate,
-    blendedChurnRate
+    blendedChurnRate,
+    paidGrowthRate,
+    paidChurnRate
   };
 };
 
@@ -218,8 +242,7 @@ export const generateProjections = (
         
         // 2. Existing Users (Renewals)
         // Assumption: Renewals are spread evenly over the year.
-        // So ~1/12th of the existing base renews this month.
-        const existingUsers = Math.max(0, plan.subscribers - churnedUsers); // Use base before growth
+        const existingUsers = Math.max(0, plan.subscribers - churnedUsers); 
         monthlyCashInflow += (existingUsers / 12) * plan.price;
 
       } else {
@@ -258,6 +281,7 @@ export const generateProjections = (
     const netIncome = grossProfit - payroll - opex - commissions;
 
     // Net Cash Flow (Bank P&L)
+    // Commissions are paid cash immediately
     const cashOutflow = monthlyCogs + payroll + opex + commissions;
     const netCashFlow = monthlyCashInflow - cashOutflow;
 
