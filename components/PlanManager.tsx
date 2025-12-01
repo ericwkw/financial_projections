@@ -29,14 +29,18 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
   };
 
   const getPaybackInfo = (plan: Plan) => {
+    // 1. Calculate Monthly Price
     const monthlyPrice = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
+    
+    // 2. Calculate Gross Margin per User
     const margin = monthlyPrice - plan.unitCost;
     
-    if (plan.price === 0) return { months: -1, label: "Free" };
-    if (margin <= 0) return { months: -1, label: "Never" };
+    // 3. Handle Edge Cases
+    if (plan.price === 0) return { months: 999, label: "Free" };
+    if (margin <= 0) return { months: 999, label: "Never" };
     
-    // Payback = (CAC - Setup Fee) / Monthly Margin
-    // We treat globalCac as the base cost.
+    // 4. Calculate Effective CAC (Global CAC - Plan Setup Fee)
+    // Setup fees are instant cash back, so they reduce the CAC we need to recover.
     const effectiveCac = Math.max(0, globalCac - (plan.setupFee || 0));
     
     if (effectiveCac === 0) return { months: 0, label: "Instant" };
@@ -70,7 +74,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
         {plans.map((plan, index) => {
           const isFree = plan.price === 0;
           const payback = getPaybackInfo(plan);
-          const isProfitable = payback.label !== "Never";
+          const isProfitable = payback.label !== "Never" && payback.label !== "Free";
+          const isFreeLabel = payback.label === "Free";
           
           return (
           <div 
@@ -99,13 +104,12 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
                   <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
                 </label>
-                {!isFree && (
-                   <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
-                      <Clock className="w-3 h-3" />
-                      <span>{payback.label}</span>
-                      <Tooltip position="top" content="Months to recover Global Avg CAC, factoring in this plan's Setup Fee." width="w-48"/>
-                   </div>
-                )}
+                {/* Payback Badge */}
+                <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
+                  <Clock className="w-3 h-3" />
+                  <span>{payback.label}</span>
+                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC, factoring in this plan's Setup Fee." width="w-48"/>}
+                </div>
               </div>
               <div className="flex gap-2">
                   <div className="relative w-2/3">
