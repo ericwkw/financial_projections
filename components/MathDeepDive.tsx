@@ -30,14 +30,15 @@ const MathDeepDive: React.FC = () => {
            <div className="space-y-8">
              <div>
                <div className="flex justify-between items-baseline mb-2">
-                 <h4 className="font-semibold text-blue-600 dark:text-blue-400">CAC (Customer Acquisition Cost)</h4>
+                 <h4 className="font-semibold text-blue-600 dark:text-blue-400">CAC (Fully Loaded)</h4>
                  <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Paid Cohorts Only</span>
                </div>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 CAC = Total Sales & Marketing Spend / New <span className="text-blue-600 font-bold">PAYING</span> Customers
+                 CAC = (Marketing Spend + <span className="text-blue-600 font-bold">New Deal Commissions</span>) / New <span className="text-blue-600 font-bold">PAYING</span> Customers
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *Crucial Detail: We ignore new Free users in the denominator. If you spend $1000 to get 100 free users and 1 paid user, your CAC is $1000, not $10.
+                 *We include both Ad Spend and Sales Commissions in the numerator.
+                 <br/>*We ignore new Free users in the denominator. Expensive users don't become cheap just because you added free users.
                </p>
              </div>
 
@@ -62,7 +63,7 @@ const MathDeepDive: React.FC = () => {
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  *Important: We use <strong>Recurring Gross Margin</strong> (excluding Setup Fees) for the denominator. <br/>
-                 Setup fees are handled in the numerator (subtracting from CAC). If we included them in the margin % (denominator), it would double-count the benefit and drastically underestimate the payback time.
+                 Setup fees are handled in the numerator (subtracting from CAC).
                </p>
              </div>
            </div>
@@ -88,11 +89,11 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-2">Magic Number</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Magic Number = Net New ARR / Monthly Marketing Spend
+                 Magic Number = Net New ARR / Monthly Acquisition Spend
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  Measures marketing efficiency. If > 1.0, you are making more recurring revenue in a year than you spent to get it.
-                 <br/>*We compare the Annual Value of new customers (ARR) against the cash spent to get them this month.
+                 <br/>*Acquisition Spend = Ads + Sales Commissions.
                </p>
              </div>
 
@@ -154,7 +155,7 @@ const MathDeepDive: React.FC = () => {
                    </p>
                    <p className="text-[10px] text-slate-400 mt-2">
                      Calculated on <span className="font-bold">Gross New Bookings</span>. 
-                     <br/>In the Dashboard Snapshot, we include an <em>Estimated Commission</em> based on current growth velocity so your Burn Rate KPIs are accurate.
+                     <br/>These are treated as a cash expense in the month the deal is signed.
                    </p>
                 </div>
               </div>

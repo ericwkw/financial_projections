@@ -98,7 +98,6 @@ export const calculateFinancials = (
   const finalTotalCogs = totalCogs + expansionCogs;
 
   // Gross Profit includes One-Time Revenue for P&L
-  // Note: We currently assume 100% margin on One-Time Revenue (Setup Fees) as it's usually labor/service
   const totalRevenue = mrr + oneTimeRevenueMonthly + impliedExpansionMrr;
   const grossProfit = totalRevenue - finalTotalCogs; 
   const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
@@ -122,14 +121,17 @@ export const calculateFinancials = (
     .reduce((acc, exp) => acc + exp.amount, 0);
 
   // 4. Commissions (Snapshot Estimation)
+  // Commission for CAC = New Logos Only
+  const commissionsFromNewLogos = impliedNewArrMonthly * (params.commissionRate / 100);
+  // Total Commission (P&L) = New Logos + Expansion
   const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
-  const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
+  const estimatedTotalCommissions = totalNewArrBase * (params.commissionRate / 100);
 
   // Add Expansion to Net New ARR for Efficiency Metrics
   const netNewArr = netNewArrReal + impliedExpansionArr;
 
   // 5. Totals
-  const totalExpenses = finalTotalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
+  const totalExpenses = finalTotalCogs + payrollMonthly + opexMonthly + estimatedTotalCommissions;
   const netMonthly = totalRevenue - totalExpenses;
   
   const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
@@ -148,7 +150,9 @@ export const calculateFinancials = (
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
   
   // CAC: Cost to Acquire / New PAYING Customers (Strict Definition)
-  const cac = totalNewPayingSubscribers > 0.1 ? acquisitionCosts / totalNewPayingSubscribers : (acquisitionCosts > 0 ? 99999 : 0);
+  // Fully Loaded CAC = Marketing Spend + Sales Commissions on New Deals
+  const totalCacSpend = acquisitionCosts + commissionsFromNewLogos;
+  const cac = totalNewPayingSubscribers > 0.1 ? totalCacSpend / totalNewPayingSubscribers : (totalCacSpend > 0 ? 99999 : 0);
 
   // LTV: Use Paid Churn Only & Recurring Gross Margin
   const safePaidChurn = Math.max(0.5, paidChurnRate); 
@@ -171,7 +175,8 @@ export const calculateFinancials = (
   // 7. Efficiency Metrics
   
   // Setup Fees Allocation for Payback
-  const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? oneTimeRevenueMonthly / totalNewPayingSubscribers : 0;
+  const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? 
+    (oneTimeRevenueMonthly * (totalNewPayingSubscribers / (Math.max(1, totalSubscribers * (blendedGrowthRate/100))))) : 0; 
   
   // Adjusted CAC = CAC - Setup Fee
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
@@ -186,9 +191,9 @@ export const calculateFinancials = (
       cacPaybackMonths = 999;
   }
 
-  // Magic Number = Net New ARR / Monthly Marketing Spend
-  const monthlyMarketing = acquisitionCosts;
-  const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
+  // Magic Number = Net New ARR / Monthly Acquisition Spend (Marketing + Sales Comm)
+  const monthlyAcquisitionTotal = totalCacSpend;
+  const magicNumber = monthlyAcquisitionTotal > 0 ? netNewArr / monthlyAcquisitionTotal : 0;
 
   // Burn Multiplier = Monthly Net Burn / Net New ARR
   let burnMultiplier = 0;
@@ -207,7 +212,7 @@ export const calculateFinancials = (
     mrr,
     arr,
     oneTimeRevenueMonthly,
-    cogs: finalTotalCogs, // Using COGS including expansion costs
+    cogs: finalTotalCogs, 
     grossProfit,
     grossMarginPercent,
     payrollMonthly,
@@ -332,7 +337,6 @@ export const generateProjections = (
     monthlyCashInflow += expansionRevenueAccumulated;
     
     // -- COGS Adjustment for Expansion Revenue --
-    // We assume expansion revenue has the same margin profile as the base business
     const expansionCogs = expansionRevenueAccumulated * baseCogsRatio;
     monthlyCogs += expansionCogs;
 
