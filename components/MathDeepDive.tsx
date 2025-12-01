@@ -138,7 +138,8 @@ const MathDeepDive: React.FC = () => {
                      Commission Rate × Gross New ARR
                    </p>
                    <p className="text-[10px] text-slate-400 mt-2">
-                     Calculated on <span className="font-bold">Gross New Bookings</span> (New Customers). In the Snapshot Dashboard, we estimate this based on current growth velocity to ensure Burn Rate KPIs are accurate.
+                     Calculated on <span className="font-bold">Gross New Bookings</span>. 
+                     <br/>In the Dashboard Snapshot, we include an <em>Estimated Commission</em> based on current growth velocity so your Burn Rate KPIs are accurate.
                    </p>
                 </div>
               </div>

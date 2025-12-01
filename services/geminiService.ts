@@ -12,13 +12,28 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
 
     const ai = new GoogleGenAI({ apiKey });
 
+    // Calculate the estimated commission amount for the breakdown
+    const otherExpenses = state.financials.payrollMonthly + state.financials.opexMonthly + state.financials.cogs;
+    const estCommissions = Math.max(0, state.financials.grossBurn - otherExpenses);
+
     // We extract the key metrics to pass clearly to the LLM
+    // CRITICAL: We must provide the "Bridge" between raw costs and Gross Burn
+    // so the AI doesn't flag "Unaccounted cash outflow" as a discrepancy.
     const metrics = {
       MRR: state.financials.mrr,
       ARR: state.financials.arr,
       GrossMarginPercent: (state.financials.grossMarginPercent * 100).toFixed(1) + "%",
-      GrossBurn: state.financials.grossBurn, // Total Cash Out
-      NetBurn: state.financials.burnRate,   // Cash Out - Cash In
+      
+      // Explicit Burn Breakdown
+      GrossBurn_Total: state.financials.grossBurn,
+      GrossBurn_Breakdown: {
+        Payroll_Loaded: state.financials.payrollMonthly,
+        OpEx: state.financials.opexMonthly,
+        COGS: state.financials.cogs,
+        Est_Sales_Commissions: estCommissions
+      },
+      
+      NetBurn: state.financials.burnRate,
       RunwayMonths: state.financials.runwayMonths,
       LTV: state.financials.ltv,
       CAC: state.financials.cac,
@@ -32,13 +47,24 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     const prompt = `
     Here is the detailed SaaS financial model for analysis:
 
+    **Context & Assumptions:**
+    - Payroll Tax Load: ${state.params.payrollTax}% (Included in Payroll figures)
+    - Sales Commission Rate: ${state.params.commissionRate}% (Of new Bookings)
+    - Marketing Efficiency: ${state.params.marketingEfficiency}x
+    
     **Key Investor Metrics:**
     ${JSON.stringify(metrics, null, 2)}
     
     **Plans (Pricing & Unit Economics):**
-    ${JSON.stringify(state.plans.map(p => ({ name: p.name, price: p.price, unitCost: p.unitCost, subscribers: p.subscribers })), null, 2)}
+    ${JSON.stringify(state.plans.map(p => ({ 
+      name: p.name, 
+      price: p.price, 
+      interval: p.interval, // Critical for AI to calc MRR correcty
+      unitCost: p.unitCost, 
+      subscribers: p.subscribers 
+    })), null, 2)}
     
-    **Staffing (Cost Base):**
+    **Staffing (Base Salaries - Before Tax Load):**
     ${JSON.stringify(state.employees, null, 2)}
 
     **Operating Expenses:**
