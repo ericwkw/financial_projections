@@ -66,10 +66,11 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">Rule of 40</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Score = <span className="font-bold">Annualized</span> Growth Rate % + Profit Margin %
+                 Score = Annualized <span className="font-bold">PAID</span> Growth % + Profit Margin %
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *We compound your monthly growth rate to an annual rate `((1+r)^12 - 1)` to correctly benchmark against public SaaS companies.
+                 *We use <strong>Paid Growth Rate</strong> (not Total User Growth) to prevent viral free users from inflating this score.
+                 <br/>*We compound monthly growth to an annual rate `((1+r)^12 - 1)` for industry benchmarking.
                </p>
              </div>
 

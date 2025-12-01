@@ -129,7 +129,8 @@ export const calculateFinancials = (
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
   // Rule of 40: Annualized Growth + Profit Margin
-  const annualizedGrowthRate = (Math.pow(1 + (blendedGrowthRate / 100), 12) - 1) * 100;
+  // CRITICAL FIX: Use PAID growth rate to prevent free users from artificially inflating the Rule of 40.
+  const annualizedGrowthRate = (Math.pow(1 + (paidGrowthRate / 100), 12) - 1) * 100;
   const ruleOf40 = annualizedGrowthRate + profitMargin; 
   
   // NRR = 100 + Expansion - Churn
