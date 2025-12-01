@@ -87,20 +87,22 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-2">Magic Number</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Magic Number = Net New ARR / Monthly Marketing Spend
+                 Magic Number = Net New ARR / (Monthly Marketing Spend × 12)
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 Measures marketing efficiency. If > 1.0, you are making more recurring revenue than you spend on ads.
+                 Measures marketing efficiency. If > 1.0, you are making more recurring revenue than you spend on ads in a year.
+                 <br/>*We annualize the marketing spend to compare with Annualized Revenue (ARR).
                </p>
              </div>
 
               <div>
                <h4 className="font-semibold text-red-600 dark:text-red-400 mb-2">Burn Multiplier</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Multiplier = Net Monthly Burn / Net New ARR
+                 Multiplier = (Net Monthly Burn × 12) / Net New ARR
                </div>
                <p className="text-xs text-slate-500 mt-2">
                  Measures capital efficiency. How much cash do you burn to generate $1 of growth? Lower is better.
+                 <br/>*We compare Annualized Burn to Annualized New ARR for consistency.
                </p>
              </div>
            </div>
