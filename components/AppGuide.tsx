@@ -14,10 +14,10 @@ const AppGuide: React.FC = () => {
         </h2>
         <div className="max-w-3xl">
           <p className="text-blue-50 text-lg leading-relaxed">
-            Welcome! This tool is like a flight simulator for your business. 
-            It helps you answer the big question: <strong>"Can I make money with this idea?"</strong>
+            Welcome! This tool is a flight simulator for your business. 
+            It helps you answer the ultimate question: <strong>"Can I make money with this idea?"</strong>
             <br/><br/>
-            You don't need a finance degree. We've translated everything into plain English below.
+            No finance degree required. We've translated everything into plain English below.
           </p>
         </div>
       </div>
@@ -29,20 +29,20 @@ const AppGuide: React.FC = () => {
           <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">1</div>
           <h3 className="font-bold text-slate-900 dark:text-white mb-2">Build Your Model</h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Go to the <strong>Model Inputs</strong> tab. Describe your business.
+            Go to the <strong>Model Inputs</strong> tab. Describe your business today.
           </p>
           <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
             <li className="flex gap-2">
               <span className="text-blue-500 font-bold">•</span>
-              <span><strong>Plans:</strong> "Basic" for $10/mo, "Pro" for $50/mo.</span>
+              <span><strong>Plans:</strong> What do you sell? (e.g. HK$80/mo Basic Plan).</span>
             </li>
             <li className="flex gap-2">
               <span className="text-blue-500 font-bold">•</span>
-              <span><strong>Team:</strong> Who do you need to hire? (Don't forget yourself).</span>
+              <span><strong>Team:</strong> Who is on your payroll?</span>
             </li>
             <li className="flex gap-2">
               <span className="text-blue-500 font-bold">•</span>
-              <span><strong>Expenses:</strong> Monthly bills like Servers, Software, or Ads.</span>
+              <span><strong>Expenses:</strong> Monthly bills like Servers or Ads.</span>
             </li>
           </ul>
         </div>
@@ -52,7 +52,7 @@ const AppGuide: React.FC = () => {
            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">2</div>
           <h3 className="font-bold text-slate-900 dark:text-white mb-2">Tweak the Scenarios</h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Use the <strong>Sliders</strong> at the top to test "What If" questions.
+            Use the <strong>Sliders</strong> at the top to ask "What If?"
           </p>
           <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
             <li className="flex gap-2">
@@ -106,7 +106,7 @@ const AppGuide: React.FC = () => {
                Q: Do I input numbers for today, or for my future goals?
              </h4>
              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: Input numbers for TODAY (Start).</strong><br/>
+               <strong>A: Input numbers for TODAY.</strong><br/>
                Think of the "Model Inputs" tab as your starting line (Month 0). The charts will then calculate the future based on the Growth Rates you set in the top slider bar.
              </p>
            </div>
@@ -115,8 +115,8 @@ const AppGuide: React.FC = () => {
                Q: How does CAC work if I don't have a Free Plan?
              </h4>
              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: It attributes 100% of costs to your Paid Users.</strong><br/>
-               The app calculates CAC as <code>Marketing Spend / New PAYING Users</code>. If you only have paid plans, this is simple. If you add a Free Plan later, the system is smart enough to <em>ignore</em> the free users in the math, so your CAC remains accurate (Cost per Paying Customer).
+               <strong>A: We prevent you from cheating.</strong><br/>
+               The app calculates CAC as <code>Marketing Spend / New PAYING Users</code>. If you have a Free Plan, we <em>ignore</em> the free users in the math. This prevents your CAC from looking artificially cheap just because you got a bunch of free signups. We only count the customers who pay the bills.
              </p>
            </div>
            <div>
@@ -157,15 +157,15 @@ const AppGuide: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">CAC (Customer Acquisition Cost)</h4>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">CAC (Price Tag of a Customer)</h4>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              How much you spend on ads/sales to get <strong>ONE</strong> new customer.
-              <br/><span className="italic text-slate-500">Example: Spend $100 on ads -> Get 1 customer. CAC = $100.</span>
+              How much you spend on ads/sales to get <strong>ONE</strong> new paying customer.
+              <br/><span className="italic text-slate-500">Example: Spend HK$100 on ads -> Get 1 customer. CAC = HK$100.</span>
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">LTV (Lifetime Value)</h4>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">LTV (Customer Worth)</h4>
             <p className="text-sm text-slate-600 dark:text-slate-300">
               The total profit you make from one customer before they quit.
               <br/><span className="text-emerald-600 font-medium">Goal: LTV should be 3x bigger than CAC.</span>
@@ -173,10 +173,10 @@ const AppGuide: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Runway (Survival Time)</h4>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Runway (Survival Timer)</h4>
             <p className="text-sm text-slate-600 dark:text-slate-300">
               How many months until your bank account hits $0. 
-              <br/><span className="italic text-slate-500">If you have $10k and lose $1k/month, you have 10 months to live.</span>
+              <br/><span className="italic text-slate-500">If you have HK$10k and lose HK$1k/month, you have 10 months to live.</span>
             </p>
           </div>
 
@@ -209,14 +209,14 @@ const AppGuide: React.FC = () => {
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
                <strong>A "Good Luck" Multiplier.</strong> 
                <br/>1.0x = Normal. 
-               <br/>1.5x = Your ads are working great (Growth is 50% faster).
-               <br/>0.5x = Hard times (Growth is half of what you planned).
+               <br/>1.2x = Your ads are working better than expected (20% bonus).
+               <br/>0.8x = Hard times (Growth is slower than planned).
              </p>
            </div>
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
              <div className="w-32 font-bold text-indigo-700 dark:text-indigo-300 text-sm mt-1">Expansion / Upsell</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>Getting more from existing users.</strong> The % of extra revenue you get from current customers each month (e.g., upgrades).
+               <strong>Getting more from existing users.</strong> The % of extra revenue you get from current customers each month (e.g., they upgrade to Pro).
              </p>
            </div>
 
@@ -224,19 +224,19 @@ const AppGuide: React.FC = () => {
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
              <div className="w-32 font-bold text-amber-700 dark:text-amber-400 text-sm mt-1">Payroll Tax</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>Hidden Employee Costs.</strong> Health insurance, taxes, and benefits. Usually adds 20% on top of the salary.
+               <strong>Hidden Employee Costs.</strong> Health insurance, taxes, and benefits. Usually adds 10-20% on top of the base salary.
              </p>
            </div>
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
              <div className="w-32 font-bold text-amber-700 dark:text-amber-400 text-sm mt-1">Salary Growth</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>Raises.</strong> Employees expect to be paid more every year. 3% is standard for inflation.
+               <strong>Raises (Inflation).</strong> Employees expect to be paid more every year. 3% is standard.
              </p>
            </div>
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
              <div className="w-32 font-bold text-amber-700 dark:text-amber-400 text-sm mt-1">Sales Commission</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>Bonus for Sales.</strong> If set to 10%, you pay your sales team $10 for every $100 plan they sell.
+               <strong>Bonus for Sales.</strong> If set to 10%, you pay your sales team HK$10 for every HK$100 plan they sell.
              </p>
            </div>
 
@@ -244,14 +244,15 @@ const AppGuide: React.FC = () => {
            <div className="flex gap-4 items-start border-b border-indigo-200 dark:border-indigo-800 pb-4">
              <div className="w-32 font-bold text-purple-700 dark:text-purple-400 text-sm mt-1">Valuation Multiple</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>What are you worth?</strong> Investors value SaaS companies as a multiple of their Revenue (ARR).
-               <br/>Example: $1M ARR x 6 Multiple = $6M Valuation.
+               <strong>What is your business worth?</strong> 
+               <br/>Think of it like selling a lemonade stand. If your stand makes HK$100 a year, and someone buys it for HK$600, the multiple is <strong>6x</strong>.
+               <br/>Investors usually value SaaS companies between 5x and 10x their yearly revenue (ARR).
              </p>
            </div>
            <div className="flex gap-4 items-start">
              <div className="w-32 font-bold text-purple-700 dark:text-purple-400 text-sm mt-1">Founder Equity</div>
              <p className="text-sm text-indigo-800 dark:text-indigo-200/80 flex-1">
-               <strong>Your Slice of the Pie.</strong> The percentage of the company YOU own. If you sell the company for $10M and own 50%, you get $5M.
+               <strong>Your Slice of the Pie.</strong> The percentage of the company YOU own. If you sell the company for HK$10M and own 50%, you walk away with HK$5M.
              </p>
            </div>
         </div>
