@@ -14,6 +14,10 @@ export const calculateFinancials = (
   let payingSubscribers = 0;
   let oneTimeRevenueMonthly = 0;
 
+  // Track weighted averages for blended metrics
+  let weightedGrowthSum = 0;
+  let weightedChurnSum = 0;
+
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
     const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
@@ -24,8 +28,22 @@ export const calculateFinancials = (
       payingSubscribers += plan.subscribers;
     }
     
-    // Calculate implied new users this month to estimate Setup Fee revenue
-    const newUsers = Math.max(0, plan.subscribers * (params.growthRate / 100));
+    // Growth Logic for Snapshot
+    // Base Plan Growth * Marketing Efficiency Multiplier + Viral Boost
+    // We treat Viral Rate as a global lift applied to the base
+    // Use fallback to 0 if monthlyGrowth/Churn are missing (backward compatibility)
+    const growth = plan.monthlyGrowth || 0;
+    const churn = plan.monthlyChurn || 0;
+    
+    const effectiveGrowthRate = (growth * params.marketingEfficiency) + params.viralRate;
+    const effectiveChurnRate = churn;
+
+    // Weighting by subscribers for an accurate "Blended" view
+    weightedGrowthSum += effectiveGrowthRate * plan.subscribers;
+    weightedChurnSum += effectiveChurnRate * plan.subscribers;
+
+    // Estimate new users this month for setup fees
+    const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
     oneTimeRevenueMonthly += newUsers * plan.setupFee;
 
     // Costs apply to ALL plans (Free + Paid)
@@ -33,8 +51,12 @@ export const calculateFinancials = (
     totalSubscribers += plan.subscribers;
   });
 
+  // Calculate Blended Rates
+  const blendedGrowthRate = totalSubscribers > 0 ? weightedGrowthSum / totalSubscribers : 0;
+  const blendedChurnRate = totalSubscribers > 0 ? weightedChurnSum / totalSubscribers : 0;
+
   const arr = mrr * 12;
-  const grossProfit = mrr - totalCogs; // Gross Profit on Recurring only for Margin calc usually, but let's be strict
+  const grossProfit = mrr - totalCogs; 
   const grossMarginPercent = mrr > 0 ? (grossProfit / mrr) : 0;
 
   // 2. Payroll (Fixed Operating Expense - Loaded)
@@ -44,7 +66,7 @@ export const calculateFinancials = (
   });
   const payrollMonthly = (annualBaseSalary * (1 + params.payrollTax / 100)) / 12;
 
-  // 3. Operating Expenses & CAC Separation (Fixed Operating Expenses)
+  // 3. Operating Expenses & CAC Separation
   const opexMonthly = expenses.reduce((acc, exp) => acc + exp.amount, 0);
   const acquisitionCosts = expenses
     .filter(e => e.isAcquisition)
@@ -62,46 +84,34 @@ export const calculateFinancials = (
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
   // 5. SaaS Advanced Metrics
-  // Blended ARPU: Revenue / All Users (Shows dilution by free users)
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
-  
-  // ARPPU: Revenue / Paying Users (Shows pricing power)
   const arppu = payingSubscribers > 0 ? mrr / payingSubscribers : 0;
-  
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
   
   // CAC: Cost to Acquire / New PAYING Customers
-  // We use implied new customers based on growth rate
-  const impliedNewPayingCustomers = Math.max(0.1, payingSubscribers * (params.growthRate / 100)); 
+  const impliedNewPayingCustomers = Math.max(0.1, payingSubscribers * (blendedGrowthRate / 100)); 
   const cac = impliedNewPayingCustomers > 0 ? acquisitionCosts / impliedNewPayingCustomers : 0;
 
-  // LTV: (ARPPU * GrossMargin%) / Churn%
-  // We use ARPPU (Paying User Rev) but apply the Overall Gross Margin %
-  // This penalizes LTV if free users drag down margins (which is accurate).
-  const safeChurn = Math.max(0.5, params.churnRate); 
+  // LTV: Use Blended Churn
+  const safeChurn = Math.max(0.5, blendedChurnRate); 
   const ltv = safeChurn > 0 ? (arppu * grossMarginPercent) / (safeChurn / 100) : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
-  const ruleOf40 = params.growthRate + profitMargin; 
   
-  // NRR = (Starting MRR + Expansion - Churn - Downgrade) / Starting MRR
-  // Simplified: 100% + Expansion% - Churn%
-  const nrr = 100 + params.expansionRate - params.churnRate;
+  // Rule of 40: Blended Growth + Profit Margin
+  const ruleOf40 = blendedGrowthRate + profitMargin; 
+  
+  // NRR = 100 + Expansion - Churn
+  const nrr = 100 + params.expansionRate - blendedChurnRate;
 
-  // 6. Efficiency Metrics (New)
-  
-  // CAC Payback: CAC / (ARPPU * GM% + SetupFeeProfit)
-  // Setup Fees help pay back CAC instantly.
+  // 6. Efficiency Metrics
   const weightedSetupFee = payingSubscribers > 0 ? oneTimeRevenueMonthly / impliedNewPayingCustomers : 0;
   const grossProfitPerPayingUser = (arppu * grossMarginPercent) + weightedSetupFee;
-  
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
 
-  // Net New ARR
-  const netGrowthRate = (params.growthRate + params.expansionRate - params.churnRate) / 100;
+  const netGrowthRate = (blendedGrowthRate + params.expansionRate - blendedChurnRate) / 100;
   const netNewArr = arr * netGrowthRate;
 
-  // Magic Number: Net New ARR / Annualized Marketing
   const annualizedMarketing = acquisitionCosts * 12;
   const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;
 
@@ -123,7 +133,6 @@ export const calculateFinancials = (
     profitMargin,
     valuation,
     founderValue,
-    // Metrics
     arpu,
     arppu,
     cac,
@@ -133,15 +142,15 @@ export const calculateFinancials = (
     runwayMonths,
     ruleOf40,
     nrr,
-    // Efficiency
     cacPaybackMonths,
     magicNumber,
     netNewArr,
     burnMultiplier,
-    // Users
     totalSubscribers,
     payingSubscribers,
-    conversionRate
+    conversionRate,
+    blendedGrowthRate,
+    blendedChurnRate
   };
 };
 
@@ -157,60 +166,81 @@ export const generateProjections = (
 
   // Initial State
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
-  let expansionRevenueAccumulated = 0; // Tracks revenue added purely via upsell (Expansion)
+  let expansionRevenueAccumulated = 0; 
 
   for (let i = 1; i <= months; i++) {
     let monthlyRecurringRevenue = 0;
     let monthlyOneTimeRevenue = 0;
     let monthlyCogs = 0;
     let totalSubs = 0;
+    let newArrForCommissions = 0;
 
-    // Apply Expansion to the Revenue Base
-    // In this model, we treat expansion as "extra revenue per existing user" implicitly or "net growth in plan value"
-    // To keep it clean: We calculate base revenue from subs, then add expansion factor.
-    // However, the cleanest way is: Net Revenue Growth = Growth - Churn + Expansion.
-    // But Growth/Churn affects USERS. Expansion affects PRICE/VALUE.
-    // Let's model Expansion as revenue growth detached from user growth (Upsell).
-    
-    // Revenue from previous month base * expansion rate
     if (i > 1) {
-       const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; // Approx recurring prev
+       const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
        expansionRevenueAccumulated += prevRevenue * (params.expansionRate / 100);
+       // Expansion counts as New ARR for commissions? Usually yes.
+       newArrForCommissions += prevRevenue * (params.expansionRate / 100) * 12;
     }
 
     currentSubscribersByPlan = currentSubscribersByPlan.map(plan => {
-      // Net User Growth = New Users - Churned Users
-      // Expansion Rate does NOT add users, it adds revenue (handled separately or implies upgrading)
-      const userGrowthRate = params.growthRate / 100;
-      const userChurnRate = params.churnRate / 100;
+      // PROJECTION LOGIC:
+      // 1. Organic Plan Growth * Marketing Efficiency
+      const growth = plan.monthlyGrowth || 0;
+      const churn = plan.monthlyChurn || 0;
+
+      const planGrowth = growth * params.marketingEfficiency;
       
-      const newUsers = plan.subscribers * userGrowthRate;
-      const churnedUsers = plan.subscribers * userChurnRate;
+      // 2. Viral Growth (Global rate applied to current user base)
+      const viralGrowth = params.viralRate; 
+      
+      const totalGrowthRate = (planGrowth + viralGrowth) / 100;
+      const churnRate = churn / 100;
+      
+      const newUsers = plan.subscribers * totalGrowthRate;
+      const churnedUsers = plan.subscribers * churnRate;
       const netSubsChange = newUsers - churnedUsers;
       
-      const currentSubs = plan.subscribers + netSubsChange;
+      const currentSubs = Math.max(0, plan.subscribers + netSubsChange);
       
       const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
       
+      // Cash Flow: Annual plans pay upfront
+      // Accrual Revenue: Recognized monthly
+      
       monthlyRecurringRevenue += priceMonthly * currentSubs;
-      monthlyOneTimeRevenue += newUsers * plan.setupFee; // Only new users pay setup fee
+      monthlyOneTimeRevenue += newUsers * plan.setupFee;
       
       monthlyCogs += plan.unitCost * currentSubs;
       totalSubs += currentSubs;
+      
+      // Commission Base: New Annualized Revenue from New Users
+      // (Simplified: We pay commission on the NET new users this month)
+      if (plan.price > 0 && netSubsChange > 0) {
+        newArrForCommissions += netSubsChange * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
+      }
 
       return { ...plan, subscribers: currentSubs };
     });
 
-    // Add accumulated expansion revenue
     monthlyRecurringRevenue += expansionRevenueAccumulated;
-
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
     const grossProfit = totalRevenue - monthlyCogs;
     
-    // Fixed costs (Simplified linear projection)
-    const payroll = baseFinancials.payrollMonthly; 
+    // Fixed costs (Payroll Inflation logic)
+    // Apply salary growth every 12 months
+    let payroll = baseFinancials.payrollMonthly;
+    if (i > 12) payroll *= (1 + params.salaryGrowthRate/100);
+    if (i > 24) payroll *= (1 + params.salaryGrowthRate/100);
+    if (i > 36) payroll *= (1 + params.salaryGrowthRate/100);
+    if (i > 48) payroll *= (1 + params.salaryGrowthRate/100);
+
     const opex = baseFinancials.opexMonthly;
-    const netIncome = grossProfit - payroll - opex;
+    
+    // Sales Commissions
+    const commissions = Math.max(0, newArrForCommissions * (params.commissionRate / 100));
+
+    // Cash Logic (simplified for Accrual view in table, but we track cash balance)
+    const netIncome = grossProfit - payroll - opex - commissions;
 
     currentCash += netIncome;
 
@@ -228,7 +258,8 @@ export const generateProjections = (
       opex,
       netIncome,
       subscribers: Math.round(totalSubs),
-      cashBalance: currentCash
+      cashBalance: currentCash,
+      commissions
     });
   }
 

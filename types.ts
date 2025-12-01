@@ -7,6 +7,8 @@ export interface Plan {
   unitCost: number; // COGS per user (e.g. LLM tokens)
   interval: 'monthly' | 'yearly';
   subscribers: number;
+  monthlyGrowth: number; // % New users per month specific to this plan
+  monthlyChurn: number; // % Lost users per month specific to this plan
 }
 
 export interface Employee {
@@ -26,10 +28,12 @@ export interface OperatingExpense {
 
 export interface ScenarioParams {
   startingCash: number; // Cash in bank
-  growthRate: number; // Monthly growth %
-  churnRate: number; // Monthly churn %
-  expansionRate: number; // Monthly upsell % (Expansion Revenue)
-  payrollTax: number; // % overhead on salaries (e.g. 20%)
+  marketingEfficiency: number; // Global Growth Multiplier (1.0 = baseline)
+  viralRate: number; // % of Total Users that invite a new user each month
+  expansionRate: number; // Monthly upsell %
+  payrollTax: number; // % overhead on salaries
+  salaryGrowthRate: number; // Annual % increase in salaries
+  commissionRate: number; // % of New ARR paid as commission
   valuationMultiple: number; // x ARR
   founderEquity: number; // % Ownership
 }
@@ -70,6 +74,8 @@ export interface Financials {
   totalSubscribers: number;
   payingSubscribers: number;
   conversionRate: number; // % of users who pay
+  blendedGrowthRate: number; // Weighted average growth
+  blendedChurnRate: number; // Weighted average churn
 }
 
 export interface MonthlyProjection {
@@ -83,6 +89,7 @@ export interface MonthlyProjection {
   netIncome: number;
   subscribers: number;
   cashBalance: number; // Actual money in bank
+  commissions: number;
 }
 
 export interface SimulationState {

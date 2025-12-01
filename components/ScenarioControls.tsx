@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -35,38 +36,38 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Growth Rate</label>
-                 <Tooltip position="bottom" content="Compound monthly growth rate of new subscribers. 5% monthly growth = ~80% annual growth." />
+                 <label className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase">Viral Rate</label>
+                 <Tooltip position="bottom" content="Referral Loop: % of total users that bring in a NEW user each month. Critical for Freemium." />
               </div>
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.growthRate}%</span>
+              <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{params.viralRate}%</span>
             </div>
             <input
               type="range"
               min="0"
-              max="50"
-              step="0.5"
-              value={params.growthRate}
-              onChange={(e) => onChange('growthRate', parseFloat(e.target.value))}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              max="5"
+              step="0.1"
+              value={params.viralRate}
+              onChange={(e) => onChange('viralRate', parseFloat(e.target.value))}
+              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
             />
           </div>
 
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Churn Rate</label>
-                <Tooltip position="bottom" content="The percentage of customers who cancel every month. > 5% is dangerous." />
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Growth Factor</label>
+                <Tooltip position="bottom" content="Global Multiplier. 1.0 = Normal. 1.2 = 20% faster growth across all plans (e.g. Good Market)." />
               </div>
-              <span className="text-xs font-bold text-red-500 dark:text-red-400">{params.churnRate}%</span>
+              <span className="text-xs font-bold text-blue-500 dark:text-blue-400">{params.marketingEfficiency}x</span>
             </div>
             <input
               type="range"
-              min="0"
-              max="20"
+              min="0.5"
+              max="2.0"
               step="0.1"
-              value={params.churnRate}
-              onChange={(e) => onChange('churnRate', parseFloat(e.target.value))}
-              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+              value={params.marketingEfficiency}
+              onChange={(e) => onChange('marketingEfficiency', parseFloat(e.target.value))}
+              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
           </div>
 
@@ -93,7 +94,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Payroll Tax</label>
-                 <Tooltip position="bottom" content="Percentage added to salaries for benefits, insurance, and taxes (Load). Typically 20-30%." />
+                 <Tooltip position="bottom" content="Percentage added to salaries for benefits, insurance, and taxes (Load)." />
               </div>
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{params.payrollTax}%</span>
             </div>

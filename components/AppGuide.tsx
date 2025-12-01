@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase } from './Icons';
 
@@ -29,7 +30,7 @@ const AppGuide: React.FC = () => {
               Go to the <strong>Model Inputs</strong> tab.
             </p>
             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Add <strong>Subscription Plans</strong> (Price, Setup Fees & Unit Cost).</li>
+              <li>Add Plans: Define <strong>Growth %</strong> and <strong>Churn %</strong> for each tier individually.</li>
               <li>Hire your <strong>Team</strong> and set salaries.</li>
               <li>List monthly <strong>Operating Expenses</strong>.</li>
             </ul>
@@ -44,11 +45,11 @@ const AppGuide: React.FC = () => {
               Adjust Scenarios
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Use the <strong>Top Bar Sliders</strong> (visible on other tabs).
+              Use the <strong>Top Bar Sliders</strong>.
             </p>
             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Set <strong>Starting Cash</strong> for runway calc.</li>
-              <li>Adjust <strong>Growth</strong>, <strong>Churn</strong>, and <strong>Upsell (Expansion)</strong>.</li>
+              <li>Set <strong>Viral Rate</strong> (Referral growth).</li>
+              <li>Adjust <strong>Growth Factor</strong> to boost/slow all plans.</li>
               <li>Set your <strong>Equity %</strong> to see personal value.</li>
             </ul>
           </div>
@@ -73,7 +74,7 @@ const AppGuide: React.FC = () => {
         </div>
       </div>
 
-      {/* Benchmarks Cheat Sheet (New) */}
+      {/* Benchmarks Cheat Sheet */}
       <div className="bg-indigo-50 dark:bg-indigo-900/10 p-8 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800/30">
         <h3 className="text-lg font-bold text-indigo-900 dark:text-indigo-400 mb-4 flex items-center gap-2">
           <DollarSign className="w-5 h-5" /> Variable Cost Benchmarks Cheat Sheet
@@ -168,7 +169,7 @@ const AppGuide: React.FC = () => {
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">Magic Number</dt>
               <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Measures sales efficiency. <em>"For every $1 I spend on marketing, how much recurring revenue do I create?"</em>
+                Measures sales efficiency. <em>"For every $1 of marketing spend, how much recurring revenue do I create?"</em>
                 Target > 0.75.
               </dd>
             </div>
@@ -203,7 +204,7 @@ const AppGuide: React.FC = () => {
             <div>
               <dt className="font-semibold text-slate-900 dark:text-white text-sm">Burn Multiplier</dt>
               <dd className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                How much cash do you burn to add $1 of Net New ARR? 
+                How much cash are you burning to add $1 of Net New ARR? 
                 <br/>Target &lt; 2. (Burning $2 to add $1 of ARR is okay in early stages, but must improve).
               </dd>
             </div>
