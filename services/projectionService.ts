@@ -86,8 +86,14 @@ export const calculateFinancials = (
   const paidChurnRate = payingSubscribers > 0 ? weightedPaidChurnSum / payingSubscribers : 0;
 
   const arr = mrr * 12;
-  const grossProfit = mrr - totalCogs; 
-  const grossMarginPercent = mrr > 0 ? (grossProfit / mrr) : 0;
+  
+  // FIXED: Gross Profit includes One-Time Revenue. 
+  // Setup Fees are high margin (usually labor is in OpEx).
+  const totalRevenue = mrr + oneTimeRevenueMonthly;
+  const grossProfit = totalRevenue - totalCogs; 
+  
+  // FIXED: Margin % should divide by Total Revenue, not just MRR.
+  const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
 
   // 2. Payroll (Fixed Operating Expense - Loaded)
   let annualBaseSalary = 0;
@@ -113,8 +119,10 @@ export const calculateFinancials = (
 
   // 5. Totals
   const totalExpenses = totalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
-  const netMonthly = (mrr + oneTimeRevenueMonthly) - totalExpenses;
-  const profitMargin = mrr > 0 ? (netMonthly / mrr) * 100 : 0;
+  const netMonthly = totalRevenue - totalExpenses;
+  
+  // FIXED: Profit Margin uses Total Revenue denominator
+  const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
   
   const valuation = arr * params.valuationMultiple;
   const founderValue = valuation * (params.founderEquity / 100);
