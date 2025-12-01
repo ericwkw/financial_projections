@@ -1,5 +1,5 @@
 {
   "name": "SaaS Vision AI",
-  "description": "Investor-grade financial modeling tool for SaaS. Features strict unit economics, AI CFO analysis (Gemini), and 5-year scenario planning.",
+  "description": "An AI-powered financial simulator to stress-test your SaaS for investors.",
   "requestFramePermissions": []
 }

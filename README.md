@@ -1,6 +1,6 @@
 # SaaS Vision AI
 
-**Investor-Grade Financial Modeling for SaaS Founders.**
+**An AI-powered financial simulator to stress-test your SaaS for investors.**
 
 SaaS Vision AI is a comprehensive flight simulator for your business. It allows you to model subscriptions, expenses, and growth scenarios to answer the ultimate question: *"Is this business fundable?"*
 
@@ -10,7 +10,7 @@ Powered by **Gemini AI**, it acts as an on-demand "CFO" to critique your unit ec
 
 ## 🚀 Key Features
 
-*   **Strict Unit Economics:** Automatically isolates **Paid Cohorts** to calculate accurate CAC and LTV. It prevents viral free users from artificially inflating your marketing efficiency metrics.
+*   **Strict Unit Economics:** Automatically isolates **Paid Cohorts** to calculate accurate CAC and LTV. It prevents viral free users from inflating your marketing efficiency metrics.
 *   **Gemini CFO Agent:** Uses Google Gemini 2.5 Flash to analyze your P&L. It bridges the gap between raw expenses and "Burn Rate" to provide accurate survival analysis.
 *   **5-Year Scenario Planning:** Test "What If" scenarios with sliders for Viral Rate, Churn, Expansion Revenue, and Payroll Inflation.
 *   **Cash Flow Engine:** Distinguishes between **Accrual Revenue (MRR)** and **Cash Balance**. It correctly handles the cash-flow advantage of annual plans (upfront payments).
