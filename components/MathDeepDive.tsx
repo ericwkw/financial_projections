@@ -120,7 +120,7 @@ const MathDeepDive: React.FC = () => {
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
                    <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Gross Burn vs Net Burn</h5>
                    <p className="font-mono text-xs text-slate-600 dark:text-slate-400 space-y-2">
-                     <span className="block"><span className="font-bold">Gross Burn:</span> Total Cash Outflow (Salaries + Tax + OpEx + Commissions).</span>
+                     <span className="block"><span className="font-bold">Gross Burn:</span> Total Cash Outflow (Salaries + Tax + OpEx + Commissions + COGS).</span>
                      <span className="block"><span className="font-bold">Net Burn:</span> Gross Burn - Total Revenue.</span>
                    </p>
                    <p className="text-[10px] text-slate-400 mt-2">
