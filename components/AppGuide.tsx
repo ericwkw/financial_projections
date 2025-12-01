@@ -45,12 +45,12 @@ const AppGuide: React.FC = () => {
               Adjust Scenarios
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Use the <strong>Top Bar Sliders</strong>.
+              Use the <strong>Scenario Bar</strong> (Grouped Controls).
             </p>
             <ul className="text-sm text-slate-500 dark:text-slate-400 list-disc list-inside mt-2 space-y-1">
-              <li>Set <strong>Viral Rate</strong> (Referral growth).</li>
-              <li>Adjust <strong>Growth Factor</strong> to boost/slow all plans.</li>
-              <li>Set your <strong>Equity %</strong> to see personal value.</li>
+              <li><strong>Growth:</strong> Viral Rate, Global Growth Factor, Expansion.</li>
+              <li><strong>Ops & Cash:</strong> Starting Cash, Salary Growth (Inflation), Commissions.</li>
+              <li><strong>Valuation:</strong> Exit Multiple & Equity.</li>
             </ul>
           </div>
 

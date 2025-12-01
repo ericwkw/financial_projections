@@ -14,7 +14,7 @@ interface InvestorDashboardProps {
   projections: MonthlyProjection[];
   state: SimulationState;
   darkMode: boolean;
-  breakEvenMonth: number | null; // Added prop
+  breakEvenMonth: number | null;
 }
 
 const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans, projections, state, darkMode, breakEvenMonth }) => {
@@ -48,7 +48,8 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
         <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Unit Economics & Efficiency
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Adjusted grid for 7 items: 2 cols mobile, 3 tablet, 4 desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <MetricTile 
             label="LTV / CAC"
             value={`${fmtNum(financials.ltvCacRatio)}x`}
@@ -90,6 +91,13 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             target="< 24 mo"
             status={breakEvenMonth && breakEvenMonth < 24 ? 'good' : breakEvenMonth ? 'warning' : 'bad'}
             tooltip="The month when your Net Income becomes positive."
+          />
+          <MetricTile 
+            label="Free-to-Paid Conv."
+            value={`${fmtNum(financials.conversionRate * 100)}%`}
+            target="> 5%"
+            status={financials.conversionRate >= 0.05 ? 'good' : financials.conversionRate >= 0.02 ? 'warning' : 'neutral'}
+            tooltip="Percentage of Total Users who are Paying Subscribers. Crucial for Freemium models."
           />
         </div>
       </div>
