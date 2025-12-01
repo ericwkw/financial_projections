@@ -87,22 +87,22 @@ const MathDeepDive: React.FC = () => {
              <div>
                <h4 className="font-semibold text-amber-600 dark:text-amber-400 mb-2">Magic Number</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Magic Number = Net New ARR / (Monthly Marketing Spend × 12)
+                 Magic Number = Net New ARR / Monthly Marketing Spend
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 Measures marketing efficiency. If > 1.0, you are making more recurring revenue than you spend on ads in a year.
-                 <br/>*We annualize the marketing spend to compare with Annualized Revenue (ARR).
+                 Measures marketing efficiency. If > 1.0, you are making more recurring revenue in a year than you spent to get it.
+                 <br/>*We compare the Annual Value of new customers (ARR) against the cash spent to get them this month.
                </p>
              </div>
 
               <div>
                <h4 className="font-semibold text-red-600 dark:text-red-400 mb-2">Burn Multiplier</h4>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 Multiplier = (Net Monthly Burn × 12) / Net New ARR
+                 Multiplier = Net Monthly Burn / Net New ARR
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 Measures capital efficiency. How much cash do you burn to generate $1 of growth? Lower is better.
-                 <br/>*We compare Annualized Burn to Annualized New ARR for consistency.
+                 Measures capital efficiency. How much cash do you burn to generate $1 of ARR growth? Lower is better.
+                 <br/>*We compare Monthly Burn against Annualized Revenue Growth for this standard metric.
                </p>
              </div>
            </div>

@@ -179,20 +179,22 @@ export const calculateFinancials = (
       cacPaybackMonths = 999;
   }
 
-  // Magic Number = Annualized Net New ARR / Annualized Marketing Spend
+  // Magic Number = Annualized Net New ARR / Monthly Marketing Spend
   // Metric > 1.0 means you make more recurring revenue in a year than you spent to get it.
-  const annualizedMarketing = acquisitionCosts * 12;
-  const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;
+  const monthlyMarketing = acquisitionCosts;
+  const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
 
-  // Burn Multiplier = Annualized Net Burn / Annualized Net New ARR
-  // OR Monthly Net Burn / Monthly Net New ARR.
-  // We use Annualized / Annualized for consistency.
-  // Fix: If we are burning cash but not growing (or shrinking), the multiplier is Bad (Infinite).
+  // Burn Multiplier = Monthly Net Burn / Annualized Net New ARR
+  // Wait, standard is Monthly Net Burn / Monthly Net New ARR? 
+  // No, usually Net Burn / Net New ARR. 
+  // Let's use Monthly Net Burn / Net New ARR (Annualized value added this month).
+  // This tells us: "How much cash did I burn this month to generate $X of annual value?"
+  // If I burn $200k to add $100k of ARR, my multiplier is 2.0x.
   let burnMultiplier = 0;
   if (burnRate > 0) {
       if (netNewArr > 0) {
-          const annualizedBurn = burnRate * 12;
-          burnMultiplier = annualizedBurn / netNewArr;
+          const monthlyBurn = burnRate;
+          burnMultiplier = monthlyBurn / netNewArr;
       } else {
           // Burning cash + Zero/Neg Growth = Disaster
           burnMultiplier = 999;
