@@ -183,6 +183,30 @@ const AppGuide: React.FC = () => {
           </div>
 
           <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">MRR (Monthly Recurring Revenue)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Your monthly paycheck from subscribers.
+              <br/><span className="italic text-slate-500">This does NOT include one-time setup fees.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">COGS (Ingredients Cost)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              <strong>Cost of Goods Sold.</strong> The direct cost to serve ONE customer. 
+              <br/><span className="italic text-slate-500">Lemonade Stand Example: COGS is the cost of the lemons, sugar, and cups. If you sell 0 cups, COGS is $0.</span>
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">OpEx (Keeping the lights on)</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              <strong>Operating Expenses.</strong> Fixed bills you pay even if you have zero customers.
+              <br/><span className="italic text-slate-500">Lemonade Stand Example: The rent for the stand and the salary for the person standing there.</span>
+            </p>
+          </div>
+
+          <div>
             <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Churn (The Leaky Bucket)</h4>
             <p className="text-sm text-slate-600 dark:text-slate-300">
               The percentage of customers who quit every month. 
