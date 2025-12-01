@@ -109,17 +109,18 @@ const MathDeepDive: React.FC = () => {
         {/* Core Financials */}
          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 md:col-span-2">
            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
-             Core P&L Logic
+             Core P&L & Survival Logic
            </h3>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Gross Profit</h5>
-                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                     Revenue - COGS
+                   <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Gross Burn vs Net Burn</h5>
+                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                     <span className="block"><span className="font-bold">Gross Burn:</span> Total Cash Outflow (Salaries + Tax + OpEx + Commissions).</span>
+                     <span className="block"><span className="font-bold">Net Burn:</span> Gross Burn - Total Revenue.</span>
                    </p>
                    <p className="text-[10px] text-slate-400 mt-2">
-                     COGS includes variable costs for BOTH free and paid users.
+                     Investors look at Gross Burn to see your cost base, and Net Burn to calculate Runway.
                    </p>
                 </div>
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
