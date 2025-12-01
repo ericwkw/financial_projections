@@ -54,6 +54,16 @@ const MathDeepDive: React.FC = () => {
                  *Paid Churn Rate: % of Paying users who cancel. We ignore free user churn so LTV isn't artificially lowered.
                </p>
              </div>
+
+             <div>
+               <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">CAC Payback Period</h4>
+               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
+                 Months = (CAC - Avg Setup Fee) / (Monthly Recurring Gross Profit)
+               </div>
+               <p className="text-xs text-slate-500 mt-2">
+                 We subtract the Setup Fee from the CAC because it's a one-time reimbursement. We divide by the Recurring Gross Profit to see how long subscription revenue takes to cover the remaining cost.
+               </p>
+             </div>
            </div>
         </div>
 

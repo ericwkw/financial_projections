@@ -109,7 +109,6 @@ export const calculateFinancials = (
   const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
 
   // Add Expansion to Net New ARR (Expansion - Churn was already handled in plan loop, now adding Expansion)
-  // Logic: netNewArrReal currently holds (NewLogos - ChurnedLogos). We add Expansion Revenue.
   const netNewArr = netNewArrReal + impliedExpansionArr;
 
   // 5. Totals
@@ -140,7 +139,6 @@ export const calculateFinancials = (
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
   // Rule of 40: Annualized REVENUE Growth + Profit Margin
-  // CRITICAL FIX: Use actual Net New ARR to calculate revenue growth, not user growth.
   const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0; // Approximate monthly growth
   const annualizedRevenueGrowthRate = (Math.pow(1 + monthlyRevenueGrowthRate, 12) - 1) * 100;
   
@@ -153,19 +151,25 @@ export const calculateFinancials = (
   const nrr = 100 + params.expansionRate - paidChurnRate;
 
   // 7. Efficiency Metrics
-  const weightedSetupFee = totalNewPayingSubscribers > 0 ? 
-    (oneTimeRevenueMonthly * (totalNewPayingSubscribers / (Math.max(1, totalSubscribers * (blendedGrowthRate/100))))) : 0; 
   
-  const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
-  const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
+  // Setup Fees: We must allocate the setup revenue to new paying users to find the "Average Setup Fee"
+  // Logic: Weighted Setup Fee per New User = Total Setup Revenue / Total New Paying Users
+  const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? oneTimeRevenueMonthly / totalNewPayingSubscribers : 0;
+  
+  // Adjusted CAC = CAC - Setup Fee (One-time reimbursement)
+  // If Setup Fee > CAC, Adjusted CAC is 0 (Instant Payback)
+  const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
+  
+  // Payback Denominator: Gross Profit from RECURRING revenue only per user
+  const monthlyRecurringGrossProfitPerUser = arppu * grossMarginPercent;
+  
+  const cacPaybackMonths = monthlyRecurringGrossProfitPerUser > 0 ? adjustedCac / monthlyRecurringGrossProfitPerUser : 0;
 
   // Magic Number = Net New ARR / Marketing Spend (Current Month)
-  // FIX: Previously we multiplied marketing by 12, which artificially lowered the score by 12x.
   const monthlyMarketing = acquisitionCosts;
   const magicNumber = monthlyMarketing > 0 ? netNewArr / monthlyMarketing : 0;
 
   // Burn Multiplier = Net Burn / Net New ARR
-  // FIX: Previously we multiplied burn by 12, artificially raising the score by 12x.
   const burnMultiplier = (burnRate > 0 && netNewArr > 0) 
     ? burnRate / netNewArr 
     : 0;
