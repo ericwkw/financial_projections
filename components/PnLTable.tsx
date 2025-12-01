@@ -36,9 +36,10 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
         payroll: acc.payroll + curr.payroll,
         opex: acc.opex + curr.opex,
         netIncome: acc.netIncome + curr.netIncome,
+        cashFlow: acc.cashFlow + curr.cashFlow,
         cashBalance: curr.cashBalance // Take end of year balance
       }), { 
-        month: year, revenue: 0, oneTimeRevenue: 0, cogs: 0, grossProfit: 0, payroll: 0, opex: 0, netIncome: 0, cashBalance: 0 
+        month: year, revenue: 0, oneTimeRevenue: 0, cogs: 0, grossProfit: 0, payroll: 0, opex: 0, netIncome: 0, cashFlow: 0, cashBalance: 0 
       });
 
       displayData.push(aggregated);
@@ -48,7 +49,7 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
 
   const downloadCSV = () => {
     // Export ALL data (60 months) regardless of view
-    const csvHeaders = ["Month", "Recurring Revenue", "One-Time Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Cash Balance"];
+    const csvHeaders = ["Month", "Recurring Revenue", "One-Time Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Net Cash Flow", "Cash Balance"];
     const rows = projections.map(p => [
       p.month,
       (p.revenue - p.oneTimeRevenue).toFixed(2),
@@ -58,6 +59,7 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
       p.payroll.toFixed(2),
       p.opex.toFixed(2),
       p.netIncome.toFixed(2),
+      p.cashFlow.toFixed(2),
       p.cashBalance.toFixed(2)
     ]);
 
@@ -182,7 +184,19 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
               ))}
             </tr>
             
-            {/* Cash Balance */}
+            {/* Cash Flow Section */}
+             <tr className="text-xs text-slate-400 pt-4">
+               <td className="px-4 py-2 text-left sticky left-0 bg-white dark:bg-slate-900 pt-4">Cash Movement</td>
+               {displayData.map((_, i) => <td key={i} className="pt-4"></td>)}
+             </tr>
+             <tr className="text-xs">
+              <td className="px-4 py-2 text-left text-slate-500 dark:text-slate-400 sticky left-0 bg-white dark:bg-slate-900">Operating Cash Flow</td>
+              {displayData.map((d, i) => (
+                <td key={i} className={`px-4 py-2 ${d.cashFlow >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                  ${fmt(d.cashFlow)}
+                </td>
+              ))}
+            </tr>
             <tr className="text-xs border-t border-slate-300 dark:border-slate-700">
               <td className="px-4 py-2 text-left font-semibold text-slate-600 dark:text-slate-300 sticky left-0 bg-white dark:bg-slate-900">Cash Balance (EOP)</td>
               {displayData.map((d, i) => (

@@ -30,8 +30,6 @@ export const calculateFinancials = (
     
     // Growth Logic for Snapshot
     // Base Plan Growth * Marketing Efficiency Multiplier + Viral Boost
-    // We treat Viral Rate as a global lift applied to the base
-    // Use fallback to 0 if monthlyGrowth/Churn are missing (backward compatibility)
     const growth = plan.monthlyGrowth || 0;
     const churn = plan.monthlyChurn || 0;
     
@@ -169,7 +167,8 @@ export const generateProjections = (
   let expansionRevenueAccumulated = 0; 
 
   for (let i = 1; i <= months; i++) {
-    let monthlyRecurringRevenue = 0;
+    let monthlyRecurringRevenue = 0; // Accrual
+    let monthlyCashInflow = 0; // Actual Cash
     let monthlyOneTimeRevenue = 0;
     let monthlyCogs = 0;
     let totalSubs = 0;
@@ -178,19 +177,18 @@ export const generateProjections = (
     if (i > 1) {
        const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
        expansionRevenueAccumulated += prevRevenue * (params.expansionRate / 100);
-       // Expansion counts as New ARR for commissions? Usually yes.
+       // Expansion counts as New ARR for commissions
        newArrForCommissions += prevRevenue * (params.expansionRate / 100) * 12;
+       // Expansion is usually recognized monthly, cash matches revenue for expansion
+       monthlyCashInflow += prevRevenue * (params.expansionRate / 100);
     }
 
     currentSubscribersByPlan = currentSubscribersByPlan.map(plan => {
       // PROJECTION LOGIC:
-      // 1. Organic Plan Growth * Marketing Efficiency
       const growth = plan.monthlyGrowth || 0;
       const churn = plan.monthlyChurn || 0;
 
       const planGrowth = growth * params.marketingEfficiency;
-      
-      // 2. Viral Growth (Global rate applied to current user base)
       const viralGrowth = params.viralRate; 
       
       const totalGrowthRate = (planGrowth + viralGrowth) / 100;
@@ -202,19 +200,34 @@ export const generateProjections = (
       
       const currentSubs = Math.max(0, plan.subscribers + netSubsChange);
       
+      // -- REVENUE (Accrual) --
       const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
-      
-      // Cash Flow: Annual plans pay upfront
-      // Accrual Revenue: Recognized monthly
-      
       monthlyRecurringRevenue += priceMonthly * currentSubs;
       monthlyOneTimeRevenue += newUsers * plan.setupFee;
-      
       monthlyCogs += plan.unitCost * currentSubs;
       totalSubs += currentSubs;
       
-      // Commission Base: New Annualized Revenue from New Users
-      // (Simplified: We pay commission on the NET new users this month)
+      // -- CASH FLOW (Bank) --
+      // Setup fees are cash upfront
+      monthlyCashInflow += newUsers * plan.setupFee;
+
+      if (plan.interval === 'yearly') {
+        // Annual Plans:
+        // 1. New Users pay 100% Upfront
+        monthlyCashInflow += newUsers * plan.price;
+        
+        // 2. Existing Users (Renewals)
+        // Assumption: Renewals are spread evenly over the year.
+        // So ~1/12th of the existing base renews this month.
+        const existingUsers = Math.max(0, plan.subscribers - churnedUsers); // Use base before growth
+        monthlyCashInflow += (existingUsers / 12) * plan.price;
+
+      } else {
+        // Monthly Plans: Cash = Revenue
+        monthlyCashInflow += currentSubs * plan.price;
+      }
+
+      // Commission Base (New Annualized Bookings)
       if (plan.price > 0 && netSubsChange > 0) {
         newArrForCommissions += netSubsChange * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
       }
@@ -223,11 +236,13 @@ export const generateProjections = (
     });
 
     monthlyRecurringRevenue += expansionRevenueAccumulated;
+    // Add expansion revenue to cash (assuming monthly billing for expansion)
+    monthlyCashInflow += expansionRevenueAccumulated;
+
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
     const grossProfit = totalRevenue - monthlyCogs;
     
     // Fixed costs (Payroll Inflation logic)
-    // Apply salary growth every 12 months
     let payroll = baseFinancials.payrollMonthly;
     if (i > 12) payroll *= (1 + params.salaryGrowthRate/100);
     if (i > 24) payroll *= (1 + params.salaryGrowthRate/100);
@@ -236,13 +251,17 @@ export const generateProjections = (
 
     const opex = baseFinancials.opexMonthly;
     
-    // Sales Commissions
+    // Sales Commissions (Cash Out)
     const commissions = Math.max(0, newArrForCommissions * (params.commissionRate / 100));
 
-    // Cash Logic (simplified for Accrual view in table, but we track cash balance)
+    // Net Income (Accrual P&L)
     const netIncome = grossProfit - payroll - opex - commissions;
 
-    currentCash += netIncome;
+    // Net Cash Flow (Bank P&L)
+    const cashOutflow = monthlyCogs + payroll + opex + commissions;
+    const netCashFlow = monthlyCashInflow - cashOutflow;
+
+    currentCash += netCashFlow;
 
     if (breakEvenMonth === null && netIncome > 0) {
       breakEvenMonth = i;
@@ -259,6 +278,7 @@ export const generateProjections = (
       netIncome,
       subscribers: Math.round(totalSubs),
       cashBalance: currentCash,
+      cashFlow: netCashFlow,
       commissions
     });
   }

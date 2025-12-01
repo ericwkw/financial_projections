@@ -72,24 +72,41 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
               />
             </div>
 
-            {/* Price - Col Span 1.5 */}
-            <div className="md:col-span-1 space-y-2 md:col-span-1.5">
+            {/* Price & Billing - Col Span 3 */}
+            <div className="md:col-span-3 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Price
+                <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  value={plan.price}
-                  onChange={(e) => onUpdate(plan.id, 'price', parseFloat(e.target.value) || 0)}
-                  className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
-                />
+              <div className="flex gap-2">
+                  <div className="relative w-2/3">
+                    <input
+                      type="number"
+                      min="0"
+                      value={plan.price}
+                      onChange={(e) => onUpdate(plan.id, 'price', parseFloat(e.target.value) || 0)}
+                      className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                    />
+                     {plan.interval === 'yearly' && plan.price > 0 && (
+                        <div className="absolute top-full left-0 text-[9px] text-slate-400 mt-0.5 ml-1">
+                          ≈ ${(plan.price / 12).toFixed(0)}/mo
+                        </div>
+                     )}
+                  </div>
+                  <div className="w-1/3">
+                    <select
+                        value={plan.interval}
+                        onChange={(e) => onUpdate(plan.id, 'interval', e.target.value)}
+                        className="w-full px-1 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950 text-sm"
+                    >
+                        <option value="monthly">/mo</option>
+                        <option value="yearly">/yr</option>
+                    </select>
+                  </div>
               </div>
             </div>
 
-             {/* Setup - Col Span 1.5 */}
-             <div className="md:col-span-1 space-y-2 md:col-span-1.5">
+             {/* Setup - Col Span 1 */}
+             <div className="md:col-span-1 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
                  Setup <Tooltip position="top" content="One-time fee" width="w-24" />
               </label>
@@ -104,11 +121,11 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
               </div>
             </div>
 
-            {/* Growth & Churn - Col Span 2.5 */}
-             <div className="md:col-span-3 grid grid-cols-2 gap-2">
+            {/* Growth & Churn - Col Span 2 */}
+             <div className="md:col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
-                        Growth% <Tooltip position="top" content="Monthly New User Growth %" width="w-32" />
+                        Grw% <Tooltip position="top" content="Monthly Growth" width="w-32" />
                     </label>
                     <input
                         type="number"
@@ -120,7 +137,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-red-500 dark:text-red-400 uppercase flex items-center gap-1">
-                        Churn% <Tooltip position="top" content="Monthly Cancellation %" width="w-32" />
+                        Chrn% <Tooltip position="top" content="Monthly Churn" width="w-32" />
                     </label>
                     <input
                         type="number"

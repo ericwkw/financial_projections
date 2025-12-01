@@ -89,6 +89,7 @@ export interface MonthlyProjection {
   netIncome: number;
   subscribers: number;
   cashBalance: number; // Actual money in bank
+  cashFlow: number; // Net change in cash this month (Inflow - Outflow)
   commissions: number;
 }
 
