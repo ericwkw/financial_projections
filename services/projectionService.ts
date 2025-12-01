@@ -115,8 +115,11 @@ export const calculateFinancials = (
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
-  // Rule of 40: Blended Growth + Profit Margin
-  const ruleOf40 = blendedGrowthRate + profitMargin; 
+  // Rule of 40: Annualized Growth + Profit Margin
+  // FIX: Previously used monthly growth (e.g. 5%), which fails Rule of 40. 
+  // Should use Annualized Growth Rate (e.g. 80%).
+  const annualizedGrowthRate = (Math.pow(1 + (blendedGrowthRate / 100), 12) - 1) * 100;
+  const ruleOf40 = annualizedGrowthRate + profitMargin; 
   
   // NRR = 100 + Expansion - Churn (Paid Churn only? Usually NRR is on revenue, so Paid Churn is correct)
   const nrr = 100 + params.expansionRate - paidChurnRate;

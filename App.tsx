@@ -9,13 +9,14 @@ import EmployeeManager from './components/EmployeeManager';
 import ExpenseManager from './components/ExpenseManager';
 import ScenarioControls from './components/ScenarioControls';
 import KPICard from './components/KPICard';
-import InvestorDashboard from './components/InvestorDashboard'; // New
+import InvestorDashboard from './components/InvestorDashboard';
 import AppGuide from './components/AppGuide';
-import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign } from './components/Icons';
+import MathDeepDive from './components/MathDeepDive';
+import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable } from './components/Icons';
 
 const App: React.FC = () => {
   // --- State Management ---
-  const [activeTab, setActiveTab] = useState<'input' | 'analysis' | 'guide'>('input');
+  const [activeTab, setActiveTab] = useState<'input' | 'analysis' | 'guide' | 'math'>('input');
   const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
   const [expenses, setExpenses] = useState<OperatingExpense[]>(INITIAL_EXPENSES);
@@ -105,6 +106,16 @@ const App: React.FC = () => {
                   Analysis & P&L
                 </button>
                  <button 
+                  onClick={() => setActiveTab('math')}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
+                    activeTab === 'math' 
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-600' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Variable className="w-3.5 h-3.5" /> Formulas
+                </button>
+                 <button 
                   onClick={() => setActiveTab('guide')}
                   className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
                     activeTab === 'guide' 
@@ -125,6 +136,7 @@ const App: React.FC = () => {
                  >
                    <option value="input">Model Inputs</option>
                    <option value="analysis">Analysis & P&L</option>
+                   <option value="math">Formulas</option>
                    <option value="guide">Guide</option>
                  </select>
               </div>
@@ -140,8 +152,8 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Scenario Controls (Sticky) - Hidden on Guide Tab for cleanliness */}
-        {activeTab !== 'guide' && (
+        {/* Scenario Controls (Sticky) - Hidden on Guide/Math Tab for cleanliness */}
+        {activeTab !== 'guide' && activeTab !== 'math' && (
           <ScenarioControls 
             params={scenarioParams} 
             onChange={handleScenarioChange} 
@@ -151,8 +163,8 @@ const App: React.FC = () => {
 
         <main className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
           
-          {/* North Star KPIs (Visible on both Input and Analysis, but we can keep it consistent) */}
-          {activeTab !== 'guide' && (
+          {/* North Star KPIs */}
+          {activeTab !== 'guide' && activeTab !== 'math' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KPICard 
                 title="LTV / CAC Ratio" 
@@ -191,6 +203,8 @@ const App: React.FC = () => {
           )}
 
           {activeTab === 'guide' && <AppGuide />}
+          
+          {activeTab === 'math' && <MathDeepDive />}
 
           {activeTab === 'input' && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

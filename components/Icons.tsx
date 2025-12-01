@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export const DollarSign: React.FC<{ className?: string }> = ({ className }) => (
@@ -155,5 +156,14 @@ export const Clock: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="10"></circle>
     <polyline points="12 6 12 12 16 14"></polyline>
+  </svg>
+);
+
+export const Variable: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M8 21s-4-3-4-9 4-9 4-9"></path>
+    <path d="M16 3s4 3 4 9-4 9-4 9"></path>
+    <line x1="15" y1="9" x2="9" y2="15"></line>
+    <line x1="9" y1="9" x2="15" y2="15"></line>
   </svg>
 );
