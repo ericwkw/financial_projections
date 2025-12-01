@@ -100,32 +100,66 @@ const AppGuide: React.FC = () => {
           <Info className="w-6 h-6 text-blue-500" />
           Common Questions
         </h3>
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
            <div>
              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-               Q: Do I input numbers for today, or for my future goals?
+               Q: How is "Lifetime Value" (LTV) calculated?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: It's (Monthly Profit) × (Average Stay).</strong><br/>
+               The tricky part is knowing "how long they stay." We use your <strong>Churn Rate</strong> to estimate this.<br/>
+               <em>Logic:</em> If 10% of people quit every month, the average person stays for 10 months (100% / 10% = 10).<br/>
+               If you make HK$50 profit/month and they stay 10 months, LTV is <strong>HK$500</strong>.
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: What is the "Magic Number"?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: Think of it like a Vending Machine.</strong><br/>
+               If you put HK$1 into the machine (Marketing Spend), how much Annual Revenue comes out?<br/>
+               • <strong>1.0:</strong> You put in HK$1, you get HK$1 back in yearly sales. (Good).<br/>
+               • <strong>0.5:</strong> You put in HK$1, you only get HK$0.50 back. (Bad Machine).
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: What is the "Burn Multiplier"?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: It's your startup's "Gas Mileage".</strong><br/>
+               How much cash do you burn to add HK$1 of new revenue?<br/>
+               • <strong>1.5x:</strong> You burn HK$1.50 to grow by HK$1. (Okay for early stage).<br/>
+               • <strong>3.0x:</strong> You burn HK$3.00 to grow by HK$1. (Gas Guzzler - Dangerous).<br/>
+               <em>Lower is always better.</em>
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: How does CAC work without a Free Plan?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: We prevent you from cheating.</strong><br/>
+               CAC = <code>Marketing Spend / New PAYING Users</code>. If you have a Free Plan, we <em>ignore</em> the free users in the math. This prevents your CAC from looking artificially cheap just because you got a bunch of free signups. We only count the customers who pay the bills.
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: Why is "Burn Rate" higher than "Expenses"?
+             </h4>
+             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+               <strong>A: Hidden Costs.</strong><br/>
+               The dashboard automatically adds <strong>Payroll Taxes</strong> (e.g. MPF/Insurance, defaults to 20%) and estimated <strong>Sales Commissions</strong> on top of your raw salary numbers. This prevents you from running out of cash unexpectedly.
+             </p>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: Input numbers for today or future?
              </h4>
              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                <strong>A: Input numbers for TODAY.</strong><br/>
                Think of the "Model Inputs" tab as your starting line (Month 0). The charts will then calculate the future based on the Growth Rates you set in the top slider bar.
-             </p>
-           </div>
-           <div>
-             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-               Q: How does CAC work if I don't have a Free Plan?
-             </h4>
-             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: We prevent you from cheating.</strong><br/>
-               The app calculates CAC as <code>Marketing Spend / New PAYING Users</code>. If you have a Free Plan, we <em>ignore</em> the free users in the math. This prevents your CAC from looking artificially cheap just because you got a bunch of free signups. We only count the customers who pay the bills.
-             </p>
-           </div>
-           <div>
-             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-               Q: Why is my "Burn Rate" higher than my "Expenses"?
-             </h4>
-             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: Hidden Costs.</strong><br/>
-               The dashboard automatically adds <strong>Payroll Taxes</strong> (defaults to 20%) and estimated <strong>Sales Commissions</strong> on top of your raw salary numbers. This is to prevent you from running out of cash unexpectedly.
              </p>
            </div>
         </div>
