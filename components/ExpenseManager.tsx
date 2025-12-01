@@ -52,13 +52,13 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
                 <DollarSign className="w-3 h-3" /> Monthly Cost
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">HK$</span>
                 <input
                   type="number"
                   min="0"
                   value={expense.amount}
                   onChange={(e) => onUpdate(expense.id, 'amount', parseFloat(e.target.value) || 0)}
-                  className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
+                  className="w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
                 />
               </div>
             </div>

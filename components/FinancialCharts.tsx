@@ -55,9 +55,9 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
   };
 
   const formatCurrencyAxis = (val: number) => {
-    if (Math.abs(val) >= 1000000) return `$${(val/1000000).toFixed(1)}M`;
-    if (Math.abs(val) >= 1000) return `$${(val/1000).toFixed(0)}k`;
-    return `$${val}`;
+    if (Math.abs(val) >= 1000000) return `HK$${(val/1000000).toFixed(1)}M`;
+    if (Math.abs(val) >= 1000) return `HK$${(val/1000).toFixed(0)}k`;
+    return `HK$${val}`;
   };
 
   const formatMonthAxis = (month: number) => {
@@ -73,7 +73,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
       {/* 24-Month Projection */}
       <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 lg:col-span-2 transition-colors">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">5-Year Financial Projection</h3>
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">5-Year Financial Projection (HKD)</h3>
           <div className="flex gap-4 text-xs text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div>Profit</div>
             <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div>Loss</div>
@@ -97,7 +97,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
               />
               <YAxis axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={formatCurrencyAxis} />
               <Tooltip 
-                formatter={(value: number) => [`$${Math.round(value).toLocaleString()}`, '']}
+                formatter={(value: number) => [`HK$${Math.round(value).toLocaleString()}`, '']}
                 labelFormatter={(l) => `Month ${l}`}
                 contentStyle={tooltipStyle}
                 itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }}
@@ -139,7 +139,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} contentStyle={tooltipStyle} itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }} />
+              <Tooltip formatter={(value: number) => `HK$${value.toLocaleString()}`} contentStyle={tooltipStyle} itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }} />
               <Legend verticalAlign="bottom" height={36}/>
             </PieChart>
           </ResponsiveContainer>
@@ -167,7 +167,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
                 <Cell fill="#f59e0b" /> {/* OpEx */}
                 <Cell fill="#64748b" /> {/* COGS */}
               </Pie>
-              <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} contentStyle={tooltipStyle} itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }} />
+              <Tooltip formatter={(value: number) => `HK$${value.toLocaleString()}`} contentStyle={tooltipStyle} itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }} />
               <Legend verticalAlign="bottom" height={36}/>
             </PieChart>
           </ResponsiveContainer>
