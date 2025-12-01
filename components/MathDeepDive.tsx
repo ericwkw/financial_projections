@@ -114,10 +114,10 @@ const MathDeepDive: React.FC = () => {
                 <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
                    <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">Operating Expenses</h5>
                    <p className="font-mono text-xs text-slate-600 dark:text-slate-400">
-                     (Salaries × (1 + TaxLoad)) + Fixed Expenses
+                     (Salaries × (1 + TaxLoad) × (1 + Inflation)) + Fixed Expenses
                    </p>
                    <p className="text-[10px] text-slate-400 mt-2">
-                     Salaries are fully loaded with benefits/taxes.
+                     Salaries are fully loaded with benefits/taxes and increase annually by the "Salary Growth" rate.
                    </p>
                 </div>
               </div>

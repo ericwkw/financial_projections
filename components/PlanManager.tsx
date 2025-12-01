@@ -98,9 +98,10 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                   <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
                 </label>
                 {!isFree && (
-                   <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border ${isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                   <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
                       <Clock className="w-3 h-3" />
                       <span>{payback.label}</span>
+                      <Tooltip position="top" content="Months to recover CAC. Calculated using Global Avg CAC / Plan Margin." width="w-48"/>
                    </div>
                 )}
               </div>
