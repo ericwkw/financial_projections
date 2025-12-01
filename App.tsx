@@ -69,7 +69,7 @@ const App: React.FC = () => {
       <div className="min-h-screen pb-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
         {/* Header */}
         <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-300">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
                 <TrendingUp className="w-5 h-5 text-white" />
@@ -148,7 +148,7 @@ const App: React.FC = () => {
           />
         )}
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+        <main className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
           
           {/* North Star KPIs (Visible on both Input and Analysis, but we can keep it consistent) */}
           {activeTab !== 'guide' && (

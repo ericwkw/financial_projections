@@ -41,13 +41,13 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: '2',
     role: 'Senior Engineer',
-    salary: 120000,
+    salary: 120000, // $10k/mo
     count: 1,
   },
   {
     id: '3',
     role: 'Customer Support',
-    salary: 50000,
+    salary: 48000, // $4k/mo (Changed from 50000 to be divisible by 12)
     count: 1,
   },
 ];

@@ -5,9 +5,10 @@ interface TooltipProps {
   content: string;
   className?: string;
   position?: 'top' | 'bottom';
+  width?: string;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ content, className, position = 'top' }) => {
+const Tooltip: React.FC<TooltipProps> = ({ content, className, position = 'top', width = 'w-48' }) => {
   return (
     <div className={`relative flex items-center group ml-1.5 ${className}`}>
       <div className="cursor-help text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors">
@@ -16,7 +17,7 @@ const Tooltip: React.FC<TooltipProps> = ({ content, className, position = 'top' 
       
       {/* Tooltip Container */}
       <div 
-        className={`absolute left-1/2 -translate-x-1/2 w-64 p-3 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] pointer-events-none text-center
+        className={`absolute left-1/2 -translate-x-1/2 ${width} p-3 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] pointer-events-none text-center
           ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}
         `}
       >

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -13,7 +12,7 @@ interface ScenarioControlsProps {
 const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, onReset }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-4 shadow-sm sticky top-16 z-20 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-6 items-center">
           
           <div className="space-y-1">

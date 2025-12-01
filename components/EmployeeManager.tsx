@@ -36,7 +36,7 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
         {employees.map((emp, index) => (
           <div 
             key={emp.id} 
-            className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-end hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${index === employees.length - 1 ? 'rounded-b-xl' : ''}`}
+            className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-start hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group ${index === employees.length - 1 ? 'rounded-b-xl' : ''}`}
           >
             
             <div className="md:col-span-5 space-y-2">
@@ -54,18 +54,21 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
 
             <div className="md:col-span-3 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Annual Salary
+                <DollarSign className="w-3 h-3" /> Monthly Salary
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                 <input
                   type="number"
                   min="0"
-                  value={emp.salary}
-                  onChange={(e) => onUpdate(emp.id, 'salary', parseFloat(e.target.value) || 0)}
+                  value={emp.salary / 12}
+                  onChange={(e) => onUpdate(emp.id, 'salary', (parseFloat(e.target.value) || 0) * 12)}
                   className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
                 />
               </div>
+              <p className="text-[10px] text-slate-400 text-right pr-1">
+                 ≈ ${(emp.salary).toLocaleString()} / yr
+              </p>
             </div>
 
             <div className="md:col-span-3 space-y-2">
@@ -79,7 +82,7 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
               />
             </div>
 
-            <div className="md:col-span-1 flex justify-end">
+            <div className="md:col-span-1 flex justify-end pt-8">
               <button
                 onClick={() => onDelete(emp.id)}
                 className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"

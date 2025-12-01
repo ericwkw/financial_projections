@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TrendingUp, Users, DollarSign, BrainCircuit, Briefcase } from './Icons';
 
@@ -9,10 +8,12 @@ const AppGuide: React.FC = () => {
       {/* Introduction */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Welcome to SaaS Scenario Architect</h2>
-        <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-          This comprehensive financial modeling tool is designed for SaaS founders and CFOs. 
-          It allows you to simulate your startup's financial future over the next 5 years by experimenting with pricing, staffing, expenses, and growth assumptions.
-        </p>
+        <div className="max-w-4xl">
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+            This comprehensive financial modeling tool is designed for SaaS founders and CFOs. 
+            It allows you to simulate your startup's financial future over the next 5 years by experimenting with pricing, staffing, expenses, and growth assumptions.
+          </p>
+        </div>
 
         <h3 className="font-bold text-slate-900 dark:text-white mt-8 mb-4">How to Use This Model</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
