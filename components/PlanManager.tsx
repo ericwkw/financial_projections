@@ -1,18 +1,19 @@
 
 import React, { useState } from 'react';
 import { Plan } from '../types';
-import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, TrendingUp } from './Icons';
+import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, Clock } from './Icons';
 import Tooltip from './Tooltip';
 import CostEstimatorModal from './CostEstimatorModal';
 
 interface PlanManagerProps {
   plans: Plan[];
+  globalCac: number; // New Prop for Payback Calculation
   onAdd: () => void;
   onUpdate: (id: string, field: keyof Plan, value: any) => void;
   onDelete: (id: string) => void;
 }
 
-const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDelete }) => {
+const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUpdate, onDelete }) => {
   const [isEstimatorOpen, setIsEstimatorOpen] = useState(false);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
 
@@ -25,6 +26,21 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
     if (activePlanId) {
       onUpdate(activePlanId, 'unitCost', Number(cost.toFixed(2)));
     }
+  };
+
+  const getPaybackInfo = (plan: Plan) => {
+    const monthlyPrice = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
+    const margin = monthlyPrice - plan.unitCost;
+    
+    if (plan.price === 0) return { months: -1, label: "Free" };
+    if (margin <= 0) return { months: -1, label: "Never" };
+    
+    // Payback = CAC / Monthly Margin
+    // We treat globalCac as the cost.
+    if (globalCac <= 0) return { months: 0, label: "Instant" };
+    
+    const months = globalCac / margin;
+    return { months, label: `${months.toFixed(1)} mo` };
   };
 
   return (
@@ -51,6 +67,9 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
       <div className="divide-y divide-slate-100 dark:divide-slate-800 rounded-b-xl">
         {plans.map((plan, index) => {
           const isFree = plan.price === 0;
+          const payback = getPaybackInfo(plan);
+          const isProfitable = payback.label !== "Never";
+          
           return (
           <div 
             key={plan.id} 
@@ -74,9 +93,17 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, onAdd, onUpdate, onDel
 
             {/* Price & Billing - Col Span 3 */}
             <div className="md:col-span-3 space-y-2">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
-              </label>
+              <div className="flex justify-between">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" /> Price / {plan.interval === 'yearly' ? 'Year' : 'Mo'}
+                </label>
+                {!isFree && (
+                   <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border ${isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                      <Clock className="w-3 h-3" />
+                      <span>{payback.label}</span>
+                   </div>
+                )}
+              </div>
               <div className="flex gap-2">
                   <div className="relative w-2/3">
                     <input

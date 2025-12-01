@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plan, Employee, OperatingExpense, ScenarioParams } from './types';
 import { INITIAL_PLANS, INITIAL_EMPLOYEES, INITIAL_EXPENSES, DEFAULT_SCENARIO } from './constants';
@@ -176,7 +177,7 @@ const App: React.FC = () => {
                 value={`${fmtNum(financials.ruleOf40)}%`}
                 icon={<TrendingUp className="w-5 h-5" />}
                 trend={financials.ruleOf40 > 40 ? 'positive' : 'neutral'}
-                subtext={`Growth: ${scenarioParams.growthRate}% + Margin: ${fmtNum(financials.profitMargin)}%`}
+                subtext={`Growth: ${fmtNum(financials.blendedGrowthRate)}% + Margin: ${fmtNum(financials.profitMargin)}%`}
                 tooltip="Growth % + Profit % should be > 40 for healthy SaaS companies."
               />
                <KPICard 
@@ -197,7 +198,8 @@ const App: React.FC = () => {
               <div className="xl:col-span-7 space-y-8">
                  <PlanManager 
                    plans={plans} 
-                   onAdd={() => setPlans([...plans, { id: Date.now().toString(), name: 'New Plan', price: 0, unitCost: 0, interval: 'monthly', subscribers: 0 }])} 
+                   globalCac={financials.cac}
+                   onAdd={() => setPlans([...plans, { id: Date.now().toString(), name: 'New Plan', price: 0, unitCost: 0, interval: 'monthly', subscribers: 0, monthlyGrowth: 5, monthlyChurn: 5 }])} 
                    onUpdate={(id, f, v) => updateItem(setPlans, id, f, v)} 
                    onDelete={(id) => deleteItem(setPlans, id)} 
                  />
@@ -277,6 +279,7 @@ const App: React.FC = () => {
                projections={projections} 
                state={{ plans, employees, expenses, params: scenarioParams, financials }}
                darkMode={darkMode}
+               breakEvenMonth={breakEvenMonth}
              />
           )}
 

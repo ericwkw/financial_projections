@@ -14,9 +14,10 @@ interface InvestorDashboardProps {
   projections: MonthlyProjection[];
   state: SimulationState;
   darkMode: boolean;
+  breakEvenMonth: number | null; // Added prop
 }
 
-const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans, projections, state, darkMode }) => {
+const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans, projections, state, darkMode, breakEvenMonth }) => {
   const fmtNum = (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(n);
   const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
@@ -47,7 +48,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
         <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" /> Unit Economics & Efficiency
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <MetricTile 
             label="LTV / CAC"
             value={`${fmtNum(financials.ltvCacRatio)}x`}
@@ -82,6 +83,13 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             target="< 2.0x"
             status={financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
             tooltip="How much cash are you burning to add $1 of Net New ARR? Lower is better. < 1 is excellent."
+          />
+          <MetricTile 
+            label="Time to Profit"
+            value={breakEvenMonth ? `Month ${breakEvenMonth}` : "Never"}
+            target="< 24 mo"
+            status={breakEvenMonth && breakEvenMonth < 24 ? 'good' : breakEvenMonth ? 'warning' : 'bad'}
+            tooltip="The month when your Net Income becomes positive."
           />
         </div>
       </div>
