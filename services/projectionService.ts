@@ -23,12 +23,14 @@ export const calculateFinancials = (
   let weightedPaidChurnSum = 0;
   let totalNewPayingSubscribers = 0;
 
-  // Track New ARR for Commission Estimation
-  let impliedNewArrMonthly = 0;
+  // Track New ARR for Commission Estimation & Efficiency Metrics
+  let impliedNewArrMonthly = 0; // Just from new logos (for commissions)
+  let netNewArrReal = 0; // Net change in ARR (New Logos - Churn + Expansion)
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
     const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
+    const planArrValue = plan.interval === 'yearly' ? plan.price : plan.price * 12;
     
     // Revenue only from paid plans
     if (isPaid) {
@@ -48,18 +50,23 @@ export const calculateFinancials = (
     weightedGrowthSum += effectiveGrowthRate * plan.subscribers;
     weightedChurnSum += effectiveChurnRate * plan.subscribers;
 
-    // Weighting for Paying Users Only
-    // Gross Adds (New Users) calculation
+    // Specific calculations per plan
     const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
-    
+    const churnedUsers = plan.subscribers * (effectiveChurnRate / 100);
+    const netAddedUsers = newUsers - churnedUsers;
+
     if (isPaid) {
+        // For Paid Growth Rate (User count based)
         weightedPaidGrowthSum += effectiveGrowthRate * plan.subscribers;
         weightedPaidChurnSum += effectiveChurnRate * plan.subscribers;
         totalNewPayingSubscribers += newUsers;
         
-        // Estimate New ARR generated this month for Commissions
-        const planArrValue = plan.interval === 'yearly' ? plan.price : plan.price * 12;
+        // For Commission Estimation (Gross Adds)
         impliedNewArrMonthly += newUsers * planArrValue;
+
+        // For Efficiency Metrics (Net New ARR - Dollar based)
+        // This fixes the issue where low-price viral plans skew the growth % of high-price plans
+        netNewArrReal += netAddedUsers * planArrValue;
     }
 
     // One-time revenue applies to all new users who have a setup fee
@@ -101,6 +108,10 @@ export const calculateFinancials = (
   const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
   const estimatedCommissions = totalNewArrBase * (params.commissionRate / 100);
 
+  // Add Expansion to Net New ARR (Expansion - Churn was already handled in plan loop, now adding Expansion)
+  // Logic: netNewArrReal currently holds (NewLogos - ChurnedLogos). We add Expansion Revenue.
+  const netNewArr = netNewArrReal + impliedExpansionArr;
+
   // 5. Totals
   const totalExpenses = totalCogs + payrollMonthly + opexMonthly + estimatedCommissions;
   const netMonthly = (mrr + oneTimeRevenueMonthly) - totalExpenses;
@@ -128,10 +139,15 @@ export const calculateFinancials = (
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
-  // Rule of 40: Annualized Growth + Profit Margin
-  // CRITICAL FIX: Use PAID growth rate to prevent free users from artificially inflating the Rule of 40.
-  const annualizedGrowthRate = (Math.pow(1 + (paidGrowthRate / 100), 12) - 1) * 100;
-  const ruleOf40 = annualizedGrowthRate + profitMargin; 
+  // Rule of 40: Annualized REVENUE Growth + Profit Margin
+  // CRITICAL FIX: Use actual Net New ARR to calculate revenue growth, not user growth.
+  const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0; // Approximate monthly growth
+  const annualizedRevenueGrowthRate = (Math.pow(1 + monthlyRevenueGrowthRate, 12) - 1) * 100;
+  
+  // Fallback: If ARR is 0, use paid growth rate
+  const finalGrowthRate = arr > 0 ? annualizedRevenueGrowthRate : (Math.pow(1 + (paidGrowthRate / 100), 12) - 1) * 100;
+  
+  const ruleOf40 = finalGrowthRate + profitMargin; 
   
   // NRR = 100 + Expansion - Churn
   const nrr = 100 + params.expansionRate - paidChurnRate;
@@ -142,10 +158,6 @@ export const calculateFinancials = (
   
   const grossProfitPerPayingUser = (arppu * grossMarginPercent) + (oneTimeRevenueMonthly / Math.max(1, totalNewPayingSubscribers));
   const cacPaybackMonths = grossProfitPerPayingUser > 0 ? cac / grossProfitPerPayingUser : 0;
-
-  // Net New ARR - Use PAID growth
-  const netGrowthRate = (paidGrowthRate + params.expansionRate - paidChurnRate) / 100;
-  const netNewArr = arr * netGrowthRate;
 
   const annualizedMarketing = acquisitionCosts * 12;
   const magicNumber = annualizedMarketing > 0 ? netNewArr / annualizedMarketing : 0;

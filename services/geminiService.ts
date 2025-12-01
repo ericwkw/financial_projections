@@ -50,7 +50,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     **Context & Assumptions:**
     - Payroll Tax Load: ${state.params.payrollTax}% (Included in Payroll figures)
     - Sales Commission Rate: ${state.params.commissionRate}% (Of new Bookings)
-    - Marketing Efficiency: ${state.params.marketingEfficiency}x
+    - Scenario_Growth_Multiplier: ${state.params.marketingEfficiency}x (Input Slider for Projection Speed)
     
     **Key Investor Metrics:**
     ${JSON.stringify(metrics, null, 2)}
