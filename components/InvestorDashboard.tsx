@@ -27,11 +27,11 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
       {/* 1. North Star - Valuation & Equity Context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KPICard 
-            title="Current ARR" 
-            value={fmtCurrency(financials.arr)} 
+            title="Current MRR" 
+            value={fmtCurrency(financials.mrr)} 
             icon={<DollarSign className="w-5 h-5" />} 
-            subtext={`Monthly Rev: ${fmtCurrency(financials.mrr)}`}
-            tooltip="Annual Recurring Revenue. This is how much money you make in a year from subscriptions."
+            subtext={`Run Rate: ${fmtCurrency(financials.arr)}/yr`}
+            tooltip="Monthly Recurring Revenue. The pulse of your subscription business."
         />
         <KPICard 
             title="Company Valuation" 
