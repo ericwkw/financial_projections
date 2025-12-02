@@ -12,7 +12,7 @@ interface ScenarioControlsProps {
 
 const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, onReset }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-6 shadow-sm sticky top-16 z-20 transition-colors overflow-y-auto max-h-[80vh] md:max-h-none">
+    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-6 shadow-sm sticky top-16 z-20 transition-colors overflow-y-auto md:overflow-visible max-h-[80vh] md:max-h-none">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="flex justify-between items-center mb-4 md:hidden">
