@@ -29,21 +29,36 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
   };
 
   const getPaybackInfo = (plan: Plan) => {
-    // 1. Calculate Monthly Price
-    const monthlyPrice = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
+    // 1. Calculate Monthly Price (Recurring Only)
+    let monthlyPrice = 0;
+    if (plan.interval === 'monthly') monthlyPrice = plan.price;
+    if (plan.interval === 'yearly') monthlyPrice = plan.price / 12;
+    // Lifetime plans have 0 monthly recurring price
     
-    // 2. Calculate Gross Margin per User
+    // 2. Calculate Gross Margin per User (Recurring)
     const margin = monthlyPrice - plan.unitCost;
     
     // 3. Handle Edge Cases
     if (plan.price === 0) return { months: 999, label: "Free" };
-    if (margin <= 0) return { months: 999, label: "Never" };
     
-    // 4. Calculate Effective CAC (Global CAC - Plan Setup Fee)
-    // Setup fees are instant cash back, so they reduce the CAC we need to recover.
-    const effectiveCac = Math.max(0, globalCac - (plan.setupFee || 0));
+    // 4. Calculate Effective CAC (Global CAC - Upfront Cash)
+    // Upfront Cash = Setup Fee + (Lifetime Price if applicable)
+    let upfrontCash = plan.setupFee || 0;
+    if (plan.interval === 'lifetime') {
+        upfrontCash += plan.price;
+    }
+
+    // Effective CAC is the remaining cost we need to recover via subscription
+    const effectiveCac = Math.max(0, globalCac - upfrontCash);
     
     if (effectiveCac === 0) return { months: 0, label: "Instant" };
+    
+    // If it's a lifetime plan and we still have CAC left (meaning Price < CAC),
+    // and margin is negative (because monthlyPrice is 0 and unitCost > 0),
+    // we will NEVER pay it back.
+    if (plan.interval === 'lifetime') return { months: 999, label: "Never" };
+
+    if (margin <= 0) return { months: 999, label: "Never" };
     
     const months = effectiveCac / margin;
     return { months, label: `${months.toFixed(1)} mo` };
@@ -76,6 +91,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
           const payback = getPaybackInfo(plan);
           const isProfitable = payback.label !== "Never" && payback.label !== "Free";
           const isFreeLabel = payback.label === "Free";
+          const isLifetime = plan.interval === 'lifetime';
           
           return (
           <div 
@@ -93,7 +109,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                 type="text"
                 value={plan.name}
                 onChange={(e) => onUpdate(plan.id, 'name', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white font-medium bg-white dark:bg-slate-950 placeholder-slate-400 text-sm"
+                className="w-full px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white font-medium bg-white dark:bg-slate-950 placeholder-slate-400 text-sm"
                 placeholder="Basic"
               />
             </div>
@@ -102,13 +118,13 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
             <div className="md:col-span-3 space-y-2">
               <div className="flex justify-between">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                  <DollarSign className="w-3 h-3" /> Price (HKD)
+                  <DollarSign className="w-3 h-3" /> Price (HKD) / {isLifetime ? 'Once' : plan.interval === 'yearly' ? 'Year' : 'Mo'}
                 </label>
                 {/* Payback Badge */}
                 <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
                   <Clock className="w-3 h-3" />
                   <span>{payback.label}</span>
-                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC, factoring in this plan's Setup Fee." width="w-48"/>}
+                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC. Lifetime deals count as instant payback if Price > CAC." width="w-48"/>}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -118,7 +134,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                       min="0"
                       value={plan.price}
                       onChange={(e) => onUpdate(plan.id, 'price', parseFloat(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                      className={`w-full px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-950 text-sm ${isFree ? 'border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                     />
                      {plan.interval === 'yearly' && plan.price > 0 && (
                         <div className="absolute top-full left-0 text-[9px] text-slate-400 mt-0.5 ml-1">
@@ -134,6 +150,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                     >
                         <option value="monthly">/mo</option>
                         <option value="yearly">/yr</option>
+                        <option value="lifetime">/life</option>
                     </select>
                   </div>
               </div>
@@ -142,7 +159,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
              {/* Setup - Col Span 1 */}
              <div className="md:col-span-1 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
-                 Setup <Tooltip position="top" content="One-time fee (HKD)" width="w-24" />
+                 Setup (HKD)
+                 <Tooltip position="top" content="One-time fee" width="w-24" />
               </label>
               <div className="relative">
                 <input
@@ -150,7 +168,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                   min="0"
                   value={plan.setupFee || 0}
                   onChange={(e) => onUpdate(plan.id, 'setupFee', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white bg-white dark:bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-2 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white bg-white dark:bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
             </div>
@@ -170,15 +188,16 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-xs font-semibold text-red-500 dark:text-red-400 uppercase flex items-center gap-1">
-                        Chrn% <Tooltip position="top" content="Monthly Churn" width="w-32" />
+                    <label className={`text-xs font-semibold uppercase flex items-center gap-1 ${isLifetime ? 'text-slate-300 dark:text-slate-600' : 'text-red-500 dark:text-red-400'}`}>
+                        Chrn% <Tooltip position="top" content={isLifetime ? "Lifetime plans don't churn revenue (0%)." : "Monthly Churn"} width="w-32" />
                     </label>
                     <input
                         type="number"
                         step="0.1"
-                        value={plan.monthlyChurn || 0}
+                        value={isLifetime ? 0 : plan.monthlyChurn || 0}
+                        disabled={isLifetime}
                         onChange={(e) => onUpdate(plan.id, 'monthlyChurn', parseFloat(e.target.value) || 0)}
-                        className="w-full px-2 py-2 border border-red-200 dark:border-red-900/50 text-slate-900 dark:text-white bg-red-50 dark:bg-red-900/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                        className={`w-full px-2 py-2 border rounded-lg focus:outline-none text-sm ${isLifetime ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800' : 'border-red-200 dark:border-red-900/50 text-slate-900 dark:text-white bg-red-50 dark:bg-red-900/10 focus:ring-2 focus:ring-red-500'}`}
                     />
                 </div>
              </div>
@@ -197,7 +216,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                       min="0"
                       value={plan.unitCost}
                       onChange={(e) => onUpdate(plan.id, 'unitCost', parseFloat(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isFree && plan.unitCost > 0 ? 'border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                      className={`w-full px-2 py-2 border bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isFree && plan.unitCost > 0 ? 'border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400' : 'border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
                     />
                   </div>
                   <button 

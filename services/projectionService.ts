@@ -22,16 +22,30 @@ export const calculateFinancials = (
   let weightedPaidGrowthSum = 0;
   let weightedPaidChurnSum = 0;
   let totalNewPayingSubscribers = 0;
-  let paidOneTimeRevenue = 0; // NEW: Track setup fees specifically from paid plans
+  let paidOneTimeRevenue = 0; 
 
   // Track New ARR for Commission Estimation & Efficiency Metrics
-  let impliedNewArrMonthly = 0; // Just from new logos (for commissions)
-  let netNewArrReal = 0; // Net change in ARR (New Logos - Churn + Expansion)
+  let impliedNewArrMonthly = 0; 
+  let netNewArrReal = 0; 
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
-    const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
-    const planArrValue = plan.interval === 'yearly' ? plan.price : plan.price * 12;
+    
+    // Determine Monthly Revenue (Accrual)
+    let priceMonthly = 0;
+    let planArrValue = 0;
+
+    if (plan.interval === 'monthly') {
+        priceMonthly = plan.price;
+        planArrValue = plan.price * 12;
+    } else if (plan.interval === 'yearly') {
+        priceMonthly = plan.price / 12;
+        planArrValue = plan.price;
+    } else if (plan.interval === 'lifetime') {
+        // Lifetime revenue is NOT recurring. It is 0 MRR.
+        priceMonthly = 0;
+        planArrValue = 0; 
+    }
     
     // Revenue only from paid plans
     if (isPaid) {
@@ -41,7 +55,8 @@ export const calculateFinancials = (
     
     // Growth Logic for Snapshot
     const growth = plan.monthlyGrowth || 0;
-    const churn = plan.monthlyChurn || 0;
+    // Lifetime plans don't churn revenue-wise.
+    const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
     
     // Effective Growth = Plan Growth * Marketing Efficiency + Viral Rate
     const effectiveGrowthRate = (growth * params.marketingEfficiency) + params.viralRate;
@@ -63,19 +78,24 @@ export const calculateFinancials = (
         totalNewPayingSubscribers += newUsers;
         
         // For Payback Offset (Strict Paid Cohort)
-        paidOneTimeRevenue += newUsers * plan.setupFee;
+        // For Lifetime plans, the Price essentially acts as a huge Setup Fee/One-time payment
+        const upfrontRevenue = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
+        paidOneTimeRevenue += newUsers * upfrontRevenue;
 
         // For Commission Estimation (Gross Adds)
-        impliedNewArrMonthly += newUsers * planArrValue;
+        const dealValue = plan.interval === 'lifetime' ? plan.price : planArrValue;
+        impliedNewArrMonthly += newUsers * dealValue; 
 
         // For Efficiency Metrics (Net New ARR - Dollar based)
         netNewArrReal += netAddedUsers * planArrValue;
     }
 
     // One-time revenue applies to all new users who have a setup fee (Total)
-    oneTimeRevenueMonthly += newUsers * plan.setupFee;
+    // For Lifetime, Price is effectively One-Time Revenue
+    const totalOneTimePerUser = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
+    oneTimeRevenueMonthly += newUsers * totalOneTimePerUser;
 
-    // Costs apply to ALL plans (Free + Paid)
+    // Costs apply to ALL plans (Free + Paid + Lifetime)
     totalCogs += plan.unitCost * plan.subscribers;
     totalSubscribers += plan.subscribers;
   });
@@ -168,8 +188,8 @@ export const calculateFinancials = (
   const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0;
   const annualizedRevenueGrowthRate = (Math.pow(1 + monthlyRevenueGrowthRate, 12) - 1) * 100;
   
-  // Fallback if ARR is 0
-  const finalGrowthRate = arr > 0 ? annualizedRevenueGrowthRate : (Math.pow(1 + (paidGrowthRate / 100), 12) - 1) * 100;
+  // Fallback if ARR is 0 (e.g. only LTD plans)
+  const finalGrowthRate = arr > 0 ? annualizedRevenueGrowthRate : 0; 
   
   const ruleOf40 = finalGrowthRate + profitMargin; 
   
@@ -192,11 +212,15 @@ export const calculateFinancials = (
   if (monthlyRecurringGrossProfitPerUser > 0) {
       cacPaybackMonths = adjustedCac / monthlyRecurringGrossProfitPerUser;
   } else {
-      cacPaybackMonths = 999;
+      // If we have no recurring profit (e.g. LTD only), but adjusted CAC is 0 (fully covered by price), then instant.
+      if (adjustedCac === 0 && totalNewPayingSubscribers > 0) {
+          cacPaybackMonths = 0;
+      } else {
+          cacPaybackMonths = 999;
+      }
   }
 
   // Magic Number = Net New ARR / Monthly Acquisition Spend
-  // Correct Logic: Include Total Commissions (New + Expansion) in Cost if Net New ARR includes Expansion Revenue
   const monthlyAcquisitionTotal = acquisitionCosts + estimatedTotalCommissions;
   const magicNumber = monthlyAcquisitionTotal > 0 ? netNewArr / monthlyAcquisitionTotal : 0;
 
@@ -265,8 +289,8 @@ export const generateProjections = (
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
   let expansionRevenueAccumulated = 0; 
   
-  // Calculate Base COGS Ratio for determining Expansion Costs
-  const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : p.price) * p.subscribers, 0);
+  // Calculate Base COGS Ratio
+  const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : (p.interval === 'lifetime' ? 0 : p.price)) * p.subscribers, 0);
   const baseCogs = plans.reduce((sum, p) => sum + p.unitCost * p.subscribers, 0);
   const baseCogsRatio = baseMrr > 0 ? baseCogs / baseMrr : 0;
 
@@ -276,12 +300,13 @@ export const generateProjections = (
     let monthlyOneTimeRevenue = 0;
     let monthlyCogs = 0;
     let totalSubs = 0;
-    let newArrForCommissions = 0;
+    let newArrForCommissions = 0; // For Recurring Commissions
+    let newDealValueForCommissions = 0; // For LTD Commissions
 
     if (i > 1) {
        const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
        
-       // 1. Add New Expansion Revenue (Monthly % of previous MRR)
+       // 1. Add New Expansion Revenue
        const newExpansion = prevRevenue * (params.expansionRate / 100);
        expansionRevenueAccumulated += newExpansion;
 
@@ -297,7 +322,8 @@ export const generateProjections = (
     currentSubscribersByPlan = currentSubscribersByPlan.map(plan => {
       // PROJECTION LOGIC:
       const growth = plan.monthlyGrowth || 0;
-      const churn = plan.monthlyChurn || 0;
+      // Force 0 churn for Lifetime plans (Revenue Churn is 0 since they paid once)
+      const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
 
       const planGrowth = growth * params.marketingEfficiency;
       const viralGrowth = params.viralRate; 
@@ -312,9 +338,19 @@ export const generateProjections = (
       const currentSubs = Math.max(0, plan.subscribers + netSubsChange);
       
       // -- REVENUE (Accrual) --
-      const priceMonthly = plan.interval === 'yearly' ? plan.price / 12 : plan.price;
+      let priceMonthly = 0;
+      if (plan.interval === 'monthly') priceMonthly = plan.price;
+      if (plan.interval === 'yearly') priceMonthly = plan.price / 12;
+      // Lifetime = 0 Recurring Revenue
+
       monthlyRecurringRevenue += priceMonthly * currentSubs;
       monthlyOneTimeRevenue += newUsers * plan.setupFee;
+      
+      // Lifetime Revenue goes into OneTimeRevenue
+      if (plan.interval === 'lifetime') {
+          monthlyOneTimeRevenue += newUsers * plan.price;
+      }
+
       monthlyCogs += plan.unitCost * currentSubs;
       totalSubs += currentSubs;
       
@@ -326,13 +362,23 @@ export const generateProjections = (
         monthlyCashInflow += newUsers * plan.price;
         const existingUsers = Math.max(0, plan.subscribers - churnedUsers); 
         monthlyCashInflow += (existingUsers / 12) * plan.price;
+      } else if (plan.interval === 'lifetime') {
+        // Lifetime Plans:
+        monthlyCashInflow += newUsers * plan.price;
+        // No renewal cash flow
       } else {
+        // Monthly Plans: Cash = Revenue
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base (Gross New Annualized Bookings)
+      // Commission Base
       if (plan.price > 0 && newUsers > 0) {
-        newArrForCommissions += newUsers * (plan.interval === 'yearly' ? plan.price : plan.price * 12);
+        if (plan.interval === 'lifetime') {
+            newDealValueForCommissions += newUsers * plan.price;
+        } else {
+            const arrValue = plan.interval === 'yearly' ? plan.price : plan.price * 12;
+            newArrForCommissions += newUsers * arrValue;
+        }
       }
 
       return { ...plan, subscribers: currentSubs };
@@ -358,13 +404,15 @@ export const generateProjections = (
     const opex = baseFinancials.opexMonthly;
     
     // Sales Commissions (Cash Out)
-    const commissions = Math.max(0, newArrForCommissions * (params.commissionRate / 100));
+    const commissionsArr = Math.max(0, newArrForCommissions * (params.commissionRate / 100));
+    const commissionsLtd = Math.max(0, newDealValueForCommissions * (params.commissionRate / 100));
+    const totalCommissions = commissionsArr + commissionsLtd;
 
     // Net Income (Accrual P&L)
-    const netIncome = grossProfit - payroll - opex - commissions;
+    const netIncome = grossProfit - payroll - opex - totalCommissions;
 
     // Net Cash Flow (Bank P&L)
-    const cashOutflow = monthlyCogs + payroll + opex + commissions;
+    const cashOutflow = monthlyCogs + payroll + opex + totalCommissions;
     const netCashFlow = monthlyCashInflow - cashOutflow;
 
     currentCash += netCashFlow;
@@ -385,7 +433,7 @@ export const generateProjections = (
       subscribers: Math.round(totalSubs),
       cashBalance: currentCash,
       cashFlow: netCashFlow,
-      commissions
+      commissions: totalCommissions
     });
   }
 

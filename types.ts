@@ -5,7 +5,7 @@ export interface Plan {
   price: number; // Price to customer
   setupFee: number; // One-time implementation fee
   unitCost: number; // COGS per user (e.g. LLM tokens)
-  interval: 'monthly' | 'yearly';
+  interval: 'monthly' | 'yearly' | 'lifetime';
   subscribers: number;
   monthlyGrowth: number; // % New users per month specific to this plan
   monthlyChurn: number; // % Lost users per month specific to this plan
