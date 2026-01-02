@@ -57,7 +57,7 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
                   type="number"
                   min="0"
                   value={expense.amount}
-                  onChange={(e) => onUpdate(expense.id, 'amount', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => onUpdate(expense.id, 'amount', Math.max(0, parseFloat(e.target.value) || 0))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
                 />
               </div>

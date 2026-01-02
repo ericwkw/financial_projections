@@ -105,12 +105,17 @@ const AppGuide: React.FC = () => {
              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
                Q: How is "Lifetime Value" (LTV) calculated?
              </h4>
-             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: It's (Monthly Profit) × (Average Stay).</strong><br/>
-               The tricky part is knowing "how long they stay." We use your <strong>Churn Rate</strong> to estimate this.<br/>
-               <em>Logic:</em> If 10% of people quit every month, the average person stays for 10 months (100% / 10% = 10).<br/>
-               If you make HK$50 profit/month and they stay 10 months, LTV is <strong>HK$500</strong>.
-             </p>
+             <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
+               <p><strong>A: It represents the total profit you earn from a single customer over their entire relationship with you.</strong></p>
+               <p className="font-mono text-xs bg-slate-200 dark:bg-slate-700 p-2 rounded">LTV = (Avg Monthly Price × Gross Margin %) / Churn Rate</p>
+               <ul className="list-disc pl-4 space-y-1 text-slate-500 dark:text-slate-400">
+                  <li><strong>Gross Margin (The Real Profit):</strong> Revenue is not profit. If you charge HK$100 but spend HK$20 on AI costs (COGS), you only keep HK$80. Your margin is 80%.</li>
+                  <li><strong>Churn Rate (The Duration):</strong> This calculates how long they stay. If 5% of users quit every month, the average customer lasts for 20 months (100 / 5 = 20).</li>
+               </ul>
+               <p className="italic text-slate-500 border-l-2 border-blue-500 pl-2 mt-2">
+                 <strong>Example:</strong> HK$80 profit/mo × 20 months = <strong>HK$1,600 LTV</strong>.
+               </p>
+             </div>
            </div>
            <div>
              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">

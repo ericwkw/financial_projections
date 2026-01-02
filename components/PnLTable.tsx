@@ -49,18 +49,36 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
 
   const downloadCSV = () => {
     // Export ALL data (60 months) regardless of view
-    const csvHeaders = ["Month", "Recurring Revenue", "One-Time Revenue", "COGS", "Gross Profit", "Payroll", "OpEx", "Net Income", "Net Cash Flow", "Cash Balance"];
+    const csvHeaders = [
+      "Month", 
+      "Total Revenue", 
+      "Recurring Revenue (MRR)", 
+      "One-Time Revenue", 
+      "COGS", 
+      "Gross Profit", 
+      "Payroll (Loaded)", 
+      "OpEx", 
+      "Commissions",
+      "Net Income", 
+      "Net Cash Flow", 
+      "Cash Balance",
+      "Total Subscribers"
+    ];
+    
     const rows = projections.map(p => [
       p.month,
+      p.revenue.toFixed(2),
       (p.revenue - p.oneTimeRevenue).toFixed(2),
       p.oneTimeRevenue.toFixed(2),
       p.cogs.toFixed(2),
       p.grossProfit.toFixed(2),
       p.payroll.toFixed(2),
       p.opex.toFixed(2),
+      p.commissions.toFixed(2),
       p.netIncome.toFixed(2),
       p.cashFlow.toFixed(2),
-      p.cashBalance.toFixed(2)
+      p.cashBalance.toFixed(2),
+      p.subscribers
     ]);
 
     const csvContent = [
@@ -77,6 +95,7 @@ const PnLTable: React.FC<PnLTableProps> = ({ projections }) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Plan, Employee, OperatingExpense, ScenarioParams } from './types';
 import { INITIAL_PLANS, INITIAL_EMPLOYEES, INITIAL_EXPENSES, DEFAULT_SCENARIO } from './constants';
@@ -309,11 +310,13 @@ const App: React.FC = () => {
                 tooltip="Growth % + Profit % should be > 40 for healthy SaaS companies."
               />
                <KPICard 
-                title="Current ARR" 
-                value={fmt(financials.arr)} 
+                title="Net Monthly Burn" 
+                value={fmt(financials.burnRate)} 
                 icon={<DollarSign className="w-5 h-5" />} 
-                subtext={`MRR: ${fmt(financials.mrr)} • Val: ${fmt(financials.valuation)}`}
-                tooltip="Annual Recurring Revenue (MRR x 12). The primary measure of SaaS scale."
+                trend={financials.burnRate === 0 ? 'positive' : 'negative'}
+                subtext={financials.burnRate === 0 ? 'Profitable (No Burn)' : `Gross Burn: ${fmt(financials.grossBurn)}`}
+                color={financials.burnRate > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-900"}
+                tooltip="Cash lost per month (Expenses - Revenue). If $0, you are profitable."
               />
             </div>
           )}

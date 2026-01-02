@@ -62,7 +62,7 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
                   type="number"
                   min="0"
                   value={emp.salary / 12}
-                  onChange={(e) => onUpdate(emp.id, 'salary', (parseFloat(e.target.value) || 0) * 12)}
+                  onChange={(e) => onUpdate(emp.id, 'salary', Math.max(0, (parseFloat(e.target.value) || 0) * 12))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
                 />
               </div>
@@ -77,7 +77,7 @@ const EmployeeManager: React.FC<EmployeeManagerProps> = ({ employees, payrollTax
                 type="number"
                 min="1"
                 value={emp.count}
-                onChange={(e) => onUpdate(emp.id, 'count', parseInt(e.target.value) || 0)}
+                onChange={(e) => onUpdate(emp.id, 'count', Math.max(0, parseInt(e.target.value) || 0))}
                 className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950"
               />
             </div>

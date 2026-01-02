@@ -18,8 +18,8 @@ interface InvestorDashboardProps {
 }
 
 const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans, projections, state, darkMode, breakEvenMonth }) => {
-  const fmtNum = (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(n);
-  const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  const fmtNum = (n: number) => new Intl.NumberFormat('en-HK', { maximumFractionDigits: 1 }).format(n);
+  const fmtCurrency = (n: number) => new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD', maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -108,7 +108,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={`${fmtNum(financials.conversionRate * 100)}%`}
             target="> 5%"
             status={financials.conversionRate >= 0.05 ? 'good' : financials.conversionRate >= 0.02 ? 'warning' : 'neutral'}
-            tooltip="Percentage of Total Users who actually pay you. Crucial for free-tier apps."
+            tooltip="Calculated based on total users (free + paid) vs paying users. Higher rate indicates effective lead generation or product-market fit."
           />
         </div>
       </div>

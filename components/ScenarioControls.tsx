@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -105,7 +106,7 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                         type="number" min="0"
                         title="Impact: Directly determines Day 1 Runway."
                         value={params.startingCash}
-                        onChange={(e) => onChange('startingCash', parseFloat(e.target.value))}
+                        onChange={(e) => onChange('startingCash', Math.max(0, parseFloat(e.target.value) || 0))}
                         className="w-full px-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
                       />
                    </div>
