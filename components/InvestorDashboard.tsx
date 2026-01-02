@@ -101,7 +101,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={financials.burnMultiplier >= 999 ? "Neg. Growth" : `${fmtNum(financials.burnMultiplier)}x`}
             target="< 2.0x"
             status={financials.burnMultiplier >= 999 ? 'bad' : financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
-            tooltip="Capital efficiency metric. Measures how much cash you burn to generate $1 of new annual revenue."
+            tooltip="Capital efficiency metric. Measures how much cash you burn to generate $1 of new annual revenue. 'Neg. Growth' means you are burning cash while revenue is shrinking."
           />
           <MetricTile 
             label="Time to Profit"

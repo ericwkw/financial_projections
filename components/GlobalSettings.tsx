@@ -2,7 +2,7 @@
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
-import { DollarSign, TrendingUp, BrainCircuit, Variable } from './Icons';
+import { DollarSign, TrendingUp, BrainCircuit, Variable, Info } from './Icons';
 
 interface GlobalSettingsProps {
   params: ScenarioParams;
@@ -264,6 +264,45 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
         </div>
 
       </div>
+
+      {/* 4. HIDDEN MECHANICS REVEALED */}
+      <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-8 mt-8">
+         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+           <Info className="w-5 h-5 text-slate-500" />
+           Simulation Mechanics (The Hidden Math)
+         </h3>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+            <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Commission Timing</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 Commissions are paid <strong>Upfront</strong> in the month of booking. 
+                 <br/><span className="text-xs opacity-70">Basis: {params.commissionRate}% of 1st Year ARR.</span>
+               </p>
+            </div>
+            <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">LTV Discounting</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 We do not apply WACC (Weighted Average Cost of Capital) to LTV. 
+                 <br/><span className="text-xs opacity-70">We assume Churn Risk ({'>'}5%/yr) outweighs Interest Rate Risk (~3%/yr).</span>
+               </p>
+            </div>
+             <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Expansion Decay</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 Upsell revenue is not permanent. It decays monthly at your <strong>Paid Churn Rate</strong>.
+                 <br/><span className="text-xs opacity-70">If a user churns, their upsell revenue vanishes too.</span>
+               </p>
+            </div>
+             <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Cash Collection</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 Cash is collected <strong>Day 1</strong> of the period (Month or Year).
+                 <br/><span className="text-xs opacity-70">We do not simulate Net-30 or Net-60 payment delays.</span>
+               </p>
+            </div>
+         </div>
+      </div>
+
     </div>
   );
 };
