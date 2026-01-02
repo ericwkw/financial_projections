@@ -1,5 +1,5 @@
 
-import { Plan, Employee, OperatingExpense, ScenarioParams, Financials, MonthlyProjection } from "../types";
+import { Plan, Employee, OperatingExpense, ScenarioParams, Financials, MonthlyProjection, Cohort } from "../types";
 
 export const calculateFinancials = (
   plans: Plan[],
@@ -22,7 +22,8 @@ export const calculateFinancials = (
   let weightedPaidGrowthSum = 0;
   let weightedPaidChurnSum = 0;
   let totalNewPayingSubscribers = 0;
-  let paidOneTimeRevenue = 0; 
+  let paidOneTimeRevenue = 0; // For Cash Flow Payback
+  let paidOneTimeRevenueAccrual = 0; // For LTV/Revenue (Setup Fees + Lifetime, NO Annual)
 
   // Track New ARR for Commission Estimation & Efficiency Metrics
   let impliedNewArrMonthly = 0; 
@@ -35,6 +36,10 @@ export const calculateFinancials = (
   // Track Churned Revenue & Costs (Snapshot Consistency)
   let churnedMrr = 0;
   let churnedUnitCosts = 0;
+
+  // -- CASH FLOW TRACKING --
+  let cashInflowFromNewUsers = 0;
+  let cashInflowFromRenewals = 0;
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
@@ -78,6 +83,7 @@ export const calculateFinancials = (
     // Specific calculations per plan
     const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
     const churnedUsers = plan.subscribers * (effectiveChurnRate / 100);
+    const existingUsers = Math.max(0, plan.subscribers - churnedUsers);
     const netAddedUsers = newUsers - churnedUsers;
 
     // Calculate New Recurring Revenue/Cost from New Users (for P&L Consistency)
@@ -95,14 +101,18 @@ export const calculateFinancials = (
         weightedPaidChurnSum += effectiveChurnRate * plan.subscribers;
         totalNewPayingSubscribers += newUsers;
         
-        // For Payback Offset (Strict Paid Cohort)
-        // For Lifetime plans AND Yearly plans, the Price essentially acts as a huge Setup Fee/One-time payment
-        // for Cash Flow Payback purposes.
-        let upfrontRevenue = plan.setupFee || 0;
-        if (plan.interval === 'lifetime') upfrontRevenue += plan.price;
-        if (plan.interval === 'yearly') upfrontRevenue += plan.price;
+        // For Cash Flow Payback Offset (Strict Paid Cohort)
+        let upfrontCashRevenue = plan.setupFee || 0;
+        if (plan.interval === 'lifetime') upfrontCashRevenue += plan.price;
+        if (plan.interval === 'yearly') upfrontCashRevenue += plan.price;
         
-        paidOneTimeRevenue += newUsers * upfrontRevenue;
+        paidOneTimeRevenue += newUsers * upfrontCashRevenue;
+
+        // For Accrual/LTV One-Time Revenue (Setup + Lifetime only)
+        // This calculates the average "Starting Value" boost per user
+        let accrualOneTime = plan.setupFee || 0;
+        if (plan.interval === 'lifetime') accrualOneTime += plan.price;
+        paidOneTimeRevenueAccrual += newUsers * accrualOneTime;
 
         // For Commission Estimation (Gross Adds)
         const dealValue = plan.interval === 'lifetime' ? plan.price : planArrValue;
@@ -112,10 +122,28 @@ export const calculateFinancials = (
         netNewArrReal += netAddedUsers * planArrValue;
     }
 
-    // One-time revenue applies to all new users who have a setup fee (Total)
-    // For Lifetime, Price is effectively One-Time Revenue
-    const totalOneTimePerUser = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
-    oneTimeRevenueMonthly += newUsers * totalOneTimePerUser;
+    // -- ACCRUAL ONE-TIME REVENUE --
+    // Only includes setup fees + Lifetime Price. 
+    // Does NOT include Annual Plan price (that is recognized ratably in MRR).
+    const accrualOneTimePerUser = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
+    oneTimeRevenueMonthly += newUsers * accrualOneTimePerUser;
+
+    // -- CASH FLOW CALCULATION --
+    // 1. Cash from New Users (Upfront)
+    let upfrontCashPerUser = plan.setupFee;
+    if (plan.interval === 'monthly') upfrontCashPerUser += plan.price;
+    else if (plan.interval === 'yearly') upfrontCashPerUser += plan.price;
+    else if (plan.interval === 'lifetime') upfrontCashPerUser += plan.price;
+
+    cashInflowFromNewUsers += newUsers * upfrontCashPerUser;
+
+    // 2. Cash from Existing Users (Renewals)
+    // We assume smoothed renewals (1/12th of annual base renews monthly)
+    let renewalCashPerUser = 0;
+    if (plan.interval === 'monthly') renewalCashPerUser = plan.price;
+    else if (plan.interval === 'yearly') renewalCashPerUser = plan.price / 12; 
+    
+    cashInflowFromRenewals += existingUsers * renewalCashPerUser;
 
     // Unit Costs apply to ALL plans (Free + Paid + Lifetime)
     totalUnitCosts += plan.unitCost * plan.subscribers;
@@ -141,83 +169,103 @@ export const calculateFinancials = (
   const baseUnitCostRatio = mrr > 0 ? totalUnitCosts / mrr : 0;
   const expansionUnitCost = impliedExpansionMrr * baseUnitCostRatio;
   
-  // -- Total Revenue for Fee Calc --
-  // Includes Base MRR - Churned MRR + New MRR + One-Time + Expansion
-  const totalRevenue = mrr - churnedMrr + newMrrFromGrowth + oneTimeRevenueMonthly + impliedExpansionMrr;
+  // ==========================================
+  // ACCRUAL P&L (Net Income)
+  // ==========================================
+  
+  // Total Accrual Revenue
+  const totalAccrualRevenue = mrr - churnedMrr + newMrrFromGrowth + oneTimeRevenueMonthly + impliedExpansionMrr;
 
-  // -- Payment Processing Fees --
-  // Calculated on Total Revenue (MRR + Setup + Expansion)
-  const paymentFees = totalRevenue * (params.paymentProcessingRate / 100);
+  // Accrual Expenses
+  const accrualPaymentFees = totalAccrualRevenue * (params.paymentProcessingRate / 100);
+  const accrualCogs = totalUnitCosts - churnedUnitCosts + newUnitCostsFromGrowth + expansionUnitCost + accrualPaymentFees;
 
-  // -- Final COGS --
-  // Includes Base Unit Costs - Churned + New + Expansion + Fees
-  const finalTotalCogs = totalUnitCosts - churnedUnitCosts + newUnitCostsFromGrowth + expansionUnitCost + paymentFees;
-
-  const grossProfit = totalRevenue - finalTotalCogs; 
-  const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
-
-  // Recurring Gross Margin (Strictly for LTV/Payback)
-  // Isolates the margin of the subscription product itself
-  // Recurring COGS = Unit Costs + Payment Fees on Recurring Revenue
-  const recurringPaymentFees = (mrr + impliedExpansionMrr) * (params.paymentProcessingRate / 100);
-  const recurringCogs = (totalUnitCosts + expansionUnitCost) + recurringPaymentFees;
-
-  const recurringGrossProfit = (mrr + impliedExpansionMrr) - recurringCogs;
-  const recurringGrossMarginPercent = (mrr + impliedExpansionMrr) > 0 ? (recurringGrossProfit / (mrr + impliedExpansionMrr)) : 0;
-
-  // 2. Payroll (Fixed Operating Expense - Loaded)
+  // Payroll & OpEx
   let annualBaseSalary = 0;
   employees.forEach(emp => {
     annualBaseSalary += emp.salary * emp.count;
   });
   const payrollMonthly = (annualBaseSalary * (1 + params.payrollTax / 100)) / 12;
 
-  // 3. Operating Expenses & CAC Separation
   const opexMonthly = expenses.reduce((acc, exp) => acc + exp.amount, 0);
   const acquisitionCosts = expenses
     .filter(e => e.isAcquisition)
     .reduce((acc, exp) => acc + exp.amount, 0);
 
-  // 4. Commissions (Snapshot Estimation)
-  // Commission for CAC = New Logos Only
+  // Commissions (Expense in period incurred)
   const commissionsFromNewLogos = impliedNewArrMonthly * (params.commissionRate / 100);
-  // Total Commission (P&L) = New Logos + Expansion
   const totalNewArrBase = impliedNewArrMonthly + impliedExpansionArr;
   const estimatedTotalCommissions = totalNewArrBase * (params.commissionRate / 100);
 
-  // Add Expansion to Net New ARR for Efficiency Metrics
+  // Net New ARR (for Efficiency)
   const netNewArr = netNewArrReal + impliedExpansionArr;
 
-  // 5. Totals
-  const totalExpenses = finalTotalCogs + payrollMonthly + opexMonthly + estimatedTotalCommissions;
+  // Totals
+  const totalAccrualExpenses = accrualCogs + payrollMonthly + opexMonthly + estimatedTotalCommissions;
+  const netMonthly = totalAccrualRevenue - totalAccrualExpenses;
+  const profitMargin = totalAccrualRevenue > 0 ? (netMonthly / totalAccrualRevenue) * 100 : 0;
+
+  // ==========================================
+  // CASH FLOW (Burn Rate & Runway)
+  // ==========================================
   
-  // Net Income (P&L View)
-  // Revenue - COGS - Payroll - OpEx - Commissions
-  const netMonthly = totalRevenue - totalExpenses;
+  const totalCashInflow = cashInflowFromNewUsers + cashInflowFromRenewals + impliedExpansionMrr;
+  const cashPaymentFees = totalCashInflow * (params.paymentProcessingRate / 100);
   
-  const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
+  // Operational costs are generally cash-out same month
+  // Note: We use the Net Unit Costs (Base - Churn + New) to represent this month's bill
+  const netUnitCosts = totalUnitCosts - churnedUnitCosts + newUnitCostsFromGrowth + expansionUnitCost;
+  
+  const totalCashExpenses = netUnitCosts + cashPaymentFees + payrollMonthly + opexMonthly + estimatedTotalCommissions;
+  
+  const netCashFlow = totalCashInflow - totalCashExpenses;
+  
+  // Gross Burn is Total Cash Outflow
+  const grossBurn = totalCashExpenses;
+  
+  // Net Burn (Burn Rate) is Net Cash Flow inverted (if negative)
+  const burnRate = netCashFlow < 0 ? Math.abs(netCashFlow) : 0; 
+  const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
+
+
+  // ==========================================
+  // METRICS
+  // ==========================================
   
   const valuation = arr * params.valuationMultiple;
   const founderValue = valuation * (params.founderEquity / 100);
 
-  // BURN CALCULATIONS
-  const grossBurn = totalExpenses;
-  const burnRate = netMonthly < 0 ? Math.abs(netMonthly) : 0; 
-  const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
+  // Gross Margin (Accrual Based)
+  const grossProfit = totalAccrualRevenue - accrualCogs; 
+  const grossMarginPercent = totalAccrualRevenue > 0 ? (grossProfit / totalAccrualRevenue) : 0;
 
-  // 6. SaaS Advanced Metrics
+  // Recurring Gross Margin (Strictly for LTV/Payback)
+  // Isolates the margin of the subscription product itself
+  const recurringPaymentFees = (mrr + impliedExpansionMrr) * (params.paymentProcessingRate / 100);
+  const recurringCogs = (totalUnitCosts + expansionUnitCost) + recurringPaymentFees;
+
+  const recurringGrossProfit = (mrr + impliedExpansionMrr) - recurringCogs;
+  const recurringGrossMarginPercent = (mrr + impliedExpansionMrr) > 0 ? (recurringGrossProfit / (mrr + impliedExpansionMrr)) : 0;
+
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
   const arppu = payingSubscribers > 0 ? mrr / payingSubscribers : 0;
   const conversionRate = totalSubscribers > 0 ? payingSubscribers / totalSubscribers : 0;
   
   // CAC: Cost to Acquire / New PAYING Customers (Strict Definition)
-  // Fully Loaded CAC = Marketing Spend + Sales Commissions on New Deals
   const totalCacSpend = acquisitionCosts + commissionsFromNewLogos;
   const cac = totalNewPayingSubscribers > 0.1 ? totalCacSpend / totalNewPayingSubscribers : (totalCacSpend > 0 ? 99999 : 0);
 
+  // Weighted Avg One-Time Revenue per New Paying User (Accrual/Setup basis)
+  const weightedAvgOneTimeRevenue = totalNewPayingSubscribers > 0 ? (paidOneTimeRevenueAccrual / totalNewPayingSubscribers) : 0;
+
   // LTV: Use Paid Churn Only & Recurring Gross Margin
+  // Also include the Gross Profit from Setup Fees/Lifetime plans
+  // We approximate the margin on Setup Fees using the Global Gross Margin (as it accounts for Payment Fees but no unit costs usually)
+  const setupProfit = weightedAvgOneTimeRevenue * grossMarginPercent;
+  
   const safePaidChurn = Math.max(0.5, paidChurnRate); 
-  const ltv = safePaidChurn > 0 ? (arppu * recurringGrossMarginPercent) / (safePaidChurn / 100) : 0;
+  const recurringLtv = safePaidChurn > 0 ? (arppu * recurringGrossMarginPercent) / (safePaidChurn / 100) : 0;
+  const ltv = setupProfit + recurringLtv;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
@@ -233,28 +281,22 @@ export const calculateFinancials = (
   // NRR = 100 + Expansion - Churn
   const nrr = 100 + params.expansionRate - paidChurnRate;
 
-  // 7. Efficiency Metrics
-  
   // Setup Fees Allocation for Payback (Strict Paid Cohort)
-  // Only count setup fees generated by the users we are calculating CAC for
   const weightedAvgSetupFee = totalNewPayingSubscribers > 0 ? (paidOneTimeRevenue / totalNewPayingSubscribers) : 0;
   
   // Adjusted CAC = CAC - Setup Fee
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
   
   // Payback Denominator: Gross Profit from RECURRING revenue only per user
-  // This already accounts for Payment Fees in recurringGrossMarginPercent
   const monthlyRecurringGrossProfitPerUser = arppu * recurringGrossMarginPercent;
   
   let cacPaybackMonths = 0;
   if (monthlyRecurringGrossProfitPerUser > 0) {
       cacPaybackMonths = adjustedCac / monthlyRecurringGrossProfitPerUser;
   } else {
-      // If we have no recurring profit (e.g. LTD only), but adjusted CAC is 0 (fully covered by price), then instant.
       if (adjustedCac === 0 && totalNewPayingSubscribers > 0) {
           cacPaybackMonths = 0;
       } else {
-          // If Price < CAC and no recurring revenue, we never pay it back.
           cacPaybackMonths = 999;
       }
   }
@@ -280,12 +322,14 @@ export const calculateFinancials = (
     mrr,
     arr,
     oneTimeRevenueMonthly,
-    cogs: finalTotalCogs, 
+    cogs: accrualCogs, 
     grossProfit,
     grossMarginPercent,
+    recurringGrossMarginPercent,
+    weightedAvgOneTimeRevenue,
     payrollMonthly,
     opexMonthly,
-    totalExpenses,
+    totalExpenses: totalAccrualExpenses,
     netMonthly,
     profitMargin,
     valuation,
@@ -339,6 +383,7 @@ export const generateProjections = (
     let monthlyOneTimeRevenue = 0;
     let monthlyUnitCosts = 0; // Renamed for clarity
     let totalSubs = 0;
+    let monthlyNewPayingSubscribers = 0; // New Calculation
     let newArrForCommissions = 0; // For Recurring Commissions
     let newDealValueForCommissions = 0; // For LTD Commissions
 
@@ -410,8 +455,10 @@ export const generateProjections = (
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base
+      // Commission Base & New Paying Count
       if (plan.price > 0 && newUsers > 0) {
+        monthlyNewPayingSubscribers += newUsers;
+        
         if (plan.interval === 'lifetime') {
             newDealValueForCommissions += newUsers * plan.price;
         } else {
@@ -459,10 +506,7 @@ export const generateProjections = (
     const netIncome = grossProfit - payroll - opex - totalCommissions;
 
     // Net Cash Flow (Bank P&L)
-    // IMPORTANT: For Cash Flow, we should really calculate fees on CASH INFLOW, not Accrual Revenue.
-    // However, to keep it aligned with P&L COGS structure in this sim, we will use the accrued fees 
-    // BUT strictly, if you get $1000 cash upfront, you pay $34 fee upfront. 
-    // Let's refine: Cash Outflow COGS = Unit Costs (incurred monthly) + Fees on CASH INFLOW.
+    // Cash Outflow COGS = Unit Costs (incurred monthly) + Fees on CASH INFLOW.
     const cashFlowFees = monthlyCashInflow * (params.paymentProcessingRate / 100);
     const cashOutflow = monthlyUnitCosts + cashFlowFees + payroll + opex + totalCommissions;
     
@@ -484,6 +528,7 @@ export const generateProjections = (
       opex,
       netIncome,
       subscribers: Math.round(totalSubs),
+      newPayingSubscribers: monthlyNewPayingSubscribers,
       cashBalance: currentCash,
       cashFlow: netCashFlow,
       commissions: totalCommissions
@@ -491,4 +536,59 @@ export const generateProjections = (
   }
 
   return { projections, breakEvenMonth };
+};
+
+export const generateCohortData = (projections: MonthlyProjection[], financials: Financials): Cohort[] => {
+  // Limit to first 12 cohorts for UI cleanliness, tracked over 12 months
+  const monthsToTrack = 12;
+  const cohortsToDisplay = projections.slice(0, 12);
+  
+  const paidChurnRate = financials.paidChurnRate / 100;
+  // Use Recurring Gross Profit per User for LTV calc
+  // Recurring Gross Margin % accounts for Payment Fees and Unit Costs
+  // ARPPU is the top line revenue per paying user
+  const monthlyGrossProfitPerUser = financials.arppu * financials.recurringGrossMarginPercent;
+  
+  // Calculate Avg One-Time Profit (Setup/Lifetime)
+  // Use Global Margin % as a proxy for One-Time Margin (accounting for Payment Fees)
+  const oneTimeGrossProfitPerUser = financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent;
+  
+  const cac = financials.cac;
+
+  return cohortsToDisplay.map(proj => {
+    const acquisitionMonth = proj.month;
+    const size = Math.round(proj.newPayingSubscribers);
+    const metrics = [];
+    
+    let currentRetention = 1.0;
+    
+    // Initialize Cumulative Gross Profit with the Upfront/One-Time Profit at Month 0
+    let cumulativeGrossProfit = oneTimeGrossProfitPerUser;
+
+    for (let i = 0; i <= monthsToTrack; i++) {
+        // Apply Churn (starting from month 1)
+        if (i > 0) {
+             currentRetention = currentRetention * (1 - paidChurnRate);
+        }
+        
+        // Add Recurring Profit for this period
+        // We assume subscription is paid at start of period. 
+        // Month 0: User pays One-Time + Month 1 Subscription
+        cumulativeGrossProfit += monthlyGrossProfitPerUser * currentRetention;
+        
+        metrics.push({
+            monthIndex: i,
+            retentionRate: currentRetention * 100,
+            cumulativeLtv: cumulativeGrossProfit,
+            isBreakeven: cumulativeGrossProfit > cac
+        });
+    }
+
+    return {
+        acquisitionMonth,
+        size,
+        cac,
+        metrics
+    };
+  });
 };

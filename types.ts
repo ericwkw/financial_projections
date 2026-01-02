@@ -46,6 +46,8 @@ export interface Financials {
   cogs: number; // Monthly Cost of Goods Sold
   grossProfit: number;
   grossMarginPercent: number;
+  recurringGrossMarginPercent: number; // Gross Margin on Recurring Revenue only
+  weightedAvgOneTimeRevenue: number; // Avg Setup/Lifetime fee per NEW PAYING user
   payrollMonthly: number; // Fully loaded
   opexMonthly: number; // Non-payroll operating expenses
   totalExpenses: number;
@@ -92,9 +94,24 @@ export interface MonthlyProjection {
   opex: number;
   netIncome: number;
   subscribers: number;
+  newPayingSubscribers: number; // New field for Cohort Analysis
   cashBalance: number; // Actual money in bank
   cashFlow: number; // Net change in cash this month (Inflow - Outflow)
   commissions: number;
+}
+
+export interface CohortMetric {
+  monthIndex: number; // 0, 1, 2...
+  retentionRate: number; // 0-100
+  cumulativeLtv: number; // Cumulative Gross Profit per User
+  isBreakeven: boolean;
+}
+
+export interface Cohort {
+  acquisitionMonth: number;
+  size: number;
+  cac: number;
+  metrics: CohortMetric[];
 }
 
 export interface SimulationState {

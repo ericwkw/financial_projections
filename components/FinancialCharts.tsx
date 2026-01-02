@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   XAxis,
@@ -12,7 +13,8 @@ import {
   ComposedChart,
   Line,
   Area,
-  ReferenceLine
+  ReferenceLine,
+  LineChart
 } from 'recharts';
 import { Plan, Financials, MonthlyProjection } from '../types';
 
@@ -41,6 +43,12 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
     { name: 'OpEx', value: financials.opexMonthly },
     { name: 'COGS', value: financials.cogs }
   ].filter(d => d.value > 0);
+
+  // Data for Burn Rate Chart
+  const burnData = projections.map(p => ({
+    month: p.month,
+    netBurn: Math.max(0, -p.netIncome) // Show 0 if profitable
+  }));
 
   // Chart Styles based on Mode
   const axisColor = darkMode ? '#94a3b8' : '#64748b';
@@ -116,6 +124,37 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
             </ComposedChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* NEW: Net Burn Rate Chart */}
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 lg:col-span-2 transition-colors">
+         <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">Net Burn Rate Trend</h3>
+             <p className="text-xs text-slate-400">Cash burn per month (Lower is better)</p>
+         </div>
+         <div className="h-64">
+           <ResponsiveContainer width="100%" height="100%">
+             <LineChart data={burnData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+               <CartesianGrid stroke={gridColor} vertical={false} />
+               <XAxis 
+                  dataKey="month" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: axisColor, fontSize: 12}} 
+                  tickFormatter={formatMonthAxis} 
+                  interval={5} 
+               />
+               <YAxis axisLine={false} tickLine={false} tick={{fill: axisColor, fontSize: 12}} tickFormatter={formatCurrencyAxis} />
+               <Tooltip 
+                  formatter={(value: number) => [`HK$${Math.round(value).toLocaleString()}`, 'Net Burn']}
+                  labelFormatter={(l) => `Month ${l}`}
+                  contentStyle={tooltipStyle}
+                  itemStyle={{ color: '#ef4444' }}
+               />
+               <Line type="monotone" dataKey="netBurn" stroke="#ef4444" strokeWidth={2} dot={false} name="Net Burn" activeDot={{ r: 8 }} />
+             </LineChart>
+           </ResponsiveContainer>
+         </div>
       </div>
 
       {/* Revenue Source Breakdown */}

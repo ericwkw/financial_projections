@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plan } from '../types';
 import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, Clock } from './Icons';
