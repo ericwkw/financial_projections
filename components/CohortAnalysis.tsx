@@ -34,30 +34,45 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
   const activeFinancials = useMemo(() => {
     if (!isSandbox) return financials;
 
-    // CFO LOGIC: Calculate Implied Fixed Unit Cost from the Baseline
-    // Profit = Revenue - Cost. Therefore Cost = Revenue * (1 - Margin%)
-    // When we simulate a Price (ARPPU) increase, this Unit Cost should stay roughly fixed, 
-    // causing the Margin % to expand.
-    const baseRecurringUnitCost = financials.arppu > 0 
-        ? financials.arppu * (1 - financials.grossMarginPercent) // Use Blended Margin for accuracy
-        : 0;
+    // CFO FIX: Derive Implied Fixed Unit Cost using Blended Profit (Revenue - Profit = Cost)
+    // This is more robust than using Margin % because it works even if Revenue (ARPPU) is 0 (e.g. Lifetime Plans).
+    // Formula: Profit = Revenue(Net) - Cost
+    // Therefore: Cost = Revenue(Net) - Profit
+    const revenueNetOfFees = financials.arppu * (1 - params.paymentProcessingRate/100);
+    const impliedUnitCost = revenueNetOfFees - financials.blendedRecurringProfitPerUser;
 
-    // New Simulated Margin based on new Price vs Fixed Cost
-    const simGrossMarginPercent = simArppu > 0 
-        ? Math.max(0, (simArppu - baseRecurringUnitCost) / simArppu)
-        : 0;
+    // --- Recalculate LTV using Strict Split PV Method ---
+    // 1. New Revenue Stream (Net of Fees)
+    const simRevenueNetOfFees = simArppu * (1 - params.paymentProcessingRate/100);
+
+    // 2. New Recurring Profit (New Rev - Fixed Cost)
+    // We assume Unit Costs stay fixed in absolute terms when we change Price (ARPPU)
+    const simMonthlyRecurringProfit = simRevenueNetOfFees - impliedUnitCost;
+
+    // 3. Recalculate Margin % for Display (Safety check for div by zero)
+    const simGrossMarginPercent = simArppu > 0 ? (simMonthlyRecurringProfit / simArppu) : 0;
     
     // CFO FIX: Calculate monthly inflation rate to drag LTV down in sandbox
     const monthlyInflationRate = Math.pow(1 + params.opexInflationRate / 100, 1/12) - 1;
 
-    // Recalculate LTV with new inputs using simplified Split PV approximation
-    // LTV ~= Setup + (Profit / (Churn + Inflation))
-    const simMonthlyRecurringProfit = simArppu * simGrossMarginPercent;
+    // 4. Setup Profit (Upfront) - Unchanged in Sandbox (Simplification)
+    const setupProfit = financials.weightedAvgOneTimeRevenue * (1 - params.paymentProcessingRate/100);
+
+    // 5. Revenue PV (Flat Revenue Perpetuity)
+    // Safety: Ensure we don't divide by zero if churn is 0
+    const effectiveChurnDenominator = Math.max(params.minChurnFloor, simChurn) / 100;
+    const revenuePv = effectiveChurnDenominator > 0 ? simRevenueNetOfFees / effectiveChurnDenominator : 0;
+
+    // 6. Cost PV (Growing Cost Perpetuity due to Inflation)
+    // Liability = Cost / (Churn - Inflation)
+    let effectiveDecayRate = effectiveChurnDenominator - monthlyInflationRate;
+    // Clamp decay rate to avoid infinity if Churn <= Inflation
+    effectiveDecayRate = Math.max(0.001, effectiveDecayRate);
     
-    const effectiveDiscountRate = (Math.max(0.1, simChurn) / 100) + monthlyInflationRate;
-    
-    const simLtv = (financials.weightedAvgOneTimeRevenue * (1 - params.paymentProcessingRate/100)) + 
-                   (simMonthlyRecurringProfit / effectiveDiscountRate);
+    const costPv = impliedUnitCost / effectiveDecayRate;
+
+    // 7. Net LTV
+    const simLtv = setupProfit + (revenuePv - costPv);
 
     return {
       ...financials,
@@ -67,7 +82,7 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
       grossMarginPercent: simGrossMarginPercent, // Use the new expanded margin
       ltv: simLtv
     } as Financials;
-  }, [financials, isSandbox, simChurn, simArppu, simCac, params.paymentProcessingRate, params.opexInflationRate]);
+  }, [financials, isSandbox, simChurn, simArppu, simCac, params.paymentProcessingRate, params.opexInflationRate, params.minChurnFloor]);
 
   const cohorts = useMemo(() => generateCohortData(projections, activeFinancials, params.paymentProcessingRate), [projections, activeFinancials, params.paymentProcessingRate]);
 

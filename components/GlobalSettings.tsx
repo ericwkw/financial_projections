@@ -17,6 +17,10 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
      return monthly.toFixed(3);
   };
 
+  const getPayrollMultiplier = (tax: number) => {
+      return (1 + tax/100).toFixed(2);
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
@@ -70,7 +74,12 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Payroll Tax Load</label>
                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.payrollTax}%</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Hidden cost of employment (MPF, Insurance, Benefits).</p>
+                     <div className="flex items-center justify-between text-xs mb-1">
+                         <p className="text-slate-500 dark:text-slate-400">Effective Cost.</p>
+                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 rounded font-mono text-[10px]">
+                           {getPayrollMultiplier(params.payrollTax)}x Salary
+                         </span>
+                    </div>
                     <input
                         type="range" min="0" max="40" step="1"
                         value={params.payrollTax}
@@ -85,12 +94,14 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                             Annual Inflation (OpEx)
                             <Tooltip content="CRITICAL: This rate increases your future OpEx/COGS. It also reduces your LTV by simulating future margin compression." />
                         </label>
-                        <div className="text-right">
-                            <div className="text-sm font-bold text-slate-900 dark:text-white">{params.opexInflationRate}%</div>
-                            <div className="text-[10px] text-slate-400">≈ {getMonthlyRate(params.opexInflationRate)}% / mo</div>
-                        </div>
+                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.opexInflationRate}%</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Yearly increase in software, rent, and vendor costs.</p>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                         <p className="text-slate-500 dark:text-slate-400">Vendor cost increase.</p>
+                         <span className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-1.5 rounded font-mono text-[10px]">
+                           -{getMonthlyRate(params.opexInflationRate)}%/mo
+                         </span>
+                    </div>
                     <input
                         type="range" min="0" max="15" step="0.5"
                         value={params.opexInflationRate}
@@ -102,12 +113,14 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                  <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Salary Growth Rate</label>
-                         <div className="text-right">
-                            <div className="text-sm font-bold text-slate-900 dark:text-white">{params.salaryGrowthRate}%</div>
-                            <div className="text-[10px] text-slate-400">≈ {getMonthlyRate(params.salaryGrowthRate)}% / mo</div>
-                        </div>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.salaryGrowthRate}%</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Annual raises for employees.</p>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                         <p className="text-slate-500 dark:text-slate-400">Annual Raises.</p>
+                         <span className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-1.5 rounded font-mono text-[10px]">
+                           -{getMonthlyRate(params.salaryGrowthRate)}%/mo
+                         </span>
+                    </div>
                     <input
                         type="range" min="0" max="15" step="0.5"
                         value={params.salaryGrowthRate}
@@ -175,7 +188,7 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                         </div>
                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.minChurnFloor}%</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Minimum churn % assumed for LTV math.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Zero-Churn Protection (Min Churn %)</p>
                     <input
                         type="range" min="0.1" max="2.0" step="0.1"
                         value={params.minChurnFloor}
