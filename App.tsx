@@ -193,7 +193,7 @@ const App: React.FC = () => {
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  Analysis & P&L
+                  Financial Dashboard
                 </button>
                  <button 
                   onClick={() => setActiveTab('cohorts')}
@@ -203,7 +203,7 @@ const App: React.FC = () => {
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Grid className="w-3.5 h-3.5" /> Cohorts
+                  <Grid className="w-3.5 h-3.5" /> Customer Analysis
                 </button>
                  <button 
                   onClick={() => setActiveTab('settings')}
@@ -213,7 +213,7 @@ const App: React.FC = () => {
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Settings className="w-3.5 h-3.5" /> Settings
+                  <Settings className="w-3.5 h-3.5" /> Global Settings
                 </button>
                  <button 
                   onClick={() => setActiveTab('math')}
@@ -233,7 +233,7 @@ const App: React.FC = () => {
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5" /> Guide
+                  <BookOpen className="w-3.5 h-3.5" /> User Guide
                 </button>
               </div>
 
@@ -242,14 +242,14 @@ const App: React.FC = () => {
                  <select 
                    value={activeTab} 
                    onChange={(e) => setActiveTab(e.target.value as any)}
-                   className="bg-slate-100 dark:bg-slate-800 border-none text-sm rounded-lg p-2 text-slate-900 dark:text-white"
+                   className="bg-slate-100 dark:bg-slate-800 border-none text-sm rounded-lg p-2 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                  >
                    <option value="input">Model Inputs</option>
-                   <option value="analysis">Analysis & P&L</option>
-                   <option value="cohorts">Cohorts</option>
-                   <option value="settings">Settings</option>
+                   <option value="analysis">Financial Dashboard</option>
+                   <option value="cohorts">Customer Analysis</option>
+                   <option value="settings">Global Settings</option>
                    <option value="math">Formulas</option>
-                   <option value="guide">Guide</option>
+                   <option value="guide">User Guide</option>
                  </select>
               </div>
 
@@ -349,7 +349,13 @@ const App: React.FC = () => {
           
           {activeTab === 'math' && <MathDeepDive />}
           
-          {activeTab === 'cohorts' && <CohortAnalysis projections={projections} financials={financials} />}
+          {activeTab === 'cohorts' && (
+            <CohortAnalysis 
+                projections={projections} 
+                financials={financials} 
+                onNavigate={(tab) => setActiveTab(tab)} 
+            />
+          )}
           
           {activeTab === 'settings' && <GlobalSettings params={scenarioParams} onChange={handleScenarioChange} onReset={handleResetScenarios} />}
 

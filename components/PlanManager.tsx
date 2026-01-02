@@ -196,7 +196,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
              <div className="md:col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
-                        Grw% <Tooltip position="top" content="Target monthly growth rate (%) for new subscribers. This leads to compounding MRR." width="w-48" />
+                        Growth % <Tooltip position="top" content="Target monthly growth rate (%) for new subscribers. This leads to compounding MRR." width="w-48" />
                     </label>
                     <input
                         type="number"
@@ -209,7 +209,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
                 </div>
                 <div className="space-y-2">
                     <label className={`text-xs font-semibold uppercase flex items-center gap-1 ${isLifetime ? 'text-slate-300 dark:text-slate-600' : 'text-red-500 dark:text-red-400'}`}>
-                        Chrn% <Tooltip position="top" content={isLifetime ? "Lifetime plans do not churn revenue (0%)." : "Percentage of customers who cancel each month."} width="w-32" />
+                        Churn % <Tooltip position="top" content={isLifetime ? "Lifetime plans do not churn revenue (0%)." : "Percentage of customers who cancel each month."} width="w-32" />
                     </label>
                     <input
                         type="number"
@@ -231,7 +231,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
                   <Tooltip width="w-64" position="top" content={`Direct service costs per user (e.g. server, AI tokens). Do not include payment processing fees here (currently ${paymentProcessingRate}% globally).`} />
                 </label>
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-1 items-stretch">
                   <div className="relative flex-grow">
                     <input
                       type="number"
@@ -243,10 +243,11 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
                   </div>
                   <button 
                     onClick={() => openEstimator(plan.id)}
-                    className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800"
-                    title="Estimate"
+                    className="px-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800 flex items-center justify-center gap-1 group/btn"
+                    title="AI Cost Estimator"
                   >
-                    <Wand2 className="w-4 h-4" />
+                    <Wand2 className="w-3.5 h-3.5" />
+                    <span className="hidden xl:inline text-[10px] font-bold uppercase tracking-wide">Estimate</span>
                   </button>
               </div>
             </div>
@@ -299,6 +300,12 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
                 <DollarSign className="w-8 h-8 text-slate-300 dark:text-slate-600" />
              </div>
              <p className="text-slate-500 dark:text-slate-400 font-medium">No plans defined</p>
+             <button
+                onClick={onAdd}
+                className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1 mx-auto"
+              >
+                <Plus className="w-4 h-4" /> Add your first plan
+              </button>
           </div>
         )}
       </div>

@@ -8,9 +8,10 @@ import { Users, DollarSign, Clock, Info, Calculator, RotateCcw, TrendingUp } fro
 interface CohortAnalysisProps {
   projections: MonthlyProjection[];
   financials: Financials;
+  onNavigate?: (tab: 'input' | 'analysis' | 'cohorts' | 'settings' | 'guide' | 'math') => void;
 }
 
-const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials }) => {
+const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials, onNavigate }) => {
   const [mode, setMode] = useState<'retention' | 'ltv'>('retention');
   
   // --- SANDBOX STATE ---
@@ -217,27 +218,36 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
                     {/* DRIVERS SECTION - Explicitly tells user where to go */}
                     <div className="md:w-1/3 bg-white dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
                         <h4 className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" /> How to improve this?
+                            <TrendingUp className="w-3 h-3" /> Fix Your Metrics:
                         </h4>
-                        <ul className="text-xs space-y-2 text-slate-600 dark:text-slate-300">
-                             <li className="flex justify-between">
-                                <span>1. Reduce Churn:</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">Inputs &gt; Plans</span>
-                             </li>
-                             <li className="flex justify-between">
-                                <span>2. Increase Price:</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">Inputs &gt; Plans</span>
-                             </li>
-                             <li className="flex justify-between">
-                                <span>3. Lower CAC:</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">Inputs &gt; Expenses</span>
-                             </li>
-                        </ul>
+                        <div className="flex flex-col gap-2">
+                             <button 
+                                onClick={() => onNavigate?.('input')} 
+                                className="flex justify-between items-center px-3 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-slate-700 transition-colors text-left"
+                             >
+                                <span>Reduce Churn</span>
+                                <span className="text-slate-400">→</span>
+                             </button>
+                             <button 
+                                onClick={() => onNavigate?.('input')} 
+                                className="flex justify-between items-center px-3 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-slate-700 transition-colors text-left"
+                             >
+                                <span>Increase Price</span>
+                                <span className="text-slate-400">→</span>
+                             </button>
+                             <button 
+                                onClick={() => onNavigate?.('input')} 
+                                className="flex justify-between items-center px-3 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-slate-700 transition-colors text-left"
+                             >
+                                <span>Lower CAC</span>
+                                <span className="text-slate-400">→</span>
+                             </button>
+                        </div>
                         <button 
                             onClick={() => setIsSandbox(true)}
-                            className="mt-3 w-full py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded transition-colors"
+                            className="mt-3 w-full py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
                         >
-                            Or Simulate Here &rarr;
+                            ...Or just simulate here
                         </button>
                     </div>
                 </div>

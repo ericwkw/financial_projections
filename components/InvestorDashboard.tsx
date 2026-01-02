@@ -5,7 +5,7 @@ import FinancialCharts from './FinancialCharts';
 import PnLTable from './PnLTable';
 import GeminiAdvisor from './GeminiAdvisor';
 import MetricTile from './MetricTile';
-import { TrendingUp, DollarSign, BrainCircuit } from './Icons';
+import { TrendingUp, DollarSign, BrainCircuit, Users } from './Icons';
 import KPICard from './KPICard';
 
 interface InvestorDashboardProps {
@@ -25,13 +25,20 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* 1. North Star - Valuation & Equity Context */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard 
             title="Current MRR" 
             value={fmtCurrency(financials.mrr)} 
             icon={<DollarSign className="w-5 h-5" />} 
             subtext={`Run Rate: ${fmtCurrency(financials.arr)}/yr`}
             tooltip="Monthly Recurring Revenue. The consistent monthly income from subscriptions."
+        />
+        <KPICard 
+            title="Avg. Revenue (ARPPU)" 
+            value={fmtCurrency(financials.arppu)} 
+            icon={<Users className="w-5 h-5" />} 
+            subtext="Per Paying User / Mo"
+            tooltip="Average Revenue Per Paying User. This represents the average monthly value of a paying customer. High ARPPU indicates strong pricing power."
         />
         <KPICard 
             title="Company Valuation" 

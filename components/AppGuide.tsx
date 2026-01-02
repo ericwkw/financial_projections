@@ -75,7 +75,7 @@ const AppGuide: React.FC = () => {
            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center text-xl font-bold mb-4">3</div>
           <h3 className="font-bold text-slate-900 dark:text-white mb-2">Check the Health</h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-            Go to <strong>Analysis & P&L</strong> to see the results.
+            Go to <strong>Financial Dashboard</strong> to see the results.
           </p>
           <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
             <li className="flex gap-2">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { SimulationState } from '../types';
@@ -61,9 +62,15 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state }) => {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-indigo-300/50 space-y-4 py-10">
             <BrainCircuit className="w-16 h-16 opacity-10 dark:opacity-20" />
-            <p className="text-sm text-center max-w-xs text-slate-500 dark:text-slate-400">
-              Click "Run Analysis" to let Gemini evaluate your pricing tiers, unit economics, and burn rate structure.
-            </p>
+            <div className="text-center max-w-xs space-y-2">
+                <h3 className="font-semibold text-slate-600 dark:text-slate-300">Not sure if your numbers work?</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                I can audit your pricing, check your burn rate, and warn you if you're running out of cash.
+                </p>
+                <button onClick={handleAnalyze} className="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline">
+                    Click "Run Analysis" to start →
+                </button>
+            </div>
           </div>
         )}
       </div>
