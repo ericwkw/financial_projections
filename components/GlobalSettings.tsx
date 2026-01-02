@@ -184,7 +184,7 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-1">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">LTV Safety Floor</label>
-                            <Tooltip content="Minimum churn rate used for LTV calculations. Standard is 0.5%. Setting this to 0% is risky and allows LTV to become Infinite." />
+                            <Tooltip content="Minimum churn rate used for LTV calculations. Standard is 0.5%. Setting this to 0% allows 'Infinite' LTV (capped at 100 years)." />
                         </div>
                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.minChurnFloor}%</span>
                     </div>

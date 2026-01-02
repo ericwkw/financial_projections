@@ -57,6 +57,11 @@ export const calculateFinancials = (
   // CFO MATH: Calculate Monthly Discount Rate (WACC) for PV calculations
   const monthlyDiscountRate = Math.pow(1 + params.discountRate / 100, 1/12) - 1;
 
+  // CFO CONSTANT: The absolute minimum decay rate (Denominator Floor).
+  // 1 / 1200 corresponds to a 1200 month (100 Year) Cap.
+  // This prevents Infinity/NaN and ensures the model handles "0% Churn" scenarios gracefully.
+  const MIN_DECAY_RATE = 1 / 1200;
+
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
     const isRecurring = plan.interval === 'monthly' || plan.interval === 'yearly';
@@ -158,14 +163,17 @@ export const calculateFinancials = (
         // Cost decays due to Churn + WACC, but INCREASES due to Inflation. 
         // Net Rate = Churn + WACC - Inflation.
         let costDecayRate = (actualChurnForCalc / 100) + monthlyDiscountRate - monthlyInflationRate;
-        costDecayRate = Math.max(0.001, costDecayRate); // Clamp to prevent div by zero or negative infinite cost
+        
+        // CFO SAFETY: If Inflation > Churn + WACC, the cost series theoretically diverges.
+        // We clamp the denominator to MIN_DECAY_RATE to prevent Infinite Liability, capping it at ~100 years.
+        const effectiveCostDecayRate = Math.max(MIN_DECAY_RATE, costDecayRate);
 
         if (plan.interval === 'lifetime') {
             // Lifetime LTV = Upfront Price - Discounted Cost Liability
             const upfrontRevenue = plan.price * marginFactor;
             // For lifetime, churn is "activity churn" (stops cost), but revenue is already collected.
             // So we only discount the cost stream.
-            const costLiability = plan.unitCost / costDecayRate;
+            const costLiability = plan.unitCost / effectiveCostDecayRate;
             
             planLtv = setupProfit + upfrontRevenue - costLiability;
         } else {
@@ -175,12 +183,12 @@ export const calculateFinancials = (
             const monthlyNetRevenue = priceMonthly * marginFactor;
             
             // CFO SAFEGUARD: Prevent Infinite LTV if Churn=0 and WACC=0
-            // If decay rate is effectively 0, we cap LTV at 100 years (1200 months) to prevent UI breakage
-            const revenuePv = revenueDecayRate > 0.0001 
-                ? monthlyNetRevenue / revenueDecayRate 
-                : monthlyNetRevenue * 1200; 
+            // We use Math.max to clamp the denominator, ensuring continuity.
+            // If rates are near zero, LTV is capped at 1200 months (100 years).
+            const effectiveRevenueDecayRate = Math.max(revenueDecayRate, MIN_DECAY_RATE);
             
-            const costPv = plan.unitCost / costDecayRate;
+            const revenuePv = monthlyNetRevenue / effectiveRevenueDecayRate;
+            const costPv = plan.unitCost / effectiveCostDecayRate;
             
             planLtv = setupProfit + (revenuePv - costPv);
         }
