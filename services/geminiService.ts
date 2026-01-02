@@ -104,7 +104,7 @@ export interface CostEstimation {
   breakdown: string;
 }
 
-export const estimateUnitCost = async (description: string): Promise<CostEstimation> => {
+export const estimateUnitCost = async (description: string, price: number, interval: string): Promise<CostEstimation> => {
    try {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
@@ -119,15 +119,26 @@ export const estimateUnitCost = async (description: string): Promise<CostEstimat
     
     "${description}"
 
-    Consider:
+    **Financial Context:**
+    - Subscription Price: HKD $${price}
+    - Billing Interval: ${interval}
+
+    **Cost Components to Estimate:**
     1. Compute (AWS/GCP/Azure)
     2. Database/Storage per user
     3. Third-party API fees (OpenAI, Twilio, SendGrid, etc.)
-    4. Payment Processing (e.g. Stripe HK ~3.4% + HK$2.35)
+    4. **Payment Processing Fees (Stripe HK)**:
+       - Formula: 3.4% of Price + HK$2.35 per transaction.
+       - Transaction Amount: HKD $${price}
+       - **Amortization Rule**: 
+         - If interval is 'monthly': Use the full fee.
+         - If interval is 'yearly': Divide fee by 12.
+         - If interval is 'lifetime': Divide fee by 24 (amortized).
+       - YOU MUST include this calculated amount in the final 'estimatedCost'.
 
     Return a JSON object with:
     - estimatedCost: number (The total estimated monthly cost per user in HKD)
-    - breakdown: string (A markdown formatted list explaining the cost components)
+    - breakdown: string (A markdown formatted list explaining the cost components. Explicitly show the math for the Payment Processing Fee.)
     
     Be conservative but realistic. If information is missing, make reasonable standard assumptions for a SaaS MVP.
     `;

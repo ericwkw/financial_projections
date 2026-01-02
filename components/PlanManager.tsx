@@ -17,6 +17,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
   const [isEstimatorOpen, setIsEstimatorOpen] = useState(false);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
 
+  const activePlan = plans.find(p => p.id === activePlanId);
+
   const openEstimator = (planId: string) => {
     setActivePlanId(planId);
     setIsEstimatorOpen(true);
@@ -73,6 +75,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
         isOpen={isEstimatorOpen} 
         onClose={() => setIsEstimatorOpen(false)} 
         onApply={handleApplyCost} 
+        planPrice={activePlan ? activePlan.price : 0}
+        planInterval={activePlan ? activePlan.interval : 'monthly'}
       />
       
       <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">

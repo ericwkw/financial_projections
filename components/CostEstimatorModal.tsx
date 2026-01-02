@@ -8,6 +8,8 @@ interface CostEstimatorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (cost: number) => void;
+  planPrice: number;
+  planInterval: string;
 }
 
 interface ManualCostItem {
@@ -17,7 +19,7 @@ interface ManualCostItem {
   quantity: number;
 }
 
-const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose, onApply }) => {
+const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose, onApply, planPrice, planInterval }) => {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
   
   // AI State
@@ -53,7 +55,7 @@ const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose
     if (!description.trim()) return;
     setLoading(true);
     try {
-      const data = await estimateUnitCost(description);
+      const data = await estimateUnitCost(description, planPrice, planInterval);
       setAiResult(data);
     } catch (e) {
       console.error(e);
