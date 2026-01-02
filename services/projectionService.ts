@@ -79,8 +79,12 @@ export const calculateFinancials = (
         totalNewPayingSubscribers += newUsers;
         
         // For Payback Offset (Strict Paid Cohort)
-        // For Lifetime plans, the Price essentially acts as a huge Setup Fee/One-time payment
-        const upfrontRevenue = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
+        // For Lifetime plans AND Yearly plans, the Price essentially acts as a huge Setup Fee/One-time payment
+        // for Cash Flow Payback purposes.
+        let upfrontRevenue = plan.setupFee || 0;
+        if (plan.interval === 'lifetime') upfrontRevenue += plan.price;
+        if (plan.interval === 'yearly') upfrontRevenue += plan.price;
+        
         paidOneTimeRevenue += newUsers * upfrontRevenue;
 
         // For Commission Estimation (Gross Adds)

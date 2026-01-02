@@ -28,7 +28,7 @@ const Tooltip: React.FC<TooltipProps> = ({ content, className = '', position = '
       
       {/* Tooltip Popup */}
       <div 
-        className={`absolute left-1/2 -translate-x-1/2 ${width} p-3 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs rounded-lg shadow-xl transition-all duration-200 z-[9999] pointer-events-none text-left font-medium leading-relaxed border border-slate-700 dark:border-slate-200
+        className={`absolute left-1/2 -translate-x-1/2 ${width} p-3 bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs rounded-lg shadow-xl transition-all duration-200 z-[9999] pointer-events-none text-left font-medium leading-relaxed border border-slate-700 dark:border-slate-200 normal-case
           ${position === 'top' ? 'bottom-full mb-2.5' : 'top-full mt-2.5'}
           ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
         `}
