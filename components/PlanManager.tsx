@@ -42,9 +42,12 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
     if (plan.price === 0) return { months: 999, label: "Free" };
     
     // 4. Calculate Effective CAC (Global CAC - Upfront Cash)
-    // Upfront Cash = Setup Fee + (Lifetime Price if applicable)
+    // Upfront Cash = Setup Fee + (Lifetime Price OR Yearly Price if applicable)
+    // This provides a "Cash Flow Payback" view, showing the benefit of annual prepayments.
     let upfrontCash = plan.setupFee || 0;
     if (plan.interval === 'lifetime') {
+        upfrontCash += plan.price;
+    } else if (plan.interval === 'yearly') {
         upfrontCash += plan.price;
     }
 
@@ -122,10 +125,10 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                   <Tooltip width="w-64" position="top" content="Customer Price. Monthly/Yearly = Recurring Revenue. Lifetime = One-time Cash (0 MRR). Upfront payments (Yearly/Lifetime) accelerate Cash Flow and shorten Payback Period." />
                 </label>
                 {/* Payback Badge */}
-                <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Months)">
+                <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Cash Flow Basis)">
                   <Clock className="w-3 h-3" />
                   <span>{payback.label}</span>
-                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC. Lifetime deals count as instant payback if Price > CAC." width="w-48"/>}
+                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC via Cash Flow. Annual/Lifetime prepayments count as instant recovery." width="w-56"/>}
                 </div>
               </div>
               <div className="flex gap-2">
