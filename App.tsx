@@ -13,11 +13,12 @@ import InvestorDashboard from './components/InvestorDashboard';
 import AppGuide from './components/AppGuide';
 import MathDeepDive from './components/MathDeepDive';
 import CohortAnalysis from './components/CohortAnalysis';
-import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable, Save, Upload, FileText, Grid } from './components/Icons';
+import GlobalSettings from './components/GlobalSettings';
+import { TrendingUp, Sun, Moon, Briefcase, BrainCircuit, BookOpen, DollarSign, Variable, Save, Upload, FileText, Grid, Settings } from './components/Icons';
 
 const App: React.FC = () => {
   // --- State Management ---
-  const [activeTab, setActiveTab] = useState<'input' | 'analysis' | 'cohorts' | 'guide' | 'math'>('input');
+  const [activeTab, setActiveTab] = useState<'input' | 'analysis' | 'cohorts' | 'settings' | 'guide' | 'math'>('input');
   const [plans, setPlans] = useState<Plan[]>(INITIAL_PLANS);
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
   const [expenses, setExpenses] = useState<OperatingExpense[]>(INITIAL_EXPENSES);
@@ -173,7 +174,7 @@ const App: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="hidden md:flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 transition-colors">
+              <div className="hidden xl:flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 transition-colors">
                 <button 
                   onClick={() => setActiveTab('input')}
                   className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
@@ -205,6 +206,16 @@ const App: React.FC = () => {
                   <Grid className="w-3.5 h-3.5" /> Cohorts
                 </button>
                  <button 
+                  onClick={() => setActiveTab('settings')}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
+                    activeTab === 'settings' 
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-600' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Settings className="w-3.5 h-3.5" /> Settings
+                </button>
+                 <button 
                   onClick={() => setActiveTab('math')}
                   className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2 ${
                     activeTab === 'math' 
@@ -227,7 +238,7 @@ const App: React.FC = () => {
               </div>
 
               {/* Mobile Tab Select - Simplified */}
-              <div className="md:hidden">
+              <div className="xl:hidden">
                  <select 
                    value={activeTab} 
                    onChange={(e) => setActiveTab(e.target.value as any)}
@@ -236,6 +247,7 @@ const App: React.FC = () => {
                    <option value="input">Model Inputs</option>
                    <option value="analysis">Analysis & P&L</option>
                    <option value="cohorts">Cohorts</option>
+                   <option value="settings">Settings</option>
                    <option value="math">Formulas</option>
                    <option value="guide">Guide</option>
                  </select>
@@ -281,7 +293,7 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Scenario Controls (Sticky) - Hidden on Guide/Math/Cohorts Tab for cleanliness */}
+        {/* Scenario Controls (Sticky) - Hidden on specific tabs for cleanliness */}
         {activeTab === 'input' || activeTab === 'analysis' ? (
           <ScenarioControls 
             params={scenarioParams} 
@@ -292,8 +304,8 @@ const App: React.FC = () => {
 
         <main className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
           
-          {/* North Star KPIs */}
-          {activeTab !== 'guide' && activeTab !== 'math' && activeTab !== 'cohorts' && (
+          {/* North Star KPIs - Hidden on specific tabs */}
+          {activeTab !== 'guide' && activeTab !== 'math' && activeTab !== 'cohorts' && activeTab !== 'settings' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KPICard 
                 title="LTV / CAC Ratio" 
@@ -328,7 +340,7 @@ const App: React.FC = () => {
                 trend={financials.burnRate === 0 ? 'positive' : 'negative'}
                 subtext={financials.burnRate === 0 ? 'Profitable (No Burn)' : `Gross Burn: ${fmt(financials.grossBurn)}`}
                 color={financials.burnRate > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-900"}
-                tooltip="Net cash lost per month (expenses minus revenue). If $0 or positive, you are profitable."
+                tooltip="Actual cash depletion per month accounting for revenue (Gross Burn - Revenue). This is the speed at which you are losing money."
               />
             </div>
           )}
@@ -338,6 +350,8 @@ const App: React.FC = () => {
           {activeTab === 'math' && <MathDeepDive />}
           
           {activeTab === 'cohorts' && <CohortAnalysis projections={projections} financials={financials} />}
+          
+          {activeTab === 'settings' && <GlobalSettings params={scenarioParams} onChange={handleScenarioChange} onReset={handleResetScenarios} />}
 
           {activeTab === 'input' && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

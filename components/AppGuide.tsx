@@ -119,6 +119,22 @@ const AppGuide: React.FC = () => {
            </div>
            <div>
              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
+               Q: Gross Burn vs. Net Burn?
+             </h4>
+             <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
+               <p><strong>A: Gross Burn is spending. Net Burn is losing money.</strong></p>
+               <ul className="list-disc pl-4 space-y-1 text-slate-500 dark:text-slate-400">
+                  <li><strong>Gross Burn:</strong> The total cash leaving your bank every month (Salaries + Rent + Servers). It ignores revenue.</li>
+                  <li><strong>Net Burn:</strong> The actual cash you lose after counting sales.</li>
+               </ul>
+               <p className="font-mono text-xs bg-slate-200 dark:bg-slate-700 p-2 rounded">Net Burn = Gross Burn - Monthly Revenue</p>
+               <p className="italic text-slate-500">
+                 If you spend $50k (Gross Burn) but make $30k (Revenue), your Net Burn is only $20k. This is the number that drains your bank account.
+               </p>
+             </div>
+           </div>
+           <div>
+             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
                Q: What is the "Magic Number"?
              </h4>
              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -156,15 +172,6 @@ const AppGuide: React.FC = () => {
              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                <strong>A: Hidden Costs.</strong><br/>
                The dashboard automatically adds <strong>Payroll Taxes</strong> (e.g. MPF/Insurance, defaults to 20%) and estimated <strong>Sales Commissions</strong> on top of your raw salary numbers. This prevents you from running out of cash unexpectedly.
-             </p>
-           </div>
-           <div>
-             <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1">
-               Q: Input numbers for today or future?
-             </h4>
-             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-               <strong>A: Input numbers for TODAY.</strong><br/>
-               Think of the "Model Inputs" tab as your starting line (Month 0). The charts will then calculate the future based on the Growth Rates you set in the top slider bar.
              </p>
            </div>
         </div>
@@ -246,7 +253,8 @@ const AppGuide: React.FC = () => {
           <div>
             <h4 className="font-bold text-slate-900 dark:text-white text-base mb-1">Burn Rate</h4>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              The amount of cash you lose every month. If you are profitable, your burn rate is $0.
+              The amount of cash you lose every month. <br/>
+              <strong>Net Burn</strong> = Gross Expenses - Revenue.
             </p>
           </div>
 

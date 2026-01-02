@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plan } from '../types';
 import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, Clock } from './Icons';
@@ -193,7 +194,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
              <div className="md:col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
-                        Grw% <Tooltip position="top" content="Target monthly growth rate (%) for new subscribers." width="w-48" />
+                        Grw% <Tooltip position="top" content="Target monthly growth rate (%) for new subscribers. This leads to compounding MRR." width="w-48" />
                     </label>
                     <input
                         type="number"
@@ -274,8 +275,8 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
             </div>
 
           </div>
-        )}})
-        }
+        );
+        })}
         {plans.length === 0 && (
           <div className="p-12 text-center rounded-b-xl">
              <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">

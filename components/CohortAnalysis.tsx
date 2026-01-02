@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Financials, MonthlyProjection } from '../types';
 import { generateCohortData } from '../services/projectionService';
 import Tooltip from './Tooltip';
-import { Users, DollarSign } from './Icons';
+import { Users, DollarSign, Clock, Info } from './Icons';
 
 interface CohortAnalysisProps {
   projections: MonthlyProjection[];
@@ -15,10 +15,16 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
   
   const cohorts = useMemo(() => generateCohortData(projections, financials), [projections, financials]);
 
+  // Extract Key Insights for the Summary Section
+  // Since our simulation model applies global churn settings, all cohorts effectively behave the same.
+  // We can use the first cohort to derive the "Unit Economics" story.
+  const representativeCohort = cohorts[0]?.metrics || [];
+  const retentionAt12Mo = representativeCohort[12]?.retentionRate || 0;
+  const breakevenMetric = representativeCohort.find(m => m.isBreakeven);
+  const breakevenMonth = breakevenMetric ? breakevenMetric.monthIndex : -1;
+
   // Color scales
   const getRetentionColor = (rate: number) => {
-      // 100% -> Green, 0% -> Red
-      // Simple opacity based on rate
       if (rate >= 90) return 'bg-emerald-500 text-white';
       if (rate >= 75) return 'bg-emerald-400 text-white';
       if (rate >= 50) return 'bg-emerald-200 text-slate-800';
@@ -27,8 +33,8 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
   };
 
   const getLtvColor = (ltv: number, cac: number) => {
-      if (ltv >= cac * 3) return 'bg-emerald-500 text-white'; // Great
-      if (ltv >= cac) return 'bg-emerald-300 text-slate-900'; // Breakeven
+      if (ltv >= cac * 3) return 'bg-emerald-500 text-white'; // Great (3x)
+      if (ltv >= cac) return 'bg-emerald-300 text-slate-900'; // Profitable
       if (ltv >= cac * 0.5) return 'bg-yellow-100 text-slate-900'; // Recovering
       return 'bg-red-100 text-slate-900'; // Negative
   };
@@ -38,15 +44,14 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
-        {/* Header & Controls */}
+        {/* 1. Header & Toggle */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div>
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    Cohort Analysis
-                    <Tooltip content="Tracks specific groups of users (Cohorts) acquired in the same month to see how they behave over time." />
+                    Customer Survival Analysis
                 </h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Visualizing <strong>{mode === 'retention' ? 'User Retention' : 'Cumulative Gross Profit'}</strong> based on current Churn ({financials.paidChurnRate.toFixed(1)}%) and ARPU.
+                    Visualize how long customers stay and when they become profitable.
                 </p>
             </div>
 
@@ -56,55 +61,118 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
                     className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${mode === 'retention' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                     <Users className="w-4 h-4" />
-                    Retention %
+                    Retention View
                 </button>
                 <button
                     onClick={() => setMode('ltv')}
                     className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all ${mode === 'ltv' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                 >
                     <DollarSign className="w-4 h-4" />
-                    Cumulative LTV
+                    Profit View
                 </button>
             </div>
         </div>
 
-        {/* Heatmap Container */}
+        {/* 2. Educational Explainer Box */}
+        <div className={`rounded-xl p-6 border ${mode === 'retention' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800' : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800'}`}>
+           <div className="flex gap-4">
+              <div className={`p-3 rounded-full h-fit ${mode === 'retention' ? 'bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200' : 'bg-emerald-100 dark:bg-emerald-800 text-emerald-600 dark:text-emerald-200'}`}>
+                  {mode === 'retention' ? <Users className="w-6 h-6" /> : <DollarSign className="w-6 h-6" />}
+              </div>
+              <div>
+                  <h3 className={`text-lg font-bold mb-1 ${mode === 'retention' ? 'text-blue-900 dark:text-blue-100' : 'text-emerald-900 dark:text-emerald-100'}`}>
+                      {mode === 'retention' ? "How many people stick around?" : "When do you make money?"}
+                  </h3>
+                  <p className={`text-sm leading-relaxed ${mode === 'retention' ? 'text-blue-800 dark:text-blue-200' : 'text-emerald-800 dark:text-emerald-200'}`}>
+                      {mode === 'retention' 
+                        ? "Imagine 100 customers sign up in January. This chart shows how many of them are still paying you in February, March, etc. We want these numbers to stay high." 
+                        : "You spend money on ads (CAC) to get a customer. This chart shows how your profit accumulates month by month. Green means you have finally paid back the ad cost and are making a profit."}
+                  </p>
+              </div>
+           </div>
+        </div>
+
+        {/* 3. High Level Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                    <Users className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">1-Year Retention</span>
+                </div>
+                <div className="text-3xl font-bold text-slate-900 dark:text-white">
+                    {Math.round(retentionAt12Mo)}%
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                   of customers are still active after 12 months.
+                </p>
+            </div>
+             <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Time to Profit</span>
+                </div>
+                <div className={`text-3xl font-bold ${breakevenMonth > -1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                    {breakevenMonth === 0 ? "Instant" : breakevenMonth > -1 ? `Month ${breakevenMonth}` : "Never"}
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                   {breakevenMonth > -1 
+                     ? `is when a customer pays back their HK$${Math.round(financials.cac)} acquisition cost.` 
+                     : "You never earn back your acquisition cost with current margins."}
+                </p>
+            </div>
+        </div>
+
+        {/* 4. The Heatmap Table */}
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                 <h4 className="font-semibold text-slate-900 dark:text-white text-sm">Detailed Cohort History</h4>
+                 <div className="text-xs text-slate-500">
+                     {mode === 'retention' ? 'Values shown in %' : 'Values shown in Cumulative Profit (HKD)'}
+                 </div>
+             </div>
+             
              <div className="overflow-x-auto">
                  <table className="w-full text-sm text-center border-collapse">
                      <thead>
                          <tr>
-                             <th className="p-4 text-left font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700 min-w-[140px] sticky left-0 z-10">Cohort</th>
-                             <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700 min-w-[100px]">Users</th>
+                             <th className="p-4 text-left font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700 min-w-[140px] sticky left-0 z-10">
+                                 Sign Up Date
+                             </th>
+                             <th className="p-4 font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 border-b dark:border-slate-700 min-w-[100px]">
+                                 Cohort Size
+                             </th>
                              {Array.from({ length: 13 }).map((_, i) => (
                                  <th key={i} className="p-4 font-medium text-slate-500 dark:text-slate-400 border-b dark:border-slate-700 min-w-[60px] bg-slate-50 dark:bg-slate-800">
-                                     M{i}
+                                     <div className="flex flex-col items-center">
+                                         <span>M{i}</span>
+                                         {i === 0 && <span className="text-[9px] uppercase tracking-wide opacity-70">(Join)</span>}
+                                     </div>
                                  </th>
                              ))}
                          </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                         {cohorts.map((cohort) => (
+                         {cohorts.map((cohort, idx) => (
                              <tr key={cohort.acquisitionMonth}>
                                  <td className="p-3 text-left font-medium text-slate-900 dark:text-white bg-white dark:bg-slate-900 sticky left-0 z-10 border-r border-slate-100 dark:border-slate-800">
                                      Month {cohort.acquisitionMonth}
                                  </td>
                                  <td className="p-3 text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/50 border-r border-slate-100 dark:border-slate-800">
-                                     {cohort.size}
+                                     {cohort.size} Users
                                  </td>
                                  {cohort.metrics.map((metric, i) => (
                                      <td key={i} className="p-1">
                                          {mode === 'retention' ? (
                                              <div 
                                                 className={`w-full h-full py-2 rounded text-xs font-medium ${getRetentionColor(metric.retentionRate)}`}
-                                                title={`${metric.retentionRate.toFixed(1)}% Retention`}
+                                                title={`${metric.retentionRate.toFixed(1)}% Retention in Month ${i}`}
                                              >
                                                  {metric.retentionRate > 5 ? `${Math.round(metric.retentionRate)}%` : ''}
                                              </div>
                                          ) : (
                                              <div 
-                                                className={`w-full h-full py-2 rounded text-xs font-medium ${getLtvColor(metric.cumulativeLtv, cohort.cac)} ${metric.isBreakeven ? 'ring-2 ring-emerald-500 ring-offset-1 dark:ring-offset-slate-900' : ''}`}
-                                                title={`Cum. LTV: ${fmtCurrency(metric.cumulativeLtv)}`}
+                                                className={`w-full h-full py-2 rounded text-xs font-medium transition-all ${getLtvColor(metric.cumulativeLtv, cohort.cac)} ${metric.isBreakeven ? 'ring-2 ring-emerald-500 ring-offset-1 dark:ring-offset-slate-900' : ''}`}
+                                                title={`Month ${i} Cumulative Profit: ${fmtCurrency(metric.cumulativeLtv)}`}
                                              >
                                                  {metric.cumulativeLtv > 0 ? `$${Math.round(metric.cumulativeLtv)}` : '$0'}
                                              </div>
@@ -117,26 +185,30 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
                  </table>
              </div>
              
-             {/* Legend / Footer */}
-             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-6 items-center justify-between">
-                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                     * Projections assume constant churn rate of <strong>{financials.paidChurnRate.toFixed(1)}%</strong> and ARPU of <strong>{fmtCurrency(financials.arppu)}</strong>.
-                 </div>
-                 
-                 {mode === 'ltv' && (
-                     <div className="flex items-center gap-4 text-xs">
-                         <span className="font-semibold text-slate-700 dark:text-slate-300">Legend:</span>
-                         <div className="flex items-center gap-1">
-                             <div className="w-3 h-3 rounded bg-red-100"></div> <span>Loss</span>
+             {/* 5. The "Legend" Footer */}
+             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800">
+                 {mode === 'retention' ? (
+                     <div className="flex flex-wrap gap-6 items-center justify-center text-xs text-slate-600 dark:text-slate-400">
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded bg-emerald-500"></div> <span>90%+ (Excellent)</span>
                          </div>
-                         <div className="flex items-center gap-1">
-                             <div className="w-3 h-3 rounded bg-emerald-300"></div> <span>Breakeven (LTV {'>'} CAC)</span>
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded bg-emerald-200"></div> <span>50-75% (Okay)</span>
                          </div>
-                         <div className="flex items-center gap-1">
-                             <div className="w-3 h-3 rounded bg-emerald-500"></div> <span>Profitable (3x CAC)</span>
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded bg-red-200"></div> <span>&lt; 25% (High Churn)</span>
                          </div>
-                         <div className="flex items-center gap-1 ml-2">
-                             <div className="w-3 h-3 rounded border-2 border-emerald-500"></div> <span>Payback Month</span>
+                     </div>
+                 ) : (
+                     <div className="flex flex-wrap gap-6 items-center justify-center text-xs text-slate-600 dark:text-slate-400">
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded bg-red-100"></div> <span>Loss (Have not covered CAC)</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded bg-emerald-300"></div> <span>Profitable (Covered CAC)</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                             <div className="w-3 h-3 rounded border-2 border-emerald-500"></div> <span>Breakeven Moment</span>
                          </div>
                      </div>
                  )}

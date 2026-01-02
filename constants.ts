@@ -96,6 +96,8 @@ export const DEFAULT_SCENARIO: ScenarioParams = {
   expansionRate: 0.5, 
   payrollTax: 5, // MPF is lower in HK (~5% cap) but let's keep it configurable
   salaryGrowthRate: 3,
+  opexInflationRate: 3, // New: Default 3% annual inflation on software/rent
+  minChurnFloor: 0.5, // New: Safety buffer, never assume < 0.5% churn in LTV calc
   commissionRate: 10,
   paymentProcessingRate: 3.4, // Standard Stripe HK (3.4%)
   valuationMultiple: 6, 

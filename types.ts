@@ -33,6 +33,8 @@ export interface ScenarioParams {
   expansionRate: number; // Monthly upsell %
   payrollTax: number; // % overhead on salaries
   salaryGrowthRate: number; // Annual % increase in salaries
+  opexInflationRate: number; // Annual % increase in OpEx (Vendor costs)
+  minChurnFloor: number; // Minimum churn % used for LTV calculation safety buffer
   commissionRate: number; // % of New ARR paid as commission
   paymentProcessingRate: number; // % fee (e.g., Stripe) on Revenue
   valuationMultiple: number; // x ARR

@@ -1,5 +1,6 @@
 
-import { Plan, Employee, OperatingExpense, ScenarioParams, Financials, MonthlyProjection, Cohort } from "../types";
+
+import { Plan, Employee, OperatingExpense, ScenarioParams, Financials, MonthlyProjection, Cohort, CohortMetric } from "../types";
 
 export const calculateFinancials = (
   plans: Plan[],
@@ -270,7 +271,8 @@ export const calculateFinancials = (
   // We approximate the margin on Setup Fees using the Global Gross Margin (as it accounts for Payment Fees but no unit costs usually)
   const setupProfit = weightedAvgOneTimeRevenue * grossMarginPercent;
   
-  const safePaidChurn = Math.max(0.5, paidChurnRate); 
+  // SAFETY: Use minChurnFloor (default 0.5%) to prevent division by zero or infinite LTV hallucinations
+  const safePaidChurn = Math.max(params.minChurnFloor, paidChurnRate); 
   const recurringLtv = safePaidChurn > 0 ? (arppu * recurringGrossMarginPercent) / (safePaidChurn / 100) : 0;
   const ltv = setupProfit + recurringLtv;
 
@@ -505,12 +507,19 @@ export const generateProjections = (
     
     // Fixed costs (Payroll Inflation logic)
     let payroll = baseFinancials.payrollMonthly;
+    // Simple yearly compounding inflation for Payroll
     if (i > 12) payroll *= (1 + params.salaryGrowthRate/100);
     if (i > 24) payroll *= (1 + params.salaryGrowthRate/100);
     if (i > 36) payroll *= (1 + params.salaryGrowthRate/100);
     if (i > 48) payroll *= (1 + params.salaryGrowthRate/100);
 
-    const opex = baseFinancials.opexMonthly;
+    // Fixed costs (OpEx Inflation logic)
+    // New: Apply user-defined inflation to OpEx
+    let opex = baseFinancials.opexMonthly;
+    if (i > 12) opex *= (1 + params.opexInflationRate/100);
+    if (i > 24) opex *= (1 + params.opexInflationRate/100);
+    if (i > 36) opex *= (1 + params.opexInflationRate/100);
+    if (i > 48) opex *= (1 + params.opexInflationRate/100);
     
     // Sales Commissions (Cash Out)
     const commissionsArr = Math.max(0, newArrForCommissions * (params.commissionRate / 100));
@@ -553,57 +562,62 @@ export const generateProjections = (
   return { projections, breakEvenMonth };
 };
 
-export const generateCohortData = (projections: MonthlyProjection[], financials: Financials): Cohort[] => {
-  // Limit to first 12 cohorts for UI cleanliness, tracked over 12 months
-  const monthsToTrack = 12;
-  const cohortsToDisplay = projections.slice(0, 12);
-  
-  const paidChurnRate = financials.paidChurnRate / 100;
-  // Use Recurring Gross Profit per User for LTV calc
-  // Recurring Gross Margin % accounts for Payment Fees and Unit Costs
-  // ARPPU is the top line revenue per paying user
-  const monthlyGrossProfitPerUser = financials.arppu * financials.recurringGrossMarginPercent;
-  
-  // Calculate Avg One-Time Profit (Setup/Lifetime)
-  // Use Global Margin % as a proxy for One-Time Margin (accounting for Payment Fees)
-  const oneTimeGrossProfitPerUser = financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent;
-  
-  const cac = financials.cac;
+export const generateCohortData = (
+  projections: MonthlyProjection[],
+  financials: Financials
+): Cohort[] => {
+  const cohorts: Cohort[] = [];
+  const MAX_COHORT_MONTHS = 12; // Rows to display
+  const MAX_LIFETIME_MONTHS = 12; // Columns to display (M0..M12)
 
-  return cohortsToDisplay.map(proj => {
-    const acquisitionMonth = proj.month;
-    const size = Math.round(proj.newPayingSubscribers);
-    const metrics = [];
-    
-    let currentRetention = 1.0;
-    
-    // Initialize Cumulative Gross Profit with the Upfront/One-Time Profit at Month 0
-    let cumulativeGrossProfit = oneTimeGrossProfitPerUser;
+  // Use first 12 months or available months
+  const acquisitionMonths = projections.slice(0, MAX_COHORT_MONTHS);
 
-    for (let i = 0; i <= monthsToTrack; i++) {
-        // Apply Churn (starting from month 1)
-        if (i > 0) {
-             currentRetention = currentRetention * (1 - paidChurnRate);
-        }
+  acquisitionMonths.forEach((proj) => {
+    const cohortSize = proj.newPayingSubscribers;
+    const metrics: CohortMetric[] = [];
+
+    let currentRetention = 100; // %
+    let cumulativeGrossProfit = 0;
+
+    // Initial One-Time Profit (Month 0) - Setup Fees
+    // Weighted Avg One Time Revenue * Gross Margin
+    const oneTimeProfit = financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent;
+    
+    // Month 0 includes Setup Fee Profit + First Month Recurring Profit
+    // (Assuming Upfront Payment logic for simplicity in synthetic cohort)
+    cumulativeGrossProfit += oneTimeProfit;
+
+    for (let m = 0; m <= MAX_LIFETIME_MONTHS; m++) {
+      const monthlyRecurringGrossProfit = financials.arppu * financials.recurringGrossMarginPercent;
+
+      if (m > 0) {
+        // Apply Churn
+        currentRetention = currentRetention * (1 - (financials.paidChurnRate / 100));
         
-        // Add Recurring Profit for this period
-        // We assume subscription is paid at start of period. 
-        // Month 0: User pays One-Time + Month 1 Subscription
-        cumulativeGrossProfit += monthlyGrossProfitPerUser * currentRetention;
-        
-        metrics.push({
-            monthIndex: i,
-            retentionRate: currentRetention * 100,
-            cumulativeLtv: cumulativeGrossProfit,
-            isBreakeven: cumulativeGrossProfit > cac
-        });
+        // Add Recurring Profit adjusted for Retention
+        // (Probability of user being active * Profit if active)
+        cumulativeGrossProfit += (currentRetention / 100) * monthlyRecurringGrossProfit;
+      } else {
+        // Month 0: 100% Retention (Just signed up)
+        cumulativeGrossProfit += monthlyRecurringGrossProfit;
+      }
+
+      metrics.push({
+        monthIndex: m,
+        retentionRate: currentRetention,
+        cumulativeLtv: cumulativeGrossProfit,
+        isBreakeven: cumulativeGrossProfit >= financials.cac
+      });
     }
 
-    return {
-        acquisitionMonth,
-        size,
-        cac,
-        metrics
-    };
+    cohorts.push({
+      acquisitionMonth: proj.month,
+      size: Math.round(cohortSize),
+      cac: financials.cac,
+      metrics
+    });
   });
+
+  return cohorts;
 };
