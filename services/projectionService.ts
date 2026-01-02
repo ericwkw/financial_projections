@@ -161,13 +161,18 @@ export const calculateFinancials = (
             const lifetimeLiability = safeChurn > 0 ? plan.unitCost / effectiveDecayRate : 0;
             planLtv = upfrontProfit - lifetimeLiability;
         } else {
-            // SaaS LTV = SetupProfit + (MonthlyRecurringProfit / Churn%)
+            // SaaS LTV = SetupProfit + (MonthlyRecurringProfit / (Churn% + Inflation%))
             const setupProfit = plan.setupFee * marginFactor;
             
-            // Monthly Recurring Profit = (Price/mo * (1-Fees)) - UnitCost
+            // Monthly Recurring Profit (Current Snapshot)
             const monthlyRecurringProfit = (priceMonthly * marginFactor) - plan.unitCost;
             
-            const recurringLtvTerm = safeChurn > 0 ? monthlyRecurringProfit / (safeChurn / 100) : 0;
+            // CFO FIX: Add monthlyInflationRate to the denominator.
+            // Inflation acts as a "Negative Growth" on the margin, effectively increasing the 'Churn' 
+            // of the profit stream even if the user stays.
+            const effectiveChurnDenominator = (safeChurn / 100) + monthlyInflationRate;
+            
+            const recurringLtvTerm = effectiveChurnDenominator > 0 ? monthlyRecurringProfit / effectiveChurnDenominator : 0;
             planLtv = setupProfit + recurringLtvTerm;
         }
 

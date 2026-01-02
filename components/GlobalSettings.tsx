@@ -75,7 +75,10 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
 
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Annual Inflation (OpEx)</label>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                            Annual Inflation (OpEx)
+                            <Tooltip content="CRITICAL: This rate increases your future OpEx/COGS. It also reduces your LTV by simulating future margin compression." />
+                        </label>
                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.opexInflationRate}%</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Yearly increase in software, rent, and vendor costs.</p>
