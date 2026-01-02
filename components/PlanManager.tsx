@@ -55,6 +55,9 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
     } else if (plan.interval === 'yearly') {
         upfrontCash += plan.price;
     }
+    
+    // CFO SAFETY: If Global CAC is infinite (no paying users yet), show N/A
+    if (globalCac > 50000) return { months: 999, label: "N/A" };
 
     // Effective CAC is the remaining cost we need to recover via subscription
     const effectiveCac = Math.max(0, globalCac - upfrontCash);
@@ -75,16 +78,6 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
   // CFO UPDATE: Default new plans to 10 subscribers so growth formulas don't return 0.
   const handleAdd = () => {
       onAdd();
-      // NOTE: The parent component's onAdd sets subs to 0. 
-      // We should ideally update the parent's default, but we can't change parent state structure directly here 
-      // without changing App.tsx props. 
-      // HOWEVER, the user asked me to update PlanManager.tsx onAdd call in App.tsx. 
-      // Wait, I can't update App.tsx in this specific block unless I include App.tsx in the XML.
-      // I will update App.tsx in the next step or modify the onAdd prop in App.tsx. 
-      // Actually, I can just not change App.tsx if I change the logic here? 
-      // No, onAdd is passed as a void function. 
-      // I will assume the prompt allows me to change App.tsx or I will just update PlanManager to display a warning or handle it.
-      // Better yet, I will modify App.tsx as well in the XML to fix the root cause.
   };
 
   return (
@@ -115,7 +108,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
         {plans.map((plan, index) => {
           const isFree = plan.price === 0;
           const payback = getPaybackInfo(plan);
-          const isProfitable = payback.label !== "Never" && payback.label !== "Free";
+          const isProfitable = payback.label !== "Never" && payback.label !== "Free" && payback.label !== "N/A";
           const isFreeLabel = payback.label === "Free";
           const isLifetime = plan.interval === 'lifetime';
           
@@ -151,7 +144,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
                 <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Cash Flow Basis)">
                   <Clock className="w-3 h-3" />
                   <span>{payback.label}</span>
-                  {!isFreeLabel && <Tooltip position="top" content="Months needed to recover global average CAC via cash flow. Annual and lifetime prepayments count as instant recovery." width="w-56"/>}
+                  {!isFreeLabel && <Tooltip position="top" content="Months needed to recover global average CAC via cash flow. Uses Global CAC estimate." width="w-56"/>}
                 </div>
               </div>
               <div className="flex gap-2">

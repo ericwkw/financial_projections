@@ -283,39 +283,47 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
 
       </div>
 
-      {/* 4. HIDDEN MECHANICS REVEALED */}
-      <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-8 mt-8">
+      {/* 4. SYSTEM CONSTANTS & MATH LIMITS (Revealed) */}
+       <div className="bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-8 mt-8">
          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
            <Info className="w-5 h-5 text-slate-500" />
-           Hidden Logic Explained
+           System Constants & Limits (Read-Only)
          </h3>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Commission Scope</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 Commissions are paid on <strong>ALL</strong> New ARR, including Upsell/Expansion revenue.
-                 <br/><span className="text-xs opacity-70">Paid fully upfront (Month 1 of booking).</span>
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Infinite LTV Cap</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-mono text-xs">
+                 MAX_LIFESPAN = 1200 Months (100 Years)
+               </p>
+               <p className="text-[10px] text-slate-400">
+                 If Churn + Discount &lt; Inflation, cost explodes. We cap customer lifespan at 100 years to prevent math errors.
                </p>
             </div>
             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Accounting Standard</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 P&L uses <strong>Cash Basis</strong> for Commissions (expensed immediately), not GAAP Amortization.
-                 <br/><span className="text-xs opacity-70">This is a conservative "Safety First" view.</span>
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Inflation Timing</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-mono text-xs">
+                 Step Function (Annual)
+               </p>
+               <p className="text-[10px] text-slate-400">
+                 Costs jump in Month 13, 25, 37... They do not increase smoothly every month.
+               </p>
+            </div>
+            <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Commission Basis</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-mono text-xs">
+                 Cash Basis (Upfront)
+               </p>
+               <p className="text-[10px] text-slate-400">
+                 Commissions are fully expensed in Month 1 of booking, regardless of payment terms.
                </p>
             </div>
              <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Inflation Steps</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 OpEx and Salaries increase annually in a <strong>Step Function</strong> (Month 13, 25, 37...).
-                 <br/><span className="text-xs opacity-70">We do not smooth inflation monthly.</span>
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Expansion Churn</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-mono text-xs">
+                 Decay Rate = Global Paid Churn %
                </p>
-            </div>
-             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">LTV Discounting</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 <strong>WACC = {params.discountRate}%</strong>. We discount future cash flows using <strong>Churn + WACC</strong>.
-                 <br/><span className="text-xs opacity-70">Standard models often ignore WACC. We include it for rigor.</span>
+               <p className="text-[10px] text-slate-400">
+                 Expansion revenue decays at the same rate as the customer base.
                </p>
             </div>
          </div>

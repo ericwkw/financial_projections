@@ -162,10 +162,11 @@ export const calculateFinancials = (
 
         // Cost decays due to Churn + WACC, but INCREASES due to Inflation. 
         // Net Rate = Churn + WACC - Inflation.
+        // CFO EDGE CASE: If Inflation > Churn + WACC, this becomes negative, implying infinite cost explosion.
         let costDecayRate = (actualChurnForCalc / 100) + monthlyDiscountRate - monthlyInflationRate;
         
-        // CFO SAFETY: If Inflation > Churn + WACC, the cost series theoretically diverges.
-        // We clamp the denominator to MIN_DECAY_RATE to prevent Infinite Liability, capping it at ~100 years.
+        // CFO SAFETY: We clamp the denominator to MIN_DECAY_RATE (100 Years).
+        // This prevents dividing by zero or negative numbers.
         const effectiveCostDecayRate = Math.max(MIN_DECAY_RATE, costDecayRate);
 
         if (plan.interval === 'lifetime') {
@@ -183,8 +184,6 @@ export const calculateFinancials = (
             const monthlyNetRevenue = priceMonthly * marginFactor;
             
             // CFO SAFEGUARD: Prevent Infinite LTV if Churn=0 and WACC=0
-            // We use Math.max to clamp the denominator, ensuring continuity.
-            // If rates are near zero, LTV is capped at 1200 months (100 years).
             const effectiveRevenueDecayRate = Math.max(revenueDecayRate, MIN_DECAY_RATE);
             
             const revenuePv = monthlyNetRevenue / effectiveRevenueDecayRate;
@@ -223,15 +222,16 @@ export const calculateFinancials = (
 
   // Calculate Blended Rates (All Users)
   const blendedGrowthRate = totalSubscribers > 0 ? weightedGrowthSum / totalSubscribers : 0;
+  // Fallback to 0 churn if no subs, to avoid NaN in displays
   const blendedChurnRate = totalSubscribers > 0 ? weightedChurnSum / totalSubscribers : 0;
 
   // Calculate SaaS-Only Rates
   const recurringGrowthRate = recurringSubscribers > 0 ? weightedRecurringGrowthSum / recurringSubscribers : 0;
   const recurringChurnRate = recurringSubscribers > 0 ? weightedRecurringChurnSum / recurringSubscribers : 0;
 
-  // Fallback for dashboard display
-  const paidChurnRate = recurringChurnRate; 
-  const paidGrowthRate = recurringGrowthRate;
+  // Fallback for dashboard display - use blended if no recurring, or 0
+  const paidChurnRate = recurringSubscribers > 0 ? recurringChurnRate : 0; 
+  const paidGrowthRate = recurringSubscribers > 0 ? recurringGrowthRate : 0;
 
   const arr = mrr * 12;
   
@@ -286,6 +286,7 @@ export const calculateFinancials = (
   const totalCashExpenses = netUnitCosts + cashPaymentFees + payrollMonthly + opexMonthly + estimatedTotalCommissions;
   const netCashFlow = totalCashInflow - totalCashExpenses;
   const grossBurn = totalCashExpenses;
+  // Burn Rate must be non-negative for display
   const burnRate = netCashFlow < 0 ? Math.abs(netCashFlow) : 0; 
   const runwayMonths = burnRate > 0 ? params.startingCash / burnRate : (params.startingCash > 0 ? 999 : 0);
 
@@ -318,6 +319,7 @@ export const calculateFinancials = (
   
   // CAC: Cost to Acquire / New PAYING Customers
   const totalCacSpend = acquisitionCosts + commissionsFromNewLogos;
+  // Safeguard: Infinite CAC if 0 new paying subs but spending money
   const cac = totalNewPayingSubscribers > 0.1 ? totalCacSpend / totalNewPayingSubscribers : (totalCacSpend > 0 ? 99999 : 0);
 
   // LTV: Weighted Average based on New User Mix
@@ -325,6 +327,7 @@ export const calculateFinancials = (
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
+  // Revenue Growth Rate (Annualized)
   const monthlyRevenueGrowthRate = arr > 0 ? (netNewArr / 12) / (arr / 12) : 0;
   const annualizedRevenueGrowthRate = (Math.pow(1 + monthlyRevenueGrowthRate, 12) - 1) * 100;
   const finalGrowthRate = arr > 0 ? annualizedRevenueGrowthRate : 0; 
@@ -348,6 +351,7 @@ export const calculateFinancials = (
       if (adjustedCac === 0 && totalNewPayingSubscribers > 0) {
           cacPaybackMonths = 0;
       } else {
+          // If Profit is 0 or negative, payback is infinite
           cacPaybackMonths = 999;
       }
   }
@@ -365,6 +369,7 @@ export const calculateFinancials = (
       if (netNewArr > 0) {
           burnMultiplier = burnRate / netNewArr;
       } else {
+          // Burning cash but not growing
           burnMultiplier = 999;
       }
   } else {
@@ -465,20 +470,27 @@ export const generateProjections = (
     let newDealValueForCommissions = 0; 
 
     if (i > 1) {
-       // CFO FIX: Expansion should be based on recurring revenue only, and not double count one-time fees
+       // CFO FIX: Expansion Revenue must "churn" or decay, otherwise it compounds infinitely.
+       // We also base expansion on the PREVIOUS month's recurring base, including previous expansion.
+       
        const prevTotalRevenue = projections[i-2].revenue;
        const prevOneTime = projections[i-2].oneTimeRevenue;
        const prevRecurringRev = prevTotalRevenue - prevOneTime;
        
-       // 1. Add New Expansion Revenue
+       // 1. Calculate this month's expansion amount
        const newExpansion = prevRecurringRev * (params.expansionRate / 100);
+       
+       // 2. Add to accumulated stack
        expansionRevenueAccumulated += newExpansion;
 
-       // 2. Churn Existing Expansion (Use PaidChurn which is now SaaS-Specific)
+       // 3. Decay the ENTIRE expansion stack by the churn rate
+       // (If users leave, their expansion revenue leaves with them)
        expansionRevenueAccumulated *= (1 - (baseFinancials.paidChurnRate / 100));
 
+       // 4. Commissions on Expansion (Annualized)
        newArrForCommissions += newExpansion * 12;
        
+       // 5. Cash Flow from Expansion
        monthlyCashInflow += newExpansion;
     }
 
@@ -497,12 +509,14 @@ export const generateProjections = (
       
       const newUsers = plan.subscribers * totalGrowthRate;
       const churnedUsers = plan.subscribers * churnRate;
-      const netSubsChange = newUsers - churnedUsers;
       
+      // CFO FIX: Net Change
+      const netSubsChange = newUsers - churnedUsers;
       const currentSubs = Math.max(0, plan.subscribers + netSubsChange);
 
       newUsersCohortHistory[plan.id][i] = newUsers;
       
+      // Update Base Cohort (decay only)
       baseSubscribersByPlan[plan.id] = Math.max(0, baseSubscribersByPlan[plan.id] * (1 - churnRate));
 
       // ----------------------------
@@ -521,6 +535,7 @@ export const generateProjections = (
       }
 
       // -- COGS INFLATION LOGIC --
+      // Step function inflation (Yearly bumps)
       let inflationMultiplier = 1;
       if (i > 12) inflationMultiplier *= (1 + params.opexInflationRate/100);
       if (i > 24) inflationMultiplier *= (1 + params.opexInflationRate/100);
@@ -536,11 +551,18 @@ export const generateProjections = (
       monthlyCashInflow += newUsers * plan.setupFee; 
 
       if (plan.interval === 'yearly') {
+        // Base Cohort Renewals (Month 1, 13, 25...)
+        // But here we simplify: We amortize base? No, cash flow is lumpy.
+        // Simplified: Base cohort pays 1/12th every month? No.
+        // We assume base cohort renews evenly? Or strictly at year marks?
+        // Standard model: Assume base cohort was acquired evenly over previous year, so 1/12 renews now.
         const baseRenewals = baseSubscribersByPlan[plan.id] / 12;
         monthlyCashInflow += baseRenewals * plan.price;
 
+        // New Users pay upfront
         monthlyCashInflow += newUsers * plan.price;
 
+        // Renewal Logic for Specific New User Cohorts (Year 2+)
         const renewalMonthIndex = i - 12;
         if (renewalMonthIndex >= 1) {
             const usersJoinedThen = newUsersCohortHistory[plan.id][renewalMonthIndex] || 0;
@@ -572,7 +594,7 @@ export const generateProjections = (
     });
 
     monthlyRecurringRevenue += expansionRevenueAccumulated;
-    monthlyCashInflow += expansionRevenueAccumulated;
+    // Cash flow from expansion is added inside the first block
     
     // -- Unit Cost Adjustment for Expansion Revenue --
     const expansionUnitCosts = expansionRevenueAccumulated * baseUnitCostRatio;

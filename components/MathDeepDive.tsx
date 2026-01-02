@@ -164,12 +164,14 @@ const MathDeepDive: React.FC = () => {
                 </div>
               </div>
               <div className="col-span-1 md:col-span-2 mt-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-100 dark:border-amber-800/30">
-                 <h5 className="font-bold text-sm text-amber-800 dark:text-amber-400 mb-2">Churn-Adjusted Expansion Revenue</h5>
-                 <p className="font-mono text-xs text-amber-900/80 dark:text-amber-300/80">
-                   1. Expansion Revenue decays by PaidChurn% monthly.
+                 <h5 className="font-bold text-sm text-amber-800 dark:text-amber-400 mb-2">The "Infinite LTV" Problem</h5>
+                 <p className="font-mono text-xs text-amber-900/80 dark:text-amber-300/80 mb-2">
+                   What if Churn is 0% and I have no Inflation?
                  </p>
-                 <p className="text-[10px] text-amber-800/60 dark:text-amber-400/60 mt-2">
-                   <strong>Why?</strong> Upsold revenue isn't permanent. If a customer churns, their expansion revenue disappears too. We model this decay to prevent unrealistic "Hockey Stick" charts.
+                 <p className="text-[10px] text-amber-800/60 dark:text-amber-400/60">
+                   Mathematically, LTV would be Infinity. This crashes computers. 
+                   <br/><strong>Solution:</strong> We cap customer lifespan at 100 years (1200 months). 
+                   If your Churn is extremely low, your LTV will be huge, but not infinite.
                  </p>
               </div>
            </div>
