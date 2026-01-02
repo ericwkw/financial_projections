@@ -75,8 +75,8 @@ export const calculateFinancials = (
     
     // Growth Logic for Snapshot
     const growth = plan.monthlyGrowth || 0;
-    // Lifetime plans don't churn revenue-wise (Single Upfront Payment).
-    const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
+    // CFO UPDATE: Allow churn on Lifetime plans (Activity Churn) to reduce COGS
+    const churn = plan.monthlyChurn || 0;
     
     // Effective Growth = Plan Growth * Marketing Efficiency + Viral Rate
     const effectiveGrowthRate = (growth * params.marketingEfficiency) + params.viralRate;
@@ -439,7 +439,8 @@ export const generateProjections = (
       // 1. GROWTH & CHURN LOGIC
       // ----------------------------
       const growth = plan.monthlyGrowth || 0;
-      const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
+      // CFO UPDATE: Enable Churn for Lifetime Plans to reduce Unit Costs
+      const churn = plan.monthlyChurn || 0;
 
       const planGrowth = growth * params.marketingEfficiency;
       const viralGrowth = params.viralRate; 
