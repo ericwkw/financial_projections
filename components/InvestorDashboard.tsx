@@ -126,7 +126,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
            <FinancialCharts financials={financials} plans={plans} projections={projections} darkMode={darkMode} />
         </div>
         <div className="xl:col-span-1 h-full">
-           <GeminiAdvisor state={state} />
+           <GeminiAdvisor state={state} projections={projections} />
         </div>
       </div>
 

@@ -1,15 +1,16 @@
 
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { SimulationState } from '../types';
+import { SimulationState, MonthlyProjection } from '../types';
 import { analyzeFinancials } from '../services/geminiService';
 import { BrainCircuit, Loader2 } from './Icons';
 
 interface GeminiAdvisorProps {
   state: SimulationState;
+  projections?: MonthlyProjection[]; // New prop to see the future
 }
 
-const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state }) => {
+const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state, projections }) => {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +18,8 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ state }) => {
     setLoading(true);
     setAnalysis(null);
     try {
-      const result = await analyzeFinancials(state);
+      // Pass projections if available, otherwise empty array (fallback)
+      const result = await analyzeFinancials(state, projections || []);
       setAnalysis(result);
     } catch (e) {
       setAnalysis("An error occurred while contacting the financial advisor.");
