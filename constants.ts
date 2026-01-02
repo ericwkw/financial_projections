@@ -105,6 +105,7 @@ export const DEFAULT_SCENARIO: ScenarioParams = {
   paymentProcessingRate: 3.4, // Standard Stripe HK (3.4%)
   valuationMultiple: 6, 
   founderEquity: 80, 
+  discountRate: 10, // 10% WACC (Standard Risk Rate for SaaS)
 };
 
 export const GEMINI_MODEL = 'gemini-2.5-flash';

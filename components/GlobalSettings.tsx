@@ -234,6 +234,20 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                     />
                 </div>
 
+                 <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Discount Rate (WACC)</label>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.discountRate}%</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Cost of Capital. Higher rate = Lower LTV.</p>
+                    <input
+                        type="range" min="0" max="25" step="0.5"
+                        value={params.discountRate}
+                        onChange={(e) => onChange('discountRate', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                </div>
+
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Founder Equity</label>
@@ -296,8 +310,8 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
              <div className="space-y-2">
                <h4 className="font-semibold text-slate-700 dark:text-slate-300">LTV Discounting</h4>
                <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 <strong>WACC = 0%</strong>. We discount future cash flows using <strong>Churn Only</strong>.
-                 <br/><span className="text-xs opacity-70">We assume Churn Risk ({'>'}5%) dominates Interest Rate Risk (~3%).</span>
+                 <strong>WACC = {params.discountRate}%</strong>. We discount future cash flows using <strong>Churn + WACC</strong>.
+                 <br/><span className="text-xs opacity-70">Standard models often ignore WACC. We include it for rigor.</span>
                </p>
             </div>
          </div>

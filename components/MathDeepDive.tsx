@@ -44,15 +44,15 @@ const MathDeepDive: React.FC = () => {
              <div>
                <div className="flex justify-between items-baseline mb-2">
                  <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">LTV (Lifetime Value)</h4>
-                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Split PV Method</span>
+                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Discounted Split PV Method</span>
                </div>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto space-y-2">
-                 <div className="font-bold border-b pb-1">We treat Revenue and Costs separately:</div>
+                 <div className="font-bold border-b pb-1">We discount future cash flows by Risk (WACC) and Churn:</div>
                  <div>
-                   1. <span className="font-bold">PV(Revenue)</span> = MonthlyRevenue / Churn
+                   1. <span className="font-bold">PV(Revenue)</span> = MonthlyRevenue / (Churn + WACC)
                  </div>
                  <div>
-                   2. <span className="font-bold">PV(Cost)</span> = MonthlyCost / (Churn - Inflation)
+                   2. <span className="font-bold">PV(Cost)</span> = MonthlyCost / (Churn + WACC - Inflation)
                  </div>
                  <div className="font-bold pt-1 text-emerald-600 dark:text-emerald-400">
                     LTV = Setup Fees + PV(Revenue) - PV(Cost)

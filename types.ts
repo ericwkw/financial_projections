@@ -40,6 +40,7 @@ export interface ScenarioParams {
   paymentProcessingRate: number; // % fee (e.g., Stripe) on Revenue
   valuationMultiple: number; // x ARR
   founderEquity: number; // % Ownership
+  discountRate: number; // Annual Discount Rate (WACC) for LTV calculations
 }
 
 export interface Financials {

@@ -53,6 +53,9 @@ export const calculateFinancials = (
   // CFO MATH: Calculate Monthly Inflation Rate for DCF Cost Modeling
   // Annual Rate -> Monthly Rate: (1 + r)^(1/12) - 1
   const monthlyInflationRate = Math.pow(1 + params.opexInflationRate / 100, 1/12) - 1;
+  
+  // CFO MATH: Calculate Monthly Discount Rate (WACC) for PV calculations
+  const monthlyDiscountRate = Math.pow(1 + params.discountRate / 100, 1/12) - 1;
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
@@ -138,37 +141,39 @@ export const calculateFinancials = (
         // For Efficiency Metrics (Net New ARR - Dollar based)
         netNewArrReal += netAddedUsers * planArrValue;
 
-        // --- CFO LTV CALCULATION PER PLAN (Advanced Split PV Method) ---
+        // --- CFO LTV CALCULATION PER PLAN (Discounted PV Method) ---
         let planLtv = 0;
         const marginFactor = 1 - (params.paymentProcessingRate / 100);
         const safeChurn = Math.max(params.minChurnFloor, churn); 
         
-        // Setup Profit (Immediate Cash)
+        // Setup Profit (Immediate Cash, no discount needed)
         const setupProfit = plan.setupFee * marginFactor;
 
-        // Effective Decay Rate for Costs
-        // Cost Liability PV = Cost / (Churn - Inflation)
-        // If Churn > Inflation, this converges.
-        // If Churn <= Inflation, liability is theoretically infinite. We clamp to a minimum decay (e.g. 0.1%) 
-        // effectively capping the liability horizon at ~80 years to prevent math errors.
-        let effectiveDecayRate = (safeChurn / 100) - monthlyInflationRate;
-        effectiveDecayRate = Math.max(0.001, effectiveDecayRate);
+        // Discounted Decay Rates
+        // Revenue decays due to Churn + WACC
+        const revenueDecayRate = (safeChurn / 100) + monthlyDiscountRate;
+
+        // Cost decays due to Churn + WACC, but INCREASES due to Inflation. 
+        // Net Rate = Churn + WACC - Inflation.
+        let costDecayRate = (safeChurn / 100) + monthlyDiscountRate - monthlyInflationRate;
+        costDecayRate = Math.max(0.001, costDecayRate); // Clamp to prevent div by zero or negative infinite cost
 
         if (plan.interval === 'lifetime') {
-            // Lifetime LTV = Upfront Price - Cost Liability
+            // Lifetime LTV = Upfront Price - Discounted Cost Liability
             const upfrontRevenue = plan.price * marginFactor;
-            const costLiability = plan.unitCost / effectiveDecayRate;
+            // For lifetime, churn is "activity churn" (stops cost), but revenue is already collected.
+            // So we only discount the cost stream.
+            const costLiability = plan.unitCost / costDecayRate;
             
             planLtv = setupProfit + upfrontRevenue - costLiability;
         } else {
             // SaaS LTV = Setup + PV(Recurring Revenue) - PV(Recurring Cost)
-            // Revenue assumes flat pricing (Nominal LTV) -> PV = Rev / Churn
-            // Cost assumes inflation (Rising Cost) -> PV = Cost / (Churn - Inflation)
+            // PV = MonthlyAmount / Rate
             
             const monthlyNetRevenue = priceMonthly * marginFactor;
-            const revenuePv = monthlyNetRevenue / (safeChurn / 100);
+            const revenuePv = revenueDecayRate > 0 ? monthlyNetRevenue / revenueDecayRate : 0;
             
-            const costPv = plan.unitCost / effectiveDecayRate;
+            const costPv = plan.unitCost / costDecayRate;
             
             planLtv = setupProfit + (revenuePv - costPv);
         }
@@ -445,10 +450,13 @@ export const generateProjections = (
     let newDealValueForCommissions = 0; 
 
     if (i > 1) {
-       const prevRevenue = projections[i-2].revenue - projections[i-2].oneTimeRevenue; 
+       // CFO FIX: Expansion should be based on recurring revenue only, and not double count one-time fees
+       const prevTotalRevenue = projections[i-2].revenue;
+       const prevOneTime = projections[i-2].oneTimeRevenue;
+       const prevRecurringRev = prevTotalRevenue - prevOneTime;
        
        // 1. Add New Expansion Revenue
-       const newExpansion = prevRevenue * (params.expansionRate / 100);
+       const newExpansion = prevRecurringRev * (params.expansionRate / 100);
        expansionRevenueAccumulated += newExpansion;
 
        // 2. Churn Existing Expansion (Use PaidChurn which is now SaaS-Specific)
