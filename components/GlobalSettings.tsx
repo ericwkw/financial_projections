@@ -110,23 +110,6 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
             </h3>
             
             <div className="space-y-6">
-                 <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-1">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">LTV Safety Floor (Churn)</label>
-                            <Tooltip content="Minimum churn rate used for LTV calculations. Prevents LTV from becoming infinite if churn is 0%. A standard safety buffer is 0.5%." />
-                        </div>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.minChurnFloor}%</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">The lowest churn allowed in math models (Safety Buffer).</p>
-                    <input
-                        type="range" min="0.1" max="2.0" step="0.1"
-                        value={params.minChurnFloor}
-                        onChange={(e) => onChange('minChurnFloor', parseFloat(e.target.value))}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                </div>
-
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Marketing Efficiency</label>
@@ -137,6 +120,51 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                         type="range" min="0.5" max="2.0" step="0.1"
                         value={params.marketingEfficiency}
                         onChange={(e) => onChange('marketingEfficiency', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Viral Referrals</label>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.viralRate}%</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Organic growth: % of users who invite a friend monthly.</p>
+                    <input
+                        type="range" min="0" max="5" step="0.1"
+                        value={params.viralRate}
+                        onChange={(e) => onChange('viralRate', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                </div>
+
+                 <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Upsell / Expansion</label>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.expansionRate}%</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Monthly % revenue increase from existing customers.</p>
+                    <input
+                        type="range" min="0" max="5" step="0.1"
+                        value={params.expansionRate}
+                        onChange={(e) => onChange('expansionRate', parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                </div>
+
+                 <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-1">
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">LTV Safety Floor</label>
+                            <Tooltip content="Minimum churn rate used for LTV calculations. Prevents LTV from becoming infinite if churn is 0%. A standard safety buffer is 0.5%." />
+                        </div>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.minChurnFloor}%</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Minimum churn % assumed for LTV math.</p>
+                    <input
+                        type="range" min="0.1" max="2.0" step="0.1"
+                        value={params.minChurnFloor}
+                        onChange={(e) => onChange('minChurnFloor', parseFloat(e.target.value))}
                         className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
                 </div>
