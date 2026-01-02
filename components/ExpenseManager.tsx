@@ -19,7 +19,7 @@ const ExpenseManager: React.FC<ExpenseManagerProps> = ({ expenses, onAdd, onUpda
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Fixed Operating Expenses</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center">
             Costs that don't scale automatically per user.
-            <Tooltip content="Fixed monthly costs (e.g. base server fees, rent, software subscriptions). Do not put variable per-user costs (COGS) or payment fees here." />
+            <Tooltip content="Fixed monthly costs that do not scale per user (e.g. rent, software subscriptions). Do not include variable COGS or payment fees here." />
           </p>
         </div>
         <button

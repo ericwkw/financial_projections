@@ -27,6 +27,14 @@ export const calculateFinancials = (
   // Track New ARR for Commission Estimation & Efficiency Metrics
   let impliedNewArrMonthly = 0; 
   let netNewArrReal = 0; 
+  
+  // Track New Recurring Revenue & Costs from Growth (Snapshot Consistency)
+  let newMrrFromGrowth = 0;
+  let newUnitCostsFromGrowth = 0;
+
+  // Track Churned Revenue & Costs (Snapshot Consistency)
+  let churnedMrr = 0;
+  let churnedUnitCosts = 0;
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
@@ -71,6 +79,15 @@ export const calculateFinancials = (
     const newUsers = Math.max(0, plan.subscribers * (effectiveGrowthRate / 100));
     const churnedUsers = plan.subscribers * (effectiveChurnRate / 100);
     const netAddedUsers = newUsers - churnedUsers;
+
+    // Calculate New Recurring Revenue/Cost from New Users (for P&L Consistency)
+    // If we count commissions/setup fees from new users, we must also count their MRR and Unit Cost impact.
+    if (isPaid) {
+        newMrrFromGrowth += newUsers * priceMonthly;
+        churnedMrr += churnedUsers * priceMonthly;
+    }
+    newUnitCostsFromGrowth += newUsers * plan.unitCost;
+    churnedUnitCosts += churnedUsers * plan.unitCost;
 
     if (isPaid) {
         // For Paid Growth Rate (User count based)
@@ -125,14 +142,16 @@ export const calculateFinancials = (
   const expansionUnitCost = impliedExpansionMrr * baseUnitCostRatio;
   
   // -- Total Revenue for Fee Calc --
-  const totalRevenue = mrr + oneTimeRevenueMonthly + impliedExpansionMrr;
+  // Includes Base MRR - Churned MRR + New MRR + One-Time + Expansion
+  const totalRevenue = mrr - churnedMrr + newMrrFromGrowth + oneTimeRevenueMonthly + impliedExpansionMrr;
 
   // -- Payment Processing Fees --
   // Calculated on Total Revenue (MRR + Setup + Expansion)
   const paymentFees = totalRevenue * (params.paymentProcessingRate / 100);
 
   // -- Final COGS --
-  const finalTotalCogs = totalUnitCosts + expansionUnitCost + paymentFees;
+  // Includes Base Unit Costs - Churned + New + Expansion + Fees
+  const finalTotalCogs = totalUnitCosts - churnedUnitCosts + newUnitCostsFromGrowth + expansionUnitCost + paymentFees;
 
   const grossProfit = totalRevenue - finalTotalCogs; 
   const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
@@ -171,6 +190,9 @@ export const calculateFinancials = (
 
   // 5. Totals
   const totalExpenses = finalTotalCogs + payrollMonthly + opexMonthly + estimatedTotalCommissions;
+  
+  // Net Income (P&L View)
+  // Revenue - COGS - Payroll - OpEx - Commissions
   const netMonthly = totalRevenue - totalExpenses;
   
   const profitMargin = totalRevenue > 0 ? (netMonthly / totalRevenue) * 100 : 0;
