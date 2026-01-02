@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Plan } from '../types';
-import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, Clock } from './Icons';
+import { Trash2, Plus, Users, DollarSign, BrainCircuit, Wand2, Clock, FileText } from './Icons';
 import Tooltip from './Tooltip';
 import CostEstimatorModal from './CostEstimatorModal';
 
@@ -272,6 +272,20 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
               >
                 <Trash2 className="w-5 h-5" />
               </button>
+            </div>
+            
+            {/* Description - Col Span 12 */}
+            <div className="md:col-span-12 space-y-2 pt-2">
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
+                <FileText className="w-3 h-3" /> Description
+              </label>
+              <textarea
+                value={plan.description || ''}
+                onChange={(e) => onUpdate(plan.id, 'description', e.target.value)}
+                className="w-full px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white font-medium bg-white dark:bg-slate-950 placeholder-slate-400 text-sm"
+                placeholder="Describe plan features..."
+                rows={2}
+              />
             </div>
 
           </div>

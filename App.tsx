@@ -361,7 +361,7 @@ const App: React.FC = () => {
                    plans={plans} 
                    globalCac={financials.cac}
                    paymentProcessingRate={scenarioParams.paymentProcessingRate}
-                   onAdd={() => setPlans([...plans, { id: Date.now().toString(), name: 'New Plan', price: 0, setupFee: 0, unitCost: 0, interval: 'monthly', subscribers: 0, monthlyGrowth: 5, monthlyChurn: 5 }])} 
+                   onAdd={() => setPlans([...plans, { id: Date.now().toString(), name: 'New Plan', description: '', price: 0, setupFee: 0, unitCost: 0, interval: 'monthly', subscribers: 0, monthlyGrowth: 5, monthlyChurn: 5 }])} 
                    onUpdate={(id, f, v) => updateItem(setPlans, id, f, v)} 
                    onDelete={(id) => deleteItem(setPlans, id)} 
                  />

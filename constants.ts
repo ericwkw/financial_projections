@@ -5,6 +5,7 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '1',
     name: 'Basic',
+    description: 'Entry-level plan for individual users. Includes core features with limited usage limits.',
     price: 78, // ~10 USD
     setupFee: 0,
     unitCost: 8, // ~1 USD
@@ -16,6 +17,7 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '2',
     name: 'Pro',
+    description: 'Designed for professionals. Includes advanced analytics, priority support, and higher usage caps.',
     price: 238, // ~30 USD
     setupFee: 0,
     unitCost: 40, // ~5 USD
@@ -27,6 +29,7 @@ export const INITIAL_PLANS: Plan[] = [
   {
     id: '3',
     name: 'Enterprise',
+    description: 'Full-featured solution for large teams. Includes SSO, SLA, and dedicated account manager.',
     price: 3888, // ~500 USD
     setupFee: 8000, // ~1000 USD
     unitCost: 400, // ~50 USD

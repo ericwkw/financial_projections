@@ -2,6 +2,7 @@
 export interface Plan {
   id: string;
   name: string;
+  description?: string; // Optional description for the plan
   price: number; // Price to customer
   setupFee: number; // One-time implementation fee
   unitCost: number; // COGS per user (e.g. LLM tokens)
