@@ -10,7 +10,7 @@ export const calculateFinancials = (
   // 1. Current MRR, COGS (Variable), Subscriber Count
   let mrr = 0;
   let totalUnitCosts = 0; // Total Variable Costs (All users)
-  let recurringUnitCosts = 0; // Variable Costs for Recurring Users ONLY (For LTV Margin)
+  let recurringUnitCosts = 0; // Variable Costs for Recurring Users ONLY
   
   let totalSubscribers = 0;
   let payingSubscribers = 0; // All who paid at least once
@@ -22,7 +22,7 @@ export const calculateFinancials = (
   let weightedGrowthSum = 0;
   let weightedChurnSum = 0;
 
-  // Track weighted averages for Recurring SaaS Users Only (For LTV)
+  // Track weighted averages for Recurring SaaS Users Only
   let weightedRecurringGrowthSum = 0;
   let weightedRecurringChurnSum = 0;
 
@@ -46,6 +46,9 @@ export const calculateFinancials = (
   // -- CASH FLOW TRACKING --
   let cashInflowFromNewUsers = 0;
   let cashInflowFromRenewals = 0;
+
+  // -- LTV WEIGHTING ACCUMULATORS --
+  let weightedLtvSum = 0;
 
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
@@ -74,7 +77,6 @@ export const calculateFinancials = (
       
       if (isRecurring) {
           recurringSubscribers += plan.subscribers;
-          // Only count recurring users for the Expansion Cost Proxy
           recurringUnitCosts += plan.unitCost * plan.subscribers;
       }
     }
@@ -131,6 +133,30 @@ export const calculateFinancials = (
 
         // For Efficiency Metrics (Net New ARR - Dollar based)
         netNewArrReal += netAddedUsers * planArrValue;
+
+        // --- CFO LTV CALCULATION PER PLAN ---
+        let planLtv = 0;
+        const marginFactor = 1 - (params.paymentProcessingRate / 100);
+        const safeChurn = Math.max(params.minChurnFloor, churn); 
+
+        if (plan.interval === 'lifetime') {
+            // Lifetime LTV = (Upfront Price - Fees) - (Monthly Cost / Activity Churn%)
+            // This subtracts the liability of hosting them forever.
+            const upfrontProfit = (plan.price + plan.setupFee) * marginFactor;
+            const lifetimeLiability = safeChurn > 0 ? plan.unitCost / (safeChurn / 100) : 0;
+            planLtv = upfrontProfit - lifetimeLiability;
+        } else {
+            // SaaS LTV = SetupProfit + (MonthlyRecurringProfit / Churn%)
+            const setupProfit = plan.setupFee * marginFactor;
+            
+            // Monthly Recurring Profit = (Price/mo * (1-Fees)) - UnitCost
+            const monthlyRecurringProfit = (priceMonthly * marginFactor) - plan.unitCost;
+            
+            const recurringLtvTerm = safeChurn > 0 ? monthlyRecurringProfit / (safeChurn / 100) : 0;
+            planLtv = setupProfit + recurringLtvTerm;
+        }
+
+        weightedLtvSum += planLtv * newUsers;
     }
 
     // -- ACCRUAL ONE-TIME REVENUE --
@@ -162,12 +188,11 @@ export const calculateFinancials = (
   const blendedGrowthRate = totalSubscribers > 0 ? weightedGrowthSum / totalSubscribers : 0;
   const blendedChurnRate = totalSubscribers > 0 ? weightedChurnSum / totalSubscribers : 0;
 
-  // Calculate SaaS-Only Rates (For LTV)
-  // CFO FIX: Use recurringSubscribers denom to prevent dilution from Lifetime users
+  // Calculate SaaS-Only Rates
   const recurringGrowthRate = recurringSubscribers > 0 ? weightedRecurringGrowthSum / recurringSubscribers : 0;
   const recurringChurnRate = recurringSubscribers > 0 ? weightedRecurringChurnSum / recurringSubscribers : 0;
 
-  // Fallback for dashboard display: "Paid Churn" usually implies Recurring Churn for SaaS
+  // Fallback for dashboard display
   const paidChurnRate = recurringChurnRate; 
   const paidGrowthRate = recurringGrowthRate;
 
@@ -238,7 +263,6 @@ export const calculateFinancials = (
   const grossMarginPercent = totalAccrualRevenue > 0 ? (grossProfit / totalAccrualRevenue) : 0;
 
   // Recurring Gross Margin (Strictly for LTV)
-  // CFO FIX: Use recurringUnitCosts instead of totalUnitCosts to avoid Lifetime plans dragging down margin
   const recurringPaymentFees = (mrr + impliedExpansionMrr) * (params.paymentProcessingRate / 100);
   const recurringCogs = (recurringUnitCosts + expansionUnitCost) + recurringPaymentFees;
 
@@ -247,8 +271,7 @@ export const calculateFinancials = (
 
   const arpu = totalSubscribers > 0 ? mrr / totalSubscribers : 0;
   
-  // CFO FIX: SaaS-only ARPPU (Recurring Revenue / Recurring Subs)
-  // This prevents $0/mo Lifetime users from artificially lowering the ARPU used for LTV calc
+  // SaaS-only ARPPU (Recurring Revenue / Recurring Subs)
   const recurringArppu = recurringSubscribers > 0 ? mrr / recurringSubscribers : 0;
   
   // General ARPPU for display (includes all paying)
@@ -260,18 +283,8 @@ export const calculateFinancials = (
   const totalCacSpend = acquisitionCosts + commissionsFromNewLogos;
   const cac = totalNewPayingSubscribers > 0.1 ? totalCacSpend / totalNewPayingSubscribers : (totalCacSpend > 0 ? 99999 : 0);
 
-  // Weighted Avg One-Time Revenue per New Paying User
-  const weightedAvgOneTimeRevenue = totalNewPayingSubscribers > 0 ? (paidOneTimeRevenueAccrual / totalNewPayingSubscribers) : 0;
-
-  // LTV: Use RECURRING Churn & RECURRING Margin & RECURRING ARPU
-  // CFO FIX: Setup Profit should NOT use Global Gross Margin (which includes server costs).
-  // Setup Fees are usually pure margin minus Payment Fees.
-  const setupMarginPercent = 1 - (params.paymentProcessingRate / 100);
-  const setupProfit = weightedAvgOneTimeRevenue * setupMarginPercent;
-  
-  const safePaidChurn = Math.max(params.minChurnFloor, recurringChurnRate); 
-  const recurringLtv = safePaidChurn > 0 ? (recurringArppu * recurringGrossMarginPercent) / (safePaidChurn / 100) : 0;
-  const ltv = setupProfit + recurringLtv;
+  // LTV: Weighted Average based on New User Mix
+  const ltv = totalNewPayingSubscribers > 0 ? weightedLtvSum / totalNewPayingSubscribers : 0;
 
   const ltvCacRatio = cac > 0 ? ltv / cac : 0;
   
@@ -281,8 +294,6 @@ export const calculateFinancials = (
   const ruleOf40 = finalGrowthRate + profitMargin; 
   
   // NRR = Annualized Net Revenue Retention
-  // Formula: (1 + Expansion% - Churn%) ^ 12
-  // We use monthly rates to project the annual retention of a cohort
   const monthlyNetRetention = 1 + (params.expansionRate - recurringChurnRate) / 100;
   const nrr = Math.pow(monthlyNetRetention, 12) * 100;
 
@@ -304,6 +315,14 @@ export const calculateFinancials = (
       }
   }
 
+  // Blended Recurring Profit (For Cohorts)
+  // This calculates the true recurring profit drag from ALL users (SaaS + LTD)
+  // Formula: (SaaS Revenue - All Variable Costs) / All Paying Users
+  // Note: 'mrr' is purely SaaS revenue. 'totalUnitCosts' includes LTD server costs.
+  const blendedRecurringProfitPerUser = payingSubscribers > 0 
+    ? (mrr - totalUnitCosts - (mrr * params.paymentProcessingRate / 100)) / payingSubscribers
+    : 0;
+
   const monthlyAcquisitionTotal = acquisitionCosts + estimatedTotalCommissions;
   const magicNumber = monthlyAcquisitionTotal > 0 ? netNewArr / monthlyAcquisitionTotal : 0;
 
@@ -317,6 +336,9 @@ export const calculateFinancials = (
   } else {
       burnMultiplier = 0;
   }
+
+  // Weighted Avg One-Time Revenue (For Display)
+  const weightedAvgOneTimeRevenue = totalNewPayingSubscribers > 0 ? (paidOneTimeRevenueAccrual / totalNewPayingSubscribers) : 0;
 
   return {
     mrr,
@@ -336,7 +358,7 @@ export const calculateFinancials = (
     valuation,
     founderValue,
     arpu,
-    arppu, // General blended ARPPU
+    arppu,
     cac,
     ltv,
     ltvCacRatio,
@@ -355,7 +377,8 @@ export const calculateFinancials = (
     blendedGrowthRate,
     blendedChurnRate,
     paidGrowthRate,
-    paidChurnRate // Now SaaS-Only Churn Rate
+    paidChurnRate,
+    blendedRecurringProfitPerUser // New Metric
   };
 };
 
@@ -388,7 +411,6 @@ export const generateProjections = (
   // Calculate Base Unit Cost Ratio for Expansion Proxy
   const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : (p.interval === 'lifetime' ? 0 : p.price)) * p.subscribers, 0);
   
-  // CFO FIX: Base Unit Costs should only include recurring plans to match the Recurring MRR base
   const baseRecurringUnitCosts = plans.reduce((sum, p) => {
       if ((p.interval === 'monthly' || p.interval === 'yearly') && p.price > 0) {
           return sum + (p.unitCost * p.subscribers);
@@ -462,7 +484,6 @@ export const generateProjections = (
       }
 
       // -- COGS INFLATION LOGIC --
-      // Apply OpEx Inflation to Unit Costs (Servers/Vendor costs rise over time)
       let inflationMultiplier = 1;
       if (i > 12) inflationMultiplier *= (1 + params.opexInflationRate/100);
       if (i > 24) inflationMultiplier *= (1 + params.opexInflationRate/100);
@@ -518,7 +539,6 @@ export const generateProjections = (
     
     // -- Unit Cost Adjustment for Expansion Revenue --
     const expansionUnitCosts = expansionRevenueAccumulated * baseUnitCostRatio;
-    // Apply inflation to expansion unit costs as well
     let inflationMultiplier = 1;
     if (i > 12) inflationMultiplier *= (1 + params.opexInflationRate/100);
     if (i > 24) inflationMultiplier *= (1 + params.opexInflationRate/100);
@@ -598,7 +618,6 @@ export const generateCohortData = (
   const MAX_COHORT_MONTHS = 12; // Rows to display
   const MAX_LIFETIME_MONTHS = 12; // Columns to display (M0..M12)
 
-  // Use first 12 months or available months
   const acquisitionMonths = projections.slice(0, MAX_COHORT_MONTHS);
 
   acquisitionMonths.forEach((proj) => {
@@ -608,33 +627,25 @@ export const generateCohortData = (
     let currentRetention = 100; // %
     let cumulativeGrossProfit = 0;
 
-    // CFO FIX: 
-    // 1. Initial Profit (Day 1) = Setup Fees * (1 - Payment Fees). 
-    // This assumes Setup Fees are pure margin (excluding fixed costs) but subject to transaction fees.
+    // 1. Initial Profit (Day 1) = Setup Fees * (1 - Payment Fees).
+    // This is pure cash margin from signup.
     const setupMarginPercent = 1 - (paymentProcessingRate / 100);
     const oneTimeProfit = financials.weightedAvgOneTimeRevenue * setupMarginPercent;
     
     cumulativeGrossProfit += oneTimeProfit;
 
     for (let m = 0; m <= MAX_LIFETIME_MONTHS; m++) {
-      // CFO FIX: 
-      // 2. Recurring Profit (M0 onwards) = Blended ARPU * Blended Gross Margin.
-      // We use BLENDED metrics here because Cohorts mix both SaaS and Lifetime users.
-      // - SaaS Users: High Revenue, Medium Cost.
-      // - Lifetime Users: Zero Revenue, Low Cost (but Cost > 0).
-      // Using "Recurring Gross Margin" (SaaS-Only) would be WRONG here because it ignores LTD server costs.
-      // Using "Global Gross Margin" correctly captures the burden of LTD users on the profit pool.
-      const monthlyBlendedGrossProfit = financials.arppu > 0 
-          ? (financials.arppu * financials.grossMarginPercent) 
-          : 0;
+      // 2. Recurring Profit (M0 onwards) = Blended Recurring Profit Per User
+      // CFO FIX: Use the calculated blended metric which accounts for LTD cost drag
+      const monthlyRecurringProfit = financials.blendedRecurringProfitPerUser;
 
       if (m > 0) {
-        // Apply Churn (Using Paid Churn as best proxy for cohort decay)
+        // Apply Churn (Using Paid Churn as best proxy for blended cohort decay)
         currentRetention = currentRetention * (1 - (financials.paidChurnRate / 100));
-        cumulativeGrossProfit += (currentRetention / 100) * monthlyBlendedGrossProfit;
+        cumulativeGrossProfit += (currentRetention / 100) * monthlyRecurringProfit;
       } else {
         // Month 0: Add the first month of recurring service profit on top of setup profit
-        cumulativeGrossProfit += monthlyBlendedGrossProfit;
+        cumulativeGrossProfit += monthlyRecurringProfit;
       }
 
       metrics.push({

@@ -86,6 +86,9 @@ export interface Financials {
   blendedChurnRate: number; // Weighted average churn (All Users)
   paidGrowthRate: number; // Weighted average growth (Paying Users Only)
   paidChurnRate: number; // Weighted average churn (Paying Users Only)
+  
+  // Cohort specific
+  blendedRecurringProfitPerUser: number; // (SaaS Rev - All Variable Costs) / All Paying Users
 }
 
 export interface MonthlyProjection {

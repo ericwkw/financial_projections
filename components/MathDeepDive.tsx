@@ -44,13 +44,22 @@ const MathDeepDive: React.FC = () => {
              <div>
                <div className="flex justify-between items-baseline mb-2">
                  <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">LTV (Lifetime Value)</h4>
-                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Gross Margin Adjusted</span>
+                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Hybrid Weighted Average</span>
                </div>
-               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto">
-                 LTV = (ARPPU × Gross Margin %) / Paid Churn Rate
+               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto space-y-2">
+                 <div className="font-bold border-b pb-1">We calculate LTV per plan:</div>
+                 <div>
+                   1. <span className="font-bold">SaaS LTV</span> = (MRR Profit) / Churn Rate
+                 </div>
+                 <div>
+                   2. <span className="font-bold">Lifetime Deal LTV</span> = (Price - Fees) - <span className="text-red-500">(Monthly Cost / Churn)</span>
+                 </div>
+                 <div className="pt-2 border-t mt-2 italic text-xs">
+                    *Global LTV is the weighted average of these two based on your growth mix.
+                 </div>
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *Paid Churn Rate: % of Paying users who cancel. If a free user quits, you lose $0. If a paid user quits, you lose money. We only count the churn that hurts your wallet.
+                 *For Lifetime Deals, we subtract the "Tail Liability" (Server Costs / Activity Churn). If you charge $100 once but pay $5/mo in server costs forever, your LTV might actually be $0.
                </p>
              </div>
 
