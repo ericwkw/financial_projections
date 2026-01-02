@@ -10,6 +10,7 @@ export const calculateFinancials = (
   // 1. Current MRR, COGS (Variable), Subscriber Count
   let mrr = 0;
   let totalUnitCosts = 0; // Renamed from totalCogs to separate Unit Costs from Fees
+  let recurringUnitCosts = 0; // For Expansion Margin Proxy
   let totalSubscribers = 0;
   let payingSubscribers = 0;
   let oneTimeRevenueMonthly = 0;
@@ -65,6 +66,11 @@ export const calculateFinancials = (
     if (isPaid) {
       mrr += priceMonthly * plan.subscribers;
       payingSubscribers += plan.subscribers;
+      
+      // Accumulate Recurring Unit Costs for Expansion Proxy (Exclude Lifetime)
+      if (plan.interval !== 'lifetime') {
+          recurringUnitCosts += plan.unitCost * plan.subscribers;
+      }
     }
     
     // Growth Logic for Snapshot
@@ -165,8 +171,9 @@ export const calculateFinancials = (
   const impliedExpansionMrr = impliedExpansionArr / 12;
   
   // -- COGS on Expansion (Logical Fix) --
-  // Assume Expansion Revenue carries the same Unit Cost Ratio as Base Revenue (proxy)
-  const baseUnitCostRatio = mrr > 0 ? totalUnitCosts / mrr : 0;
+  // Assume Expansion Revenue carries the same Unit Cost Ratio as Base Recurring Revenue
+  // This avoids Lifetime/Free users distorting expansion margins
+  const baseUnitCostRatio = mrr > 0 ? recurringUnitCosts / mrr : 0;
   const expansionUnitCost = impliedExpansionMrr * baseUnitCostRatio;
   
   // ==========================================
@@ -374,8 +381,16 @@ export const generateProjections = (
   
   // Calculate Base Unit Cost Ratio (excluding payment fees for now)
   const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : (p.interval === 'lifetime' ? 0 : p.price)) * p.subscribers, 0);
-  const baseUnitCosts = plans.reduce((sum, p) => sum + p.unitCost * p.subscribers, 0);
-  const baseUnitCostRatio = baseMrr > 0 ? baseUnitCosts / baseMrr : 0;
+  
+  // Only costs from recurring paid plans for Expansion Ratio proxy
+  const baseRecurringUnitCosts = plans.reduce((sum, p) => {
+      if (p.price > 0 && p.interval !== 'lifetime') {
+          return sum + (p.unitCost * p.subscribers);
+      }
+      return sum;
+  }, 0);
+  
+  const baseUnitCostRatio = baseMrr > 0 ? baseRecurringUnitCosts / baseMrr : 0;
 
   for (let i = 1; i <= months; i++) {
     let monthlyRecurringRevenue = 0; // Accrual
