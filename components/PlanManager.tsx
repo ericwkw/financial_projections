@@ -8,12 +8,13 @@ import CostEstimatorModal from './CostEstimatorModal';
 interface PlanManagerProps {
   plans: Plan[];
   globalCac: number; // New Prop for Payback Calculation
+  paymentProcessingRate: number; // New Prop for context awareness
   onAdd: () => void;
   onUpdate: (id: string, field: keyof Plan, value: any) => void;
   onDelete: (id: string) => void;
 }
 
-const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUpdate, onDelete }) => {
+const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProcessingRate, onAdd, onUpdate, onDelete }) => {
   const [isEstimatorOpen, setIsEstimatorOpen] = useState(false);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
 
@@ -77,6 +78,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
         onApply={handleApplyCost} 
         planPrice={activePlan ? activePlan.price : 0}
         planInterval={activePlan ? activePlan.interval : 'monthly'}
+        paymentProcessingRate={paymentProcessingRate}
       />
       
       <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl">
@@ -126,13 +128,13 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
               <div className="flex justify-between">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
                   <DollarSign className="w-3 h-3" /> Price (HKD) / {isLifetime ? 'Once' : plan.interval === 'yearly' ? 'Year' : 'Mo'}
-                  <Tooltip width="w-64" position="top" content="Customer Price. Monthly/Yearly = Recurring Revenue. Lifetime = One-time Cash (0 MRR). Upfront payments (Yearly/Lifetime) accelerate Cash Flow and shorten Payback Period." />
+                  <Tooltip width="w-64" position="top" content="Customer price. Monthly/yearly = recurring revenue. Lifetime = one-time cash (0 MRR). Upfront payments (yearly/lifetime) accelerate cash flow and shorten payback period." />
                 </label>
                 {/* Payback Badge */}
                 <div className={`flex items-center gap-1 text-[10px] px-1.5 rounded-full border cursor-help ${isFreeLabel ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : isProfitable ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700' : 'bg-red-50 text-red-600 border-red-100'}`} title="Payback Period (Cash Flow Basis)">
                   <Clock className="w-3 h-3" />
                   <span>{payback.label}</span>
-                  {!isFreeLabel && <Tooltip position="top" content="Months to recover Global Avg CAC via Cash Flow. Annual/Lifetime prepayments count as instant recovery." width="w-56"/>}
+                  {!isFreeLabel && <Tooltip position="top" content="Months to recover global average CAC via cash flow. Annual/lifetime prepayments count as instant recovery." width="w-56"/>}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -175,7 +177,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
              <div className="md:col-span-1 space-y-2">
               <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1">
                  Setup (HKD)
-                 <Tooltip position="top" content="One-time fee" width="w-24" />
+                 <Tooltip position="top" content="One-time fee." width="w-24" />
               </label>
               <div className="relative">
                 <input
@@ -205,7 +207,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                 </div>
                 <div className="space-y-2">
                     <label className={`text-xs font-semibold uppercase flex items-center gap-1 ${isLifetime ? 'text-slate-300 dark:text-slate-600' : 'text-red-500 dark:text-red-400'}`}>
-                        Chrn% <Tooltip position="top" content={isLifetime ? "Lifetime plans don't churn revenue (0%)." : "Monthly Churn"} width="w-32" />
+                        Chrn% <Tooltip position="top" content={isLifetime ? "Lifetime plans don't churn revenue (0%)." : "Monthly churn rate."} width="w-32" />
                     </label>
                     <input
                         type="number"
@@ -224,6 +226,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
               <div className="flex items-center justify-between">
                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1 text-slate-600 dark:text-slate-300">
                   <BrainCircuit className="w-3 h-3" /> COGS (HKD)
+                  <Tooltip width="w-64" position="top" content={`Direct service costs (e.g. server, AI tokens). Do not include Stripe/payment fees here (currently ${paymentProcessingRate}% globally).`} />
                 </label>
               </div>
               <div className="flex gap-1">

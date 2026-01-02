@@ -9,7 +9,7 @@ export const calculateFinancials = (
 ): Financials => {
   // 1. Current MRR, COGS (Variable), Subscriber Count
   let mrr = 0;
-  let totalCogs = 0;
+  let totalUnitCosts = 0; // Renamed from totalCogs to separate Unit Costs from Fees
   let totalSubscribers = 0;
   let payingSubscribers = 0;
   let oneTimeRevenueMonthly = 0;
@@ -42,7 +42,7 @@ export const calculateFinancials = (
         priceMonthly = plan.price / 12;
         planArrValue = plan.price;
     } else if (plan.interval === 'lifetime') {
-        // Lifetime revenue is treated as One-Time. MRR is 0.
+        // Lifetime plans have 0 monthly recurring price
         // Revenue is recognized upfront in 'oneTimeRevenueMonthly' or CashFlow.
         priceMonthly = 0;
         planArrValue = 0; 
@@ -96,8 +96,8 @@ export const calculateFinancials = (
     const totalOneTimePerUser = plan.setupFee + (plan.interval === 'lifetime' ? plan.price : 0);
     oneTimeRevenueMonthly += newUsers * totalOneTimePerUser;
 
-    // Costs apply to ALL plans (Free + Paid + Lifetime)
-    totalCogs += plan.unitCost * plan.subscribers;
+    // Unit Costs apply to ALL plans (Free + Paid + Lifetime)
+    totalUnitCosts += plan.unitCost * plan.subscribers;
     totalSubscribers += plan.subscribers;
   });
 
@@ -116,20 +116,30 @@ export const calculateFinancials = (
   const impliedExpansionMrr = impliedExpansionArr / 12;
   
   // -- COGS on Expansion (Logical Fix) --
-  // Assume Expansion Revenue carries the same Gross Margin profile as Base Revenue
-  const baseCogsRatio = mrr > 0 ? totalCogs / mrr : 0;
-  const expansionCogs = impliedExpansionMrr * baseCogsRatio;
+  // Assume Expansion Revenue carries the same Unit Cost Ratio as Base Revenue (proxy)
+  const baseUnitCostRatio = mrr > 0 ? totalUnitCosts / mrr : 0;
+  const expansionUnitCost = impliedExpansionMrr * baseUnitCostRatio;
   
-  const finalTotalCogs = totalCogs + expansionCogs;
-
-  // Gross Profit includes One-Time Revenue for P&L
+  // -- Total Revenue for Fee Calc --
   const totalRevenue = mrr + oneTimeRevenueMonthly + impliedExpansionMrr;
+
+  // -- Payment Processing Fees --
+  // Calculated on Total Revenue (MRR + Setup + Expansion)
+  const paymentFees = totalRevenue * (params.paymentProcessingRate / 100);
+
+  // -- Final COGS --
+  const finalTotalCogs = totalUnitCosts + expansionUnitCost + paymentFees;
+
   const grossProfit = totalRevenue - finalTotalCogs; 
   const grossMarginPercent = totalRevenue > 0 ? (grossProfit / totalRevenue) : 0;
 
   // Recurring Gross Margin (Strictly for LTV/Payback)
   // Isolates the margin of the subscription product itself
-  const recurringGrossProfit = (mrr + impliedExpansionMrr) - finalTotalCogs;
+  // Recurring COGS = Unit Costs + Payment Fees on Recurring Revenue
+  const recurringPaymentFees = (mrr + impliedExpansionMrr) * (params.paymentProcessingRate / 100);
+  const recurringCogs = (totalUnitCosts + expansionUnitCost) + recurringPaymentFees;
+
+  const recurringGrossProfit = (mrr + impliedExpansionMrr) - recurringCogs;
   const recurringGrossMarginPercent = (mrr + impliedExpansionMrr) > 0 ? (recurringGrossProfit / (mrr + impliedExpansionMrr)) : 0;
 
   // 2. Payroll (Fixed Operating Expense - Loaded)
@@ -207,6 +217,7 @@ export const calculateFinancials = (
   const adjustedCac = Math.max(0, cac - weightedAvgSetupFee);
   
   // Payback Denominator: Gross Profit from RECURRING revenue only per user
+  // This already accounts for Payment Fees in recurringGrossMarginPercent
   const monthlyRecurringGrossProfitPerUser = arppu * recurringGrossMarginPercent;
   
   let cacPaybackMonths = 0;
@@ -291,16 +302,16 @@ export const generateProjections = (
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
   let expansionRevenueAccumulated = 0; 
   
-  // Calculate Base COGS Ratio
+  // Calculate Base Unit Cost Ratio (excluding payment fees for now)
   const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : (p.interval === 'lifetime' ? 0 : p.price)) * p.subscribers, 0);
-  const baseCogs = plans.reduce((sum, p) => sum + p.unitCost * p.subscribers, 0);
-  const baseCogsRatio = baseMrr > 0 ? baseCogs / baseMrr : 0;
+  const baseUnitCosts = plans.reduce((sum, p) => sum + p.unitCost * p.subscribers, 0);
+  const baseUnitCostRatio = baseMrr > 0 ? baseUnitCosts / baseMrr : 0;
 
   for (let i = 1; i <= months; i++) {
     let monthlyRecurringRevenue = 0; // Accrual
     let monthlyCashInflow = 0; // Actual Cash
     let monthlyOneTimeRevenue = 0;
-    let monthlyCogs = 0;
+    let monthlyUnitCosts = 0; // Renamed for clarity
     let totalSubs = 0;
     let newArrForCommissions = 0; // For Recurring Commissions
     let newDealValueForCommissions = 0; // For LTD Commissions
@@ -353,7 +364,7 @@ export const generateProjections = (
           monthlyOneTimeRevenue += newUsers * plan.price;
       }
 
-      monthlyCogs += plan.unitCost * currentSubs;
+      monthlyUnitCosts += plan.unitCost * currentSubs;
       totalSubs += currentSubs;
       
       // -- CASH FLOW (Bank) --
@@ -389,11 +400,19 @@ export const generateProjections = (
     monthlyRecurringRevenue += expansionRevenueAccumulated;
     monthlyCashInflow += expansionRevenueAccumulated;
     
-    // -- COGS Adjustment for Expansion Revenue --
-    const expansionCogs = expansionRevenueAccumulated * baseCogsRatio;
-    monthlyCogs += expansionCogs;
+    // -- Unit Cost Adjustment for Expansion Revenue --
+    const expansionUnitCosts = expansionRevenueAccumulated * baseUnitCostRatio;
+    monthlyUnitCosts += expansionUnitCosts;
 
     const totalRevenue = monthlyRecurringRevenue + monthlyOneTimeRevenue;
+
+    // -- DYNAMIC PAYMENT FEES --
+    // Fees applied to Total Revenue for P&L (Accrual matching)
+    const paymentFees = totalRevenue * (params.paymentProcessingRate / 100);
+    
+    // Total COGS = Unit Costs + Payment Fees
+    const monthlyCogs = monthlyUnitCosts + paymentFees;
+
     const grossProfit = totalRevenue - monthlyCogs;
     
     // Fixed costs (Payroll Inflation logic)
@@ -414,7 +433,13 @@ export const generateProjections = (
     const netIncome = grossProfit - payroll - opex - totalCommissions;
 
     // Net Cash Flow (Bank P&L)
-    const cashOutflow = monthlyCogs + payroll + opex + totalCommissions;
+    // IMPORTANT: For Cash Flow, we should really calculate fees on CASH INFLOW, not Accrual Revenue.
+    // However, to keep it aligned with P&L COGS structure in this sim, we will use the accrued fees 
+    // BUT strictly, if you get $1000 cash upfront, you pay $34 fee upfront. 
+    // Let's refine: Cash Outflow COGS = Unit Costs (incurred monthly) + Fees on CASH INFLOW.
+    const cashFlowFees = monthlyCashInflow * (params.paymentProcessingRate / 100);
+    const cashOutflow = monthlyUnitCosts + cashFlowFees + payroll + opex + totalCommissions;
+    
     const netCashFlow = monthlyCashInflow - cashOutflow;
 
     currentCash += netCashFlow;

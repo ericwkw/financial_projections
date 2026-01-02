@@ -290,7 +290,7 @@ const App: React.FC = () => {
                 trend={financials.ltvCacRatio > 3 ? 'positive' : 'negative'}
                 subtext={`LTV: ${fmt(financials.ltv)} | CAC: ${fmt(financials.cac)}`}
                 color={financials.ltvCacRatio < 3 && financials.ltvCacRatio > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : undefined}
-                tooltip="Profit from a customer vs. Cost to find them. Goal: Make $3 for every $1 spent."
+                tooltip="Profit from a customer vs. cost to find them. Goal: make $3 for every $1 spent."
               />
               <KPICard 
                 title="Cash Runway" 
@@ -299,7 +299,7 @@ const App: React.FC = () => {
                 trend={financials.runwayMonths > 12 ? 'positive' : 'negative'}
                 subtext={`Net Burn: ${fmt(financials.burnRate)} / mo`}
                 color={financials.runwayMonths < 6 && financials.runwayMonths > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : undefined}
-                tooltip="How long until you run out of cash. Calculated as Cash / Burn Rate."
+                tooltip="How long until you run out of cash. Calculated as cash / burn rate."
               />
               <KPICard 
                 title="Rule of 40" 
@@ -307,7 +307,7 @@ const App: React.FC = () => {
                 icon={<TrendingUp className="w-5 h-5" />}
                 trend={financials.ruleOf40 > 40 ? 'positive' : 'neutral'}
                 subtext={`Growth: ${fmtNum(financials.blendedGrowthRate)}% + Margin: ${fmtNum(financials.profitMargin)}%`}
-                tooltip="Growth % + Profit % should be > 40 for healthy SaaS companies."
+                tooltip="Growth % + profit % should be > 40 for healthy SaaS companies."
               />
                <KPICard 
                 title="Net Monthly Burn" 
@@ -316,7 +316,7 @@ const App: React.FC = () => {
                 trend={financials.burnRate === 0 ? 'positive' : 'negative'}
                 subtext={financials.burnRate === 0 ? 'Profitable (No Burn)' : `Gross Burn: ${fmt(financials.grossBurn)}`}
                 color={financials.burnRate > 0 ? "border-red-500/50 bg-red-50 dark:bg-red-900/20 dark:border-red-900" : "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-900"}
-                tooltip="Cash lost per month (Expenses - Revenue). If $0, you are profitable."
+                tooltip="Cash lost per month (expenses - revenue). If $0, you are profitable."
               />
             </div>
           )}
@@ -332,6 +332,7 @@ const App: React.FC = () => {
                  <PlanManager 
                    plans={plans} 
                    globalCac={financials.cac}
+                   paymentProcessingRate={scenarioParams.paymentProcessingRate}
                    onAdd={() => setPlans([...plans, { id: Date.now().toString(), name: 'New Plan', price: 0, setupFee: 0, unitCost: 0, interval: 'monthly', subscribers: 0, monthlyGrowth: 5, monthlyChurn: 5 }])} 
                    onUpdate={(id, f, v) => updateItem(setPlans, id, f, v)} 
                    onDelete={(id) => deleteItem(setPlans, id)} 

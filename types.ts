@@ -34,6 +34,7 @@ export interface ScenarioParams {
   payrollTax: number; // % overhead on salaries
   salaryGrowthRate: number; // Annual % increase in salaries
   commissionRate: number; // % of New ARR paid as commission
+  paymentProcessingRate: number; // % fee (e.g., Stripe) on Revenue
   valuationMultiple: number; // x ARR
   founderEquity: number; // % Ownership
 }

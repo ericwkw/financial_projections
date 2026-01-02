@@ -97,6 +97,7 @@ export const DEFAULT_SCENARIO: ScenarioParams = {
   payrollTax: 5, // MPF is lower in HK (~5% cap) but let's keep it configurable
   salaryGrowthRate: 3,
   commissionRate: 10,
+  paymentProcessingRate: 3.4, // Standard Stripe HK (3.4%)
   valuationMultiple: 6, 
   founderEquity: 80, 
 };

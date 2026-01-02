@@ -31,7 +31,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={fmtCurrency(financials.mrr)} 
             icon={<DollarSign className="w-5 h-5" />} 
             subtext={`Run Rate: ${fmtCurrency(financials.arr)}/yr`}
-            tooltip="Monthly Recurring Revenue. The pulse of your subscription business."
+            tooltip="Monthly recurring revenue. The pulse of your subscription business."
         />
         <KPICard 
             title="Company Valuation" 
@@ -62,7 +62,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={`${fmtNum(financials.ltvCacRatio)}x`}
             target="> 3.0x"
             status={financials.ltvCacRatio >= 3 ? 'good' : financials.ltvCacRatio >= 1 ? 'warning' : 'bad'}
-            tooltip="Profit from a customer vs. Cost to find them. Goal: Make $3 for every $1 spent."
+            tooltip="Profit from a customer vs. cost to find them. Goal: make $3 for every $1 spent."
           />
            <MetricTile 
             label="Net Rev Retention"
@@ -87,14 +87,14 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({ financials, plans
             value={`${fmtNum(financials.magicNumber)}`}
             target="> 0.75"
             status={financials.magicNumber >= 0.75 ? 'good' : financials.magicNumber >= 0.5 ? 'warning' : 'bad'}
-            tooltip="Marketing Efficiency. If you put $1 into ads, do you get more than $1 of yearly revenue back?"
+            tooltip="Marketing efficiency. If you put $1 into ads, do you get more than $1 of yearly revenue back?"
           />
           <MetricTile 
             label="Burn Multiplier"
             value={financials.burnMultiplier >= 999 ? "Neg. Growth" : `${fmtNum(financials.burnMultiplier)}x`}
             target="< 2.0x"
             status={financials.burnMultiplier >= 999 ? 'bad' : financials.burnMultiplier <= 1.5 && financials.burnMultiplier > 0 ? 'good' : financials.burnMultiplier <= 2.5 ? 'warning' : 'bad'}
-            tooltip="Capital Efficiency. How much cash do you burn to grow? Lower is better."
+            tooltip="Capital efficiency. How much cash do you burn to grow? Lower is better."
           />
           <MetricTile 
             label="Time to Profit"

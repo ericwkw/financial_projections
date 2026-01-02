@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Wand2, Loader2, BrainCircuit, Calculator, Plus, Trash2 } from './Icons';
+import { X, Wand2, Loader2, BrainCircuit, Calculator, Plus, Trash2, Info } from './Icons';
 import { estimateUnitCost, CostEstimation } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 
@@ -10,6 +10,7 @@ interface CostEstimatorModalProps {
   onApply: (cost: number) => void;
   planPrice: number;
   planInterval: string;
+  paymentProcessingRate: number;
 }
 
 interface ManualCostItem {
@@ -19,7 +20,7 @@ interface ManualCostItem {
   quantity: number;
 }
 
-const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose, onApply, planPrice, planInterval }) => {
+const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose, onApply, planPrice, planInterval, paymentProcessingRate }) => {
   const [mode, setMode] = useState<'manual' | 'ai'>('manual');
   
   // AI State
@@ -100,6 +101,14 @@ const CostEstimatorModal: React.FC<CostEstimatorModalProps> = ({ isOpen, onClose
 
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-grow">
+            
+            {/* Payment Fee Warning Banner */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-start gap-2 mb-4 border border-blue-100 dark:border-blue-800">
+              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                 <strong>Note:</strong> Payment Processing Fees ({paymentProcessingRate}%) are calculated automatically in the P&L. Do not list them here.
+              </p>
+            </div>
             
             {/* MANUAL MODE */}
             {mode === 'manual' && (

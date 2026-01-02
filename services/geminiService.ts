@@ -55,6 +55,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
     **Context & Assumptions:**
     - Payroll Tax Load: ${state.params.payrollTax}% (Included in Payroll figures)
     - Sales Commission Rate: ${state.params.commissionRate}% (Of new Gross Bookings)
+    - Payment Processing Rate: ${state.params.paymentProcessingRate}% (Of Gross Revenue)
     - Scenario_Growth_Multiplier: ${state.params.marketingEfficiency}x (Input Slider for Projection Speed)
     
     **Key Investor Metrics (SOURCE OF TRUTH):**
@@ -127,18 +128,15 @@ export const estimateUnitCost = async (description: string, price: number, inter
     1. Compute (AWS/GCP/Azure)
     2. Database/Storage per user
     3. Third-party API fees (OpenAI, Twilio, SendGrid, etc.)
-    4. **Payment Processing Fees (Stripe HK)**:
-       - Formula: 3.4% of Price + HK$2.35 per transaction.
-       - Transaction Amount: HKD $${price}
-       - **Amortization Rule**: 
-         - If interval is 'monthly': Use the full fee.
-         - If interval is 'yearly': Divide fee by 12.
-         - If interval is 'lifetime': Divide fee by 24 (amortized).
-       - YOU MUST include this calculated amount in the final 'estimatedCost'.
+    
+    **IMPORTANT EXCLUSION:**
+    - **DO NOT** include Payment Processing Fees (Stripe/PayPal) in this estimate. 
+    - The application calculates payment fees automatically as a separate global percentage. 
+    - Only estimate the *technical* and *service* delivery costs.
 
     Return a JSON object with:
     - estimatedCost: number (The total estimated monthly cost per user in HKD)
-    - breakdown: string (A markdown formatted list explaining the cost components. Explicitly show the math for the Payment Processing Fee.)
+    - breakdown: string (A markdown formatted list explaining the cost components.)
     
     Be conservative but realistic. If information is missing, make reasonable standard assumptions for a SaaS MVP.
     `;
