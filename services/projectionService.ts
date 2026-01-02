@@ -50,6 +50,10 @@ export const calculateFinancials = (
   // -- LTV WEIGHTING ACCUMULATORS --
   let weightedLtvSum = 0;
 
+  // CFO MATH: Calculate Monthly Inflation Rate for DCF Cost Modeling
+  // Annual Rate -> Monthly Rate: (1 + r)^(1/12) - 1
+  const monthlyInflationRate = Math.pow(1 + params.opexInflationRate / 100, 1/12) - 1;
+
   plans.forEach(plan => {
     const isPaid = plan.price > 0;
     const isRecurring = plan.interval === 'monthly' || plan.interval === 'yearly';
@@ -140,10 +144,21 @@ export const calculateFinancials = (
         const safeChurn = Math.max(params.minChurnFloor, churn); 
 
         if (plan.interval === 'lifetime') {
-            // Lifetime LTV = (Upfront Price - Fees) - (Monthly Cost / Activity Churn%)
-            // This subtracts the liability of hosting them forever.
+            // Lifetime LTV = (Upfront Price - Fees) - (Inflation-Adjusted Liability)
+            // Liability = UnitCost / (Churn - Inflation)
+            // This models the "Cost Perpetuity" that grows over time.
             const upfrontProfit = (plan.price + plan.setupFee) * marginFactor;
-            const lifetimeLiability = safeChurn > 0 ? plan.unitCost / (safeChurn / 100) : 0;
+            
+            // Effective Decay = Rate at which the cohort burden disappears
+            // If Costs grow (Inflation) as fast as People leave (Churn), the burden never drops.
+            let effectiveDecayRate = (safeChurn / 100) - monthlyInflationRate;
+            
+            // Safety Clamp: If effective decay is <= 0 (Hyper-inflation or Zero Churn),
+            // we assume a max liability cap (e.g. 10 years) to avoid infinity.
+            // Using 0.005 (0.5%) as a floor implies a max effective life of 16 years.
+            effectiveDecayRate = Math.max(0.005, effectiveDecayRate);
+
+            const lifetimeLiability = safeChurn > 0 ? plan.unitCost / effectiveDecayRate : 0;
             planLtv = upfrontProfit - lifetimeLiability;
         } else {
             // SaaS LTV = SetupProfit + (MonthlyRecurringProfit / Churn%)
@@ -316,9 +331,6 @@ export const calculateFinancials = (
   }
 
   // Blended Recurring Profit (For Cohorts)
-  // This calculates the true recurring profit drag from ALL users (SaaS + LTD)
-  // Formula: (SaaS Revenue - All Variable Costs) / All Paying Users
-  // Note: 'mrr' is purely SaaS revenue. 'totalUnitCosts' includes LTD server costs.
   const blendedRecurringProfitPerUser = payingSubscribers > 0 
     ? (mrr - totalUnitCosts - (mrr * params.paymentProcessingRate / 100)) / payingSubscribers
     : 0;
@@ -378,7 +390,7 @@ export const calculateFinancials = (
     blendedChurnRate,
     paidGrowthRate,
     paidChurnRate,
-    blendedRecurringProfitPerUser // New Metric
+    blendedRecurringProfitPerUser 
   };
 };
 

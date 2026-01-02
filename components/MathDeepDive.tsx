@@ -52,14 +52,14 @@ const MathDeepDive: React.FC = () => {
                    1. <span className="font-bold">SaaS LTV</span> = (MRR Profit) / Churn Rate
                  </div>
                  <div>
-                   2. <span className="font-bold">Lifetime Deal LTV</span> = (Price - Fees) - <span className="text-red-500">(Monthly Cost / Churn)</span>
+                   2. <span className="font-bold">Lifetime Deal LTV</span> = (Price - Fees) - <span className="text-red-500">(Unit Cost / Effective Decay)</span>
                  </div>
                  <div className="pt-2 border-t mt-2 italic text-xs">
                     *Global LTV is the weighted average of these two based on your growth mix.
                  </div>
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *For Lifetime Deals, we subtract the "Tail Liability" (Server Costs / Activity Churn). If you charge $100 once but pay $5/mo in server costs forever, your LTV might actually be $0.
+                 *For Lifetime Deals, we apply <strong>Inflation-Adjusted Liability</strong>. We assume your server costs will rise by 3% annually while the customer pays nothing. This prevents you from overestimating profit on long-term users.
                </p>
              </div>
 
