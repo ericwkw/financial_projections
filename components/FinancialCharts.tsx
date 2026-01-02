@@ -38,10 +38,11 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
   }).filter(d => d.value > 0);
 
   // Cost Structure Breakdown (Pie)
+  // Define colors directly in the data to ensure stability when filtering
   const costData = [
-    { name: 'Payroll', value: financials.payrollMonthly },
-    { name: 'OpEx', value: financials.opexMonthly },
-    { name: 'COGS', value: financials.cogs }
+    { name: 'Payroll', value: financials.payrollMonthly, color: '#ef4444' }, // Red-500
+    { name: 'OpEx', value: financials.opexMonthly, color: '#f59e0b' },    // Amber-500
+    { name: 'COGS', value: financials.cogs, color: '#64748b' }           // Slate-500
   ].filter(d => d.value > 0);
 
   // Data for Burn Rate Chart
@@ -202,9 +203,9 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
                 dataKey="value"
                 stroke={darkMode ? '#0f172a' : '#fff'}
               >
-                <Cell fill="#ef4444" /> {/* Payroll */}
-                <Cell fill="#f59e0b" /> {/* OpEx */}
-                <Cell fill="#64748b" /> {/* COGS */}
+                {costData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
               </Pie>
               <Tooltip formatter={(value: number) => `HK$${value.toLocaleString()}`} contentStyle={tooltipStyle} itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }} />
               <Legend verticalAlign="bottom" height={36}/>
