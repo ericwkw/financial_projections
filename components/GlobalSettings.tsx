@@ -273,31 +273,31 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
          </h3>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Commission Timing</h4>
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Commission Scope</h4>
                <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 Commissions are paid <strong>Upfront</strong> in the month of booking. 
-                 <br/><span className="text-xs opacity-70">Basis: {params.commissionRate}% of 1st Year ARR.</span>
+                 Commissions are paid on <strong>ALL</strong> New ARR, including Upsell/Expansion revenue.
+                 <br/><span className="text-xs opacity-70">Paid fully upfront (Month 1 of booking).</span>
                </p>
             </div>
             <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Accounting Standard</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 P&L uses <strong>Cash Basis</strong> for Commissions (expensed immediately), not GAAP Amortization.
+                 <br/><span className="text-xs opacity-70">This is a conservative "Safety First" view.</span>
+               </p>
+            </div>
+             <div className="space-y-2">
+               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Inflation Steps</h4>
+               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                 OpEx and Salaries increase annually in a <strong>Step Function</strong> (Month 13, 25, 37...).
+                 <br/><span className="text-xs opacity-70">We do not smooth inflation monthly.</span>
+               </p>
+            </div>
+             <div className="space-y-2">
                <h4 className="font-semibold text-slate-700 dark:text-slate-300">LTV Discounting</h4>
                <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 We do not apply WACC (Weighted Average Cost of Capital) to LTV. 
-                 <br/><span className="text-xs opacity-70">We assume Churn Risk ({'>'}5%/yr) outweighs Interest Rate Risk (~3%/yr).</span>
-               </p>
-            </div>
-             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Expansion Decay</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 Upsell revenue is not permanent. It decays monthly at your <strong>Paid Churn Rate</strong>.
-                 <br/><span className="text-xs opacity-70">If a user churns, their upsell revenue vanishes too.</span>
-               </p>
-            </div>
-             <div className="space-y-2">
-               <h4 className="font-semibold text-slate-700 dark:text-slate-300">Cash Collection</h4>
-               <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                 Cash is collected <strong>Day 1</strong> of the period (Month or Year).
-                 <br/><span className="text-xs opacity-70">We do not simulate Net-30 or Net-60 payment delays.</span>
+                 <strong>WACC = 0%</strong>. We discount future cash flows using <strong>Churn Only</strong>.
+                 <br/><span className="text-xs opacity-70">We assume Churn Risk ({'>'}5%) dominates Interest Rate Risk (~3%).</span>
                </p>
             </div>
          </div>
