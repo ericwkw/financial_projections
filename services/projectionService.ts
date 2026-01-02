@@ -138,42 +138,39 @@ export const calculateFinancials = (
         // For Efficiency Metrics (Net New ARR - Dollar based)
         netNewArrReal += netAddedUsers * planArrValue;
 
-        // --- CFO LTV CALCULATION PER PLAN ---
+        // --- CFO LTV CALCULATION PER PLAN (Advanced Split PV Method) ---
         let planLtv = 0;
         const marginFactor = 1 - (params.paymentProcessingRate / 100);
         const safeChurn = Math.max(params.minChurnFloor, churn); 
+        
+        // Setup Profit (Immediate Cash)
+        const setupProfit = plan.setupFee * marginFactor;
+
+        // Effective Decay Rate for Costs
+        // Cost Liability PV = Cost / (Churn - Inflation)
+        // If Churn > Inflation, this converges.
+        // If Churn <= Inflation, liability is theoretically infinite. We clamp to a minimum decay (e.g. 0.1%) 
+        // effectively capping the liability horizon at ~80 years to prevent math errors.
+        let effectiveDecayRate = (safeChurn / 100) - monthlyInflationRate;
+        effectiveDecayRate = Math.max(0.001, effectiveDecayRate);
 
         if (plan.interval === 'lifetime') {
-            // Lifetime LTV = (Upfront Price - Fees) - (Inflation-Adjusted Liability)
-            // Liability = UnitCost / (Churn - Inflation)
-            // This models the "Cost Perpetuity" that grows over time.
-            const upfrontProfit = (plan.price + plan.setupFee) * marginFactor;
+            // Lifetime LTV = Upfront Price - Cost Liability
+            const upfrontRevenue = plan.price * marginFactor;
+            const costLiability = plan.unitCost / effectiveDecayRate;
             
-            // Effective Decay = Rate at which the cohort burden disappears
-            // If Costs grow (Inflation) as fast as People leave (Churn), the burden never drops.
-            let effectiveDecayRate = (safeChurn / 100) - monthlyInflationRate;
-            
-            // Safety Clamp: If effective decay is <= 0 (Hyper-inflation or Zero Churn),
-            // we assume a max liability cap (e.g. 10 years) to avoid infinity.
-            // Using 0.005 (0.5%) as a floor implies a max effective life of 16 years.
-            effectiveDecayRate = Math.max(0.005, effectiveDecayRate);
-
-            const lifetimeLiability = safeChurn > 0 ? plan.unitCost / effectiveDecayRate : 0;
-            planLtv = upfrontProfit - lifetimeLiability;
+            planLtv = setupProfit + upfrontRevenue - costLiability;
         } else {
-            // SaaS LTV = SetupProfit + (MonthlyRecurringProfit / (Churn% + Inflation%))
-            const setupProfit = plan.setupFee * marginFactor;
+            // SaaS LTV = Setup + PV(Recurring Revenue) - PV(Recurring Cost)
+            // Revenue assumes flat pricing (Nominal LTV) -> PV = Rev / Churn
+            // Cost assumes inflation (Rising Cost) -> PV = Cost / (Churn - Inflation)
             
-            // Monthly Recurring Profit (Current Snapshot)
-            const monthlyRecurringProfit = (priceMonthly * marginFactor) - plan.unitCost;
+            const monthlyNetRevenue = priceMonthly * marginFactor;
+            const revenuePv = monthlyNetRevenue / (safeChurn / 100);
             
-            // CFO FIX: Add monthlyInflationRate to the denominator.
-            // Inflation acts as a "Negative Growth" on the margin, effectively increasing the 'Churn' 
-            // of the profit stream even if the user stays.
-            const effectiveChurnDenominator = (safeChurn / 100) + monthlyInflationRate;
+            const costPv = plan.unitCost / effectiveDecayRate;
             
-            const recurringLtvTerm = effectiveChurnDenominator > 0 ? monthlyRecurringProfit / effectiveChurnDenominator : 0;
-            planLtv = setupProfit + recurringLtvTerm;
+            planLtv = setupProfit + (revenuePv - costPv);
         }
 
         weightedLtvSum += planLtv * newUsers;

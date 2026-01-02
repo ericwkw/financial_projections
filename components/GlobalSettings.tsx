@@ -11,6 +11,12 @@ interface GlobalSettingsProps {
 }
 
 const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onReset }) => {
+  // Helper to calculate monthly equivalent
+  const getMonthlyRate = (annualRate: number) => {
+     const monthly = (Math.pow(1 + annualRate / 100, 1/12) - 1) * 100;
+     return monthly.toFixed(3);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
@@ -79,7 +85,10 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                             Annual Inflation (OpEx)
                             <Tooltip content="CRITICAL: This rate increases your future OpEx/COGS. It also reduces your LTV by simulating future margin compression." />
                         </label>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.opexInflationRate}%</span>
+                        <div className="text-right">
+                            <div className="text-sm font-bold text-slate-900 dark:text-white">{params.opexInflationRate}%</div>
+                            <div className="text-[10px] text-slate-400">≈ {getMonthlyRate(params.opexInflationRate)}% / mo</div>
+                        </div>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Yearly increase in software, rent, and vendor costs.</p>
                     <input
@@ -93,7 +102,10 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                  <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Salary Growth Rate</label>
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{params.salaryGrowthRate}%</span>
+                         <div className="text-right">
+                            <div className="text-sm font-bold text-slate-900 dark:text-white">{params.salaryGrowthRate}%</div>
+                            <div className="text-[10px] text-slate-400">≈ {getMonthlyRate(params.salaryGrowthRate)}% / mo</div>
+                        </div>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Annual raises for employees.</p>
                     <input

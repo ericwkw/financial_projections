@@ -44,22 +44,22 @@ const MathDeepDive: React.FC = () => {
              <div>
                <div className="flex justify-between items-baseline mb-2">
                  <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">LTV (Lifetime Value)</h4>
-                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Hybrid Weighted Average</span>
+                 <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500">Split PV Method</span>
                </div>
                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto space-y-2">
-                 <div className="font-bold border-b pb-1">We calculate LTV per plan:</div>
+                 <div className="font-bold border-b pb-1">We treat Revenue and Costs separately:</div>
                  <div>
-                   1. <span className="font-bold">SaaS LTV</span> = (MRR Profit) / Churn Rate
+                   1. <span className="font-bold">PV(Revenue)</span> = MonthlyRevenue / Churn
                  </div>
                  <div>
-                   2. <span className="font-bold">Lifetime Deal LTV</span> = (Price - Fees) - <span className="text-red-500">(Unit Cost / Effective Decay)</span>
+                   2. <span className="font-bold">PV(Cost)</span> = MonthlyCost / (Churn - Inflation)
                  </div>
-                 <div className="pt-2 border-t mt-2 italic text-xs">
-                    *Global LTV is the weighted average of these two based on your growth mix.
+                 <div className="font-bold pt-1 text-emerald-600 dark:text-emerald-400">
+                    LTV = Setup Fees + PV(Revenue) - PV(Cost)
                  </div>
                </div>
                <p className="text-xs text-slate-500 mt-2">
-                 *For Lifetime Deals, we apply <strong>Inflation-Adjusted Liability</strong>. We assume your server costs will rise by 3% annually while the customer pays nothing. This prevents you from overestimating profit on long-term users.
+                 *Why "Split PV"? Standard formulas assume costs are flat. In reality, server costs rise with inflation (3%/yr) while your price often stays flat. We penalize your LTV for this "Margin Compression" over time.
                </p>
              </div>
 

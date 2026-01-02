@@ -46,12 +46,18 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
     const simGrossMarginPercent = simArppu > 0 
         ? Math.max(0, (simArppu - baseRecurringUnitCost) / simArppu)
         : 0;
+    
+    // CFO FIX: Calculate monthly inflation rate to drag LTV down in sandbox
+    const monthlyInflationRate = Math.pow(1 + params.opexInflationRate / 100, 1/12) - 1;
 
-    // Recalculate LTV with new inputs
+    // Recalculate LTV with new inputs using simplified Split PV approximation
+    // LTV ~= Setup + (Profit / (Churn + Inflation))
     const simMonthlyRecurringProfit = simArppu * simGrossMarginPercent;
-    // LTV = SetupProfit + (MonthlyProfit / Churn%)
+    
+    const effectiveDiscountRate = (Math.max(0.1, simChurn) / 100) + monthlyInflationRate;
+    
     const simLtv = (financials.weightedAvgOneTimeRevenue * (1 - params.paymentProcessingRate/100)) + 
-                   (simMonthlyRecurringProfit / (Math.max(0.1, simChurn) / 100));
+                   (simMonthlyRecurringProfit / effectiveDiscountRate);
 
     return {
       ...financials,
@@ -61,7 +67,7 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
       grossMarginPercent: simGrossMarginPercent, // Use the new expanded margin
       ltv: simLtv
     } as Financials;
-  }, [financials, isSandbox, simChurn, simArppu, simCac, params.paymentProcessingRate]);
+  }, [financials, isSandbox, simChurn, simArppu, simCac, params.paymentProcessingRate, params.opexInflationRate]);
 
   const cohorts = useMemo(() => generateCohortData(projections, activeFinancials, params.paymentProcessingRate), [projections, activeFinancials, params.paymentProcessingRate]);
 
