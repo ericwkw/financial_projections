@@ -1,5 +1,4 @@
 
-
 import { Plan, Employee, OperatingExpense, ScenarioParams, Financials, MonthlyProjection, Cohort, CohortMetric } from "../types";
 
 export const calculateFinancials = (
@@ -338,6 +337,7 @@ export const calculateFinancials = (
     weightedAvgOneTimeRevenue,
     payrollMonthly,
     opexMonthly,
+    commissions: estimatedTotalCommissions, // EXPLICIT COMMISSION RETURN
     totalExpenses: totalAccrualExpenses,
     netMonthly,
     profitMargin,
@@ -379,12 +379,26 @@ export const generateProjections = (
 
   // Initial State
   let currentSubscribersByPlan = plans.map(p => ({ ...p }));
+  
+  // Tracking for Yearly Plan Cash Flow Cohorts
+  // We need to track exactly WHEN new users joined to calculate their renewal (M+12)
+  // Map<PlanId, Array<number>> where array index is MonthIndex (0..months) and value is Count
+  const newUsersCohortHistory: Record<string, number[]> = {};
+  
+  // Tracking Base Subscribers (Existing before simulation) separately
+  // so we can apply smoothed renewal logic ONLY to them.
+  const baseSubscribersByPlan: Record<string, number> = {};
+  
+  plans.forEach(p => {
+      newUsersCohortHistory[p.id] = [];
+      baseSubscribersByPlan[p.id] = p.subscribers;
+  });
+
   let expansionRevenueAccumulated = 0; 
   
-  // Calculate Base Unit Cost Ratio (excluding payment fees for now)
+  // Calculate Base Unit Cost Ratio
   const baseMrr = plans.reduce((sum, p) => sum + (p.interval === 'yearly' ? p.price/12 : (p.interval === 'lifetime' ? 0 : p.price)) * p.subscribers, 0);
   
-  // Only costs from recurring paid plans for Expansion Ratio proxy
   const baseRecurringUnitCosts = plans.reduce((sum, p) => {
       if (p.price > 0 && p.interval !== 'lifetime') {
           return sum + (p.unitCost * p.subscribers);
@@ -421,9 +435,10 @@ export const generateProjections = (
     }
 
     currentSubscribersByPlan = currentSubscribersByPlan.map(plan => {
-      // PROJECTION LOGIC:
+      // ----------------------------
+      // 1. GROWTH & CHURN LOGIC
+      // ----------------------------
       const growth = plan.monthlyGrowth || 0;
-      // Force 0 churn for Lifetime plans (Revenue Churn is 0 since they paid once)
       const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
 
       const planGrowth = growth * params.marketingEfficiency;
@@ -436,18 +451,27 @@ export const generateProjections = (
       const churnedUsers = plan.subscribers * churnRate;
       const netSubsChange = newUsers - churnedUsers;
       
+      // Update Total Count
       const currentSubs = Math.max(0, plan.subscribers + netSubsChange);
+
+      // Track New Users for this month (for renewal logic)
+      newUsersCohortHistory[plan.id][i] = newUsers;
       
-      // -- REVENUE (Accrual) --
+      // Update Base Subscribers (Decay only)
+      baseSubscribersByPlan[plan.id] = Math.max(0, baseSubscribersByPlan[plan.id] * (1 - churnRate));
+
+      // ----------------------------
+      // 2. REVENUE (ACCRUAL)
+      // ----------------------------
       let priceMonthly = 0;
       if (plan.interval === 'monthly') priceMonthly = plan.price;
       if (plan.interval === 'yearly') priceMonthly = plan.price / 12;
       // Lifetime = 0 Recurring Revenue
 
       monthlyRecurringRevenue += priceMonthly * currentSubs;
-      monthlyOneTimeRevenue += newUsers * plan.setupFee;
       
-      // Lifetime Revenue goes into OneTimeRevenue
+      // One Time & Setup
+      monthlyOneTimeRevenue += newUsers * plan.setupFee;
       if (plan.interval === 'lifetime') {
           monthlyOneTimeRevenue += newUsers * plan.price;
       }
@@ -455,24 +479,41 @@ export const generateProjections = (
       monthlyUnitCosts += plan.unitCost * currentSubs;
       totalSubs += currentSubs;
       
-      // -- CASH FLOW (Bank) --
-      monthlyCashInflow += newUsers * plan.setupFee;
+      // ----------------------------
+      // 3. CASH FLOW (BANK)
+      // ----------------------------
+      monthlyCashInflow += newUsers * plan.setupFee; // Setup fees always upfront
 
       if (plan.interval === 'yearly') {
-        // Annual Plans:
+        // A. Base Users (Pre-existing): Apply Smoothed Renewal
+        // We assume they are distributed evenly throughout the year
+        const baseRenewals = baseSubscribersByPlan[plan.id] / 12;
+        monthlyCashInflow += baseRenewals * plan.price;
+
+        // B. New Users (Acquired in Simulation): Pay Upfront
         monthlyCashInflow += newUsers * plan.price;
-        const existingUsers = Math.max(0, plan.subscribers - churnedUsers); 
-        monthlyCashInflow += (existingUsers / 12) * plan.price;
+
+        // C. Cohort Renewals (New Users from 12 months ago)
+        // Check if we have users who joined 12 months ago
+        const renewalMonthIndex = i - 12;
+        if (renewalMonthIndex >= 1) {
+            const usersJoinedThen = newUsersCohortHistory[plan.id][renewalMonthIndex] || 0;
+            // Apply 12 months of churn to see who is left to renew
+            const retainedUsers = usersJoinedThen * Math.pow(1 - churnRate, 12);
+            monthlyCashInflow += retainedUsers * plan.price;
+        }
+
       } else if (plan.interval === 'lifetime') {
-        // Lifetime Plans:
         // Cash = Price x New Users. No renewals.
         monthlyCashInflow += newUsers * plan.price;
       } else {
-        // Monthly Plans: Cash = Revenue
+        // Monthly Plans: Cash = Revenue (Simplification)
         monthlyCashInflow += currentSubs * plan.price;
       }
 
-      // Commission Base & New Paying Count
+      // ----------------------------
+      // 4. COMMISSIONS
+      // ----------------------------
       if (plan.price > 0 && newUsers > 0) {
         monthlyNewPayingSubscribers += newUsers;
         
@@ -514,7 +555,6 @@ export const generateProjections = (
     if (i > 48) payroll *= (1 + params.salaryGrowthRate/100);
 
     // Fixed costs (OpEx Inflation logic)
-    // New: Apply user-defined inflation to OpEx
     let opex = baseFinancials.opexMonthly;
     if (i > 12) opex *= (1 + params.opexInflationRate/100);
     if (i > 24) opex *= (1 + params.opexInflationRate/100);

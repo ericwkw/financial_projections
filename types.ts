@@ -53,6 +53,7 @@ export interface Financials {
   weightedAvgOneTimeRevenue: number; // Avg Setup/Lifetime fee per NEW PAYING user
   payrollMonthly: number; // Fully loaded
   opexMonthly: number; // Non-payroll operating expenses
+  commissions: number; // Monthly Sales Commissions (New)
   totalExpenses: number;
   netMonthly: number;
   profitMargin: number;

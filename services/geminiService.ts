@@ -12,11 +12,6 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Calculate the estimated commission amount for the breakdown transparency
-    const otherExpenses = state.financials.payrollMonthly + state.financials.opexMonthly + state.financials.cogs;
-    // Ensure we don't show negative commissions due to rounding
-    const estCommissions = Math.max(0, state.financials.grossBurn - otherExpenses);
-
     // We extract the key metrics to pass clearly to the LLM
     // CRITICAL: We must provide the "Bridge" between raw costs and Gross Burn
     // so the AI doesn't flag "Unaccounted cash outflow" as a discrepancy.
@@ -31,7 +26,7 @@ export const analyzeFinancials = async (state: SimulationState): Promise<string>
         Payroll_Loaded: state.financials.payrollMonthly,
         OpEx: state.financials.opexMonthly,
         COGS: state.financials.cogs,
-        Est_Sales_Commissions: estCommissions
+        Sales_Commissions: state.financials.commissions
       },
       
       NetBurn: state.financials.burnRate,

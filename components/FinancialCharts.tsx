@@ -42,7 +42,8 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
   const costData = [
     { name: 'Payroll', value: financials.payrollMonthly, color: '#ef4444' }, // Red-500
     { name: 'OpEx', value: financials.opexMonthly, color: '#f59e0b' },    // Amber-500
-    { name: 'COGS', value: financials.cogs, color: '#64748b' }           // Slate-500
+    { name: 'COGS', value: financials.cogs, color: '#64748b' },           // Slate-500
+    { name: 'Commissions', value: financials.commissions, color: '#8b5cf6' } // Purple-500
   ].filter(d => d.value > 0);
 
   // Data for Burn Rate Chart
