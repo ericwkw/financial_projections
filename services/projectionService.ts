@@ -144,18 +144,20 @@ export const calculateFinancials = (
         // --- CFO LTV CALCULATION PER PLAN (Discounted PV Method) ---
         let planLtv = 0;
         const marginFactor = 1 - (params.paymentProcessingRate / 100);
+        // CFO SAFETY: We allow churn to be 0 for stress testing, but we use safeChurn for denominator safety logic below
         const safeChurn = Math.max(params.minChurnFloor, churn); 
+        const actualChurnForCalc = params.minChurnFloor === 0 ? churn : safeChurn; // Allow 0 if user explicitly sets floor to 0
         
         // Setup Profit (Immediate Cash, no discount needed)
         const setupProfit = plan.setupFee * marginFactor;
 
         // Discounted Decay Rates
         // Revenue decays due to Churn + WACC
-        const revenueDecayRate = (safeChurn / 100) + monthlyDiscountRate;
+        const revenueDecayRate = (actualChurnForCalc / 100) + monthlyDiscountRate;
 
         // Cost decays due to Churn + WACC, but INCREASES due to Inflation. 
         // Net Rate = Churn + WACC - Inflation.
-        let costDecayRate = (safeChurn / 100) + monthlyDiscountRate - monthlyInflationRate;
+        let costDecayRate = (actualChurnForCalc / 100) + monthlyDiscountRate - monthlyInflationRate;
         costDecayRate = Math.max(0.001, costDecayRate); // Clamp to prevent div by zero or negative infinite cost
 
         if (plan.interval === 'lifetime') {
@@ -171,7 +173,12 @@ export const calculateFinancials = (
             // PV = MonthlyAmount / Rate
             
             const monthlyNetRevenue = priceMonthly * marginFactor;
-            const revenuePv = revenueDecayRate > 0 ? monthlyNetRevenue / revenueDecayRate : 0;
+            
+            // CFO SAFEGUARD: Prevent Infinite LTV if Churn=0 and WACC=0
+            // If decay rate is effectively 0, we cap LTV at 100 years (1200 months) to prevent UI breakage
+            const revenuePv = revenueDecayRate > 0.0001 
+                ? monthlyNetRevenue / revenueDecayRate 
+                : monthlyNetRevenue * 1200; 
             
             const costPv = plan.unitCost / costDecayRate;
             

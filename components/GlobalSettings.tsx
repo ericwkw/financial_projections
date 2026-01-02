@@ -184,17 +184,20 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-1">
                             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">LTV Safety Floor</label>
-                            <Tooltip content="Minimum churn rate used for LTV calculations. Prevents LTV from becoming infinite if churn is 0%. A standard safety buffer is 0.5%." />
+                            <Tooltip content="Minimum churn rate used for LTV calculations. Standard is 0.5%. Setting this to 0% is risky and allows LTV to become Infinite." />
                         </div>
                         <span className="text-sm font-bold text-slate-900 dark:text-white">{params.minChurnFloor}%</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Zero-Churn Protection (Min Churn %)</p>
                     <input
-                        type="range" min="0.1" max="2.0" step="0.1"
+                        type="range" min="0" max="2.0" step="0.1"
                         value={params.minChurnFloor}
                         onChange={(e) => onChange('minChurnFloor', parseFloat(e.target.value))}
                         className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
+                    {params.minChurnFloor === 0 && (
+                        <p className="text-[10px] text-red-500 mt-1 font-semibold">Warning: 0% Safety Floor enabled. LTV may become Infinite.</p>
+                    )}
                 </div>
 
                  <div className="space-y-2">
@@ -269,6 +272,7 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
                     <input
                         type="number"
                         min="0"
+                        step="1000"
                         value={params.startingCash}
                         onChange={(e) => onChange('startingCash', Math.max(0, parseFloat(e.target.value) || 0))}
                         className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm"
@@ -283,7 +287,7 @@ const GlobalSettings: React.FC<GlobalSettingsProps> = ({ params, onChange, onRes
       <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-8 mt-8">
          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
            <Info className="w-5 h-5 text-slate-500" />
-           Simulation Mechanics (The Hidden Math)
+           Hidden Logic Explained
          </h3>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
             <div className="space-y-2">
