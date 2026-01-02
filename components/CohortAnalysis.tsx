@@ -31,15 +31,33 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
   // Create "Active" financials (Real vs Simulated)
   const activeFinancials = useMemo(() => {
     if (!isSandbox) return financials;
+
+    // CFO LOGIC: Calculate Implied Fixed Unit Cost from the Baseline
+    // Profit = Revenue - Cost. Therefore Cost = Revenue * (1 - Margin%)
+    // When we simulate a Price (ARPPU) increase, this Unit Cost should stay roughly fixed, 
+    // causing the Margin % to expand.
+    const baseRecurringUnitCost = financials.arppu > 0 
+        ? financials.arppu * (1 - financials.recurringGrossMarginPercent)
+        : 0;
+
+    // New Simulated Margin based on new Price vs Fixed Cost
+    const simRecurringGrossMarginPercent = simArppu > 0 
+        ? Math.max(0, (simArppu - baseRecurringUnitCost) / simArppu)
+        : 0;
+
+    // Recalculate LTV with new inputs
+    const simMonthlyRecurringProfit = simArppu * simRecurringGrossMarginPercent;
+    // LTV = SetupProfit + (MonthlyProfit / Churn%)
+    const simLtv = (financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent) + 
+                   (simMonthlyRecurringProfit / (Math.max(0.1, simChurn) / 100));
+
     return {
       ...financials,
       paidChurnRate: simChurn,
       arppu: simArppu,
       cac: simCac,
-      // Recalculate LTV based on simulated values (simplified approximation for visualization)
-      // LTV = Setup + (Recurring Margin / Churn)
-      ltv: (financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent) + 
-           ((simArppu * financials.recurringGrossMarginPercent) / (Math.max(0.1, simChurn) / 100))
+      recurringGrossMarginPercent: simRecurringGrossMarginPercent, // Use the new expanded margin
+      ltv: simLtv
     } as Financials;
   }, [financials, isSandbox, simChurn, simArppu, simCac]);
 

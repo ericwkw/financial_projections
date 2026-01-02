@@ -39,7 +39,9 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, paymentProc
     // Lifetime plans have 0 monthly recurring price
     
     // 2. Calculate Gross Margin per User (Recurring)
-    const margin = monthlyPrice - plan.unitCost;
+    // CFO FIX: Include Payment Processing Fees (e.g. Stripe) in calculation
+    const paymentFeePerUser = monthlyPrice * (paymentProcessingRate / 100);
+    const margin = monthlyPrice - plan.unitCost - paymentFeePerUser;
     
     // 3. Handle Edge Cases
     if (plan.price === 0) return { months: 999, label: "Free" };
