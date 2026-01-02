@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ScenarioParams } from '../types';
 import Tooltip from './Tooltip';
@@ -39,12 +38,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Viral Referral Rate</label>
-                      <Tooltip position="bottom" content="Free growth. Imagine if every 100 users brought in 1 friend." />
+                      <Tooltip width="w-64" position="bottom" content="Free growth. Impact: Increases MRR exponentially without increasing CAC. Extends Runway." />
                     </div>
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{params.viralRate}%</span>
                   </div>
                   <input
                     type="range" min="0" max="5" step="0.1"
+                    title="Impact: Increases MRR exponentially without increasing CAC."
                     value={params.viralRate}
                     onChange={(e) => onChange('viralRate', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -55,12 +55,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Growth Speed Dial</label>
-                      <Tooltip position="bottom" content="1.0 is normal. 1.2 means your marketing is working 20% better than expected." />
+                      <Tooltip width="w-64" position="bottom" content="Marketing Multiplier. Impact: Higher efficiency lowers effective CAC and accelerates Revenue." />
                     </div>
                     <span className="text-xs font-bold text-blue-500 dark:text-blue-400">{params.marketingEfficiency}x</span>
                   </div>
                   <input
                     type="range" min="0.5" max="2.0" step="0.1"
+                    title="Impact: Higher efficiency lowers effective CAC and accelerates Revenue."
                     value={params.marketingEfficiency}
                     onChange={(e) => onChange('marketingEfficiency', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
@@ -71,12 +72,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Expansion / Upsell</label>
-                      <Tooltip position="bottom" content="How much extra money you make from existing customers each month (upgrades)." />
+                      <Tooltip width="w-64" position="bottom" content="Upsell %. Impact: Increases LTV and Net Revenue Retention (NRR). Offsets Churn." />
                     </div>
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{params.expansionRate}%</span>
                   </div>
                   <input
                     type="range" min="0" max="5" step="0.1"
+                    title="Impact: Increases LTV and Net Revenue Retention (NRR)."
                     value={params.expansionRate}
                     onChange={(e) => onChange('expansionRate', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
@@ -96,11 +98,12 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                 <div className="space-y-1">
                    <div className="flex items-center mb-1">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Starting Cash (HKD)</label>
-                      <Tooltip position="bottom" content="Money in the bank right now." />
+                      <Tooltip width="w-64" position="bottom" content="Bank Balance. Impact: Directly determines Day 1 Runway. No effect on Unit Economics." />
                    </div>
                    <div className="relative">
                       <input
                         type="number" min="0"
+                        title="Impact: Directly determines Day 1 Runway."
                         value={params.startingCash}
                         onChange={(e) => onChange('startingCash', parseFloat(e.target.value))}
                         className="w-full px-2 py-1 text-sm border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
@@ -112,12 +115,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Payroll Tax</label>
-                       <Tooltip position="bottom" content="Hidden costs like insurance and taxes added on top of every salary." />
+                       <Tooltip width="w-64" position="bottom" content="Hidden costs (MPF/Ins). Impact: Increases Gross Burn and reduces Profit Margin." />
                     </div>
                     <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{params.payrollTax}%</span>
                   </div>
                   <input
                     type="range" min="0" max="40" step="1"
+                    title="Impact: Increases Gross Burn and reduces Profit Margin."
                     value={params.payrollTax}
                     onChange={(e) => onChange('payrollTax', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-slate-500"
@@ -128,12 +132,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Salary Growth</label>
-                       <Tooltip position="bottom" content="Yearly raises for employees (Inflation)." />
+                       <Tooltip width="w-64" position="bottom" content="Annual raises. Impact: Compounding increase in OpEx. Shortens Runway significantly over time." />
                     </div>
                     <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{params.salaryGrowthRate}% / yr</span>
                   </div>
                   <input
                     type="range" min="0" max="10" step="0.5"
+                    title="Impact: Compounding increase in OpEx."
                     value={params.salaryGrowthRate}
                     onChange={(e) => onChange('salaryGrowthRate', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
@@ -144,12 +149,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Sales Comm.</label>
-                       <Tooltip position="bottom" content="Cash bonus paid to sales team for closing new deals." />
+                       <Tooltip width="w-64" position="bottom" content="Sales Bonus. Impact: Increases CAC and reduces Cash Flow immediately. Reduces Profit Margin." />
                     </div>
                     <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{params.commissionRate}%</span>
                   </div>
                   <input
                     type="range" min="0" max="25" step="1"
+                    title="Impact: Increases CAC and reduces Cash Flow."
                     value={params.commissionRate}
                     onChange={(e) => onChange('commissionRate', parseFloat(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
@@ -176,12 +182,13 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                    <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center">
                         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Valuation Multiple</label>
-                        <Tooltip position="bottom" content="Company Value = ARR x This Number." />
+                        <Tooltip width="w-64" position="bottom" content="Company Value = ARR x Multiple. Impact: Sets Company Valuation and Founder Net Worth." />
                       </div>
                       <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{params.valuationMultiple}x</span>
                    </div>
                    <input
                         type="range" min="1" max="20" step="0.5"
+                        title="Impact: Sets Company Valuation and Founder Net Worth."
                         value={params.valuationMultiple}
                         onChange={(e) => onChange('valuationMultiple', parseFloat(e.target.value))}
                         className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
@@ -194,10 +201,12 @@ const ScenarioControls: React.FC<ScenarioControlsProps> = ({ params, onChange, o
                 <div className="space-y-1">
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Founder Equity</label>
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{params.founderEquity}%</span>
+                      <Tooltip width="w-64" position="bottom" content="Your Ownership. Impact: Determines Founder Wealth upon exit." />
                     </div>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{params.founderEquity}%</span>
                     <input
                         type="range" min="0" max="100" step="1"
+                        title="Impact: Determines Founder Wealth upon exit."
                         value={params.founderEquity}
                         onChange={(e) => onChange('founderEquity', parseFloat(e.target.value))}
                         className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-slate-500"

@@ -1,5 +1,3 @@
-## Support me: https://ko-fi.com/ericwkw
-
 # SaaS Vision AI
 
 **An AI-powered financial simulator to stress-test your SaaS for investors.**

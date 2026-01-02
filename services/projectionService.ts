@@ -42,7 +42,8 @@ export const calculateFinancials = (
         priceMonthly = plan.price / 12;
         planArrValue = plan.price;
     } else if (plan.interval === 'lifetime') {
-        // Lifetime revenue is NOT recurring. It is 0 MRR.
+        // Lifetime revenue is treated as One-Time. MRR is 0.
+        // Revenue is recognized upfront in 'oneTimeRevenueMonthly' or CashFlow.
         priceMonthly = 0;
         planArrValue = 0; 
     }
@@ -55,7 +56,7 @@ export const calculateFinancials = (
     
     // Growth Logic for Snapshot
     const growth = plan.monthlyGrowth || 0;
-    // Lifetime plans don't churn revenue-wise.
+    // Lifetime plans don't churn revenue-wise (Single Upfront Payment).
     const churn = plan.interval === 'lifetime' ? 0 : (plan.monthlyChurn || 0);
     
     // Effective Growth = Plan Growth * Marketing Efficiency + Viral Rate
@@ -216,6 +217,7 @@ export const calculateFinancials = (
       if (adjustedCac === 0 && totalNewPayingSubscribers > 0) {
           cacPaybackMonths = 0;
       } else {
+          // If Price < CAC and no recurring revenue, we never pay it back.
           cacPaybackMonths = 999;
       }
   }
@@ -364,8 +366,8 @@ export const generateProjections = (
         monthlyCashInflow += (existingUsers / 12) * plan.price;
       } else if (plan.interval === 'lifetime') {
         // Lifetime Plans:
+        // Cash = Price x New Users. No renewals.
         monthlyCashInflow += newUsers * plan.price;
-        // No renewal cash flow
       } else {
         // Monthly Plans: Cash = Revenue
         monthlyCashInflow += currentSubs * plan.price;

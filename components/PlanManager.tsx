@@ -55,7 +55,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
     
     // If it's a lifetime plan and we still have CAC left (meaning Price < CAC),
     // and margin is negative (because monthlyPrice is 0 and unitCost > 0),
-    // we will NEVER pay it back.
+    // we will NEVER pay it back via recurring profit (since there is none).
     if (plan.interval === 'lifetime') return { months: 999, label: "Never" };
 
     if (margin <= 0) return { months: 999, label: "Never" };
@@ -145,7 +145,14 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
                   <div className="w-1/3">
                     <select
                         value={plan.interval}
-                        onChange={(e) => onUpdate(plan.id, 'interval', e.target.value)}
+                        onChange={(e) => {
+                            const newInterval = e.target.value;
+                            onUpdate(plan.id, 'interval', newInterval);
+                            // Force churn to 0 for lifetime to prevent calculation errors
+                            if (newInterval === 'lifetime') {
+                                onUpdate(plan.id, 'monthlyChurn', 0);
+                            }
+                        }}
                         className="w-full px-1 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white bg-white dark:bg-slate-950 text-sm"
                     >
                         <option value="monthly">/mo</option>
@@ -177,7 +184,7 @@ const PlanManager: React.FC<PlanManagerProps> = ({ plans, globalCac, onAdd, onUp
              <div className="md:col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
-                        Grw% <Tooltip position="top" content="Monthly Growth" width="w-32" />
+                        Grw% <Tooltip position="top" content="Target monthly growth rate (%) for new subscribers." width="w-48" />
                     </label>
                     <input
                         type="number"
