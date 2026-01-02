@@ -77,6 +77,19 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
     return ''; 
   };
 
+  // Gradient Calculation for Net Income
+  const gradientOffset = () => {
+    const dataMax = Math.max(...projections.map((i) => i.netIncome));
+    const dataMin = Math.min(...projections.map((i) => i.netIncome));
+
+    if (dataMax <= 0) return 0;
+    if (dataMin >= 0) return 1;
+
+    return dataMax / (dataMax - dataMin);
+  };
+
+  const off = gradientOffset();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
@@ -96,6 +109,12 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
               data={projections}
               margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
             >
+              <defs>
+                <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset={off} stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset={off} stopColor="#ef4444" stopOpacity={0.3}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid stroke={gridColor} vertical={false} />
               <XAxis 
                 dataKey="month" 
@@ -113,16 +132,9 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financials, plans, pr
                 itemStyle={{ color: darkMode ? '#e2e8f0' : '#1e293b' }}
               />
               <ReferenceLine y={0} stroke={darkMode ? "#475569" : "#cbd5e1"} />
-              <Area type="monotone" dataKey="netIncome" fill="url(#colorNet)" stroke="#10b981" strokeWidth={2} fillOpacity={0.1} name="Net Income" />
+              <Area type="monotone" dataKey="netIncome" fill="url(#colorNet)" stroke={off === 0 ? "#ef4444" : off === 1 ? "#10b981" : "#64748b"} strokeWidth={2} fillOpacity={1} name="Net Income" />
               <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={false} name="Total Revenue" />
               <Line type="monotone" dataKey="grossProfit" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Gross Profit" />
-              
-              <defs>
-                <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3}/>
-                </linearGradient>
-              </defs>
             </ComposedChart>
           </ResponsiveContainer>
         </div>

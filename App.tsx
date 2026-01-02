@@ -353,6 +353,7 @@ const App: React.FC = () => {
             <CohortAnalysis 
                 projections={projections} 
                 financials={financials} 
+                params={scenarioParams} // New: Pass params for payment fee calculation
                 onNavigate={(tab) => setActiveTab(tab)} 
             />
           )}

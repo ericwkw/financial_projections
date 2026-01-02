@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Financials, MonthlyProjection } from '../types';
+import { Financials, MonthlyProjection, ScenarioParams } from '../types';
 import { generateCohortData } from '../services/projectionService';
 import Tooltip from './Tooltip';
 import { Users, DollarSign, Clock, Info, Calculator, RotateCcw, TrendingUp } from './Icons';
@@ -8,10 +8,11 @@ import { Users, DollarSign, Clock, Info, Calculator, RotateCcw, TrendingUp } fro
 interface CohortAnalysisProps {
   projections: MonthlyProjection[];
   financials: Financials;
+  params: ScenarioParams; // New Prop for Payment Fees
   onNavigate?: (tab: 'input' | 'analysis' | 'cohorts' | 'settings' | 'guide' | 'math') => void;
 }
 
-const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials, onNavigate }) => {
+const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials, params, onNavigate }) => {
   const [mode, setMode] = useState<'retention' | 'ltv'>('retention');
   
   // --- SANDBOX STATE ---
@@ -38,18 +39,18 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
     // When we simulate a Price (ARPPU) increase, this Unit Cost should stay roughly fixed, 
     // causing the Margin % to expand.
     const baseRecurringUnitCost = financials.arppu > 0 
-        ? financials.arppu * (1 - financials.recurringGrossMarginPercent)
+        ? financials.arppu * (1 - financials.grossMarginPercent) // Use Blended Margin for accuracy
         : 0;
 
     // New Simulated Margin based on new Price vs Fixed Cost
-    const simRecurringGrossMarginPercent = simArppu > 0 
+    const simGrossMarginPercent = simArppu > 0 
         ? Math.max(0, (simArppu - baseRecurringUnitCost) / simArppu)
         : 0;
 
     // Recalculate LTV with new inputs
-    const simMonthlyRecurringProfit = simArppu * simRecurringGrossMarginPercent;
+    const simMonthlyRecurringProfit = simArppu * simGrossMarginPercent;
     // LTV = SetupProfit + (MonthlyProfit / Churn%)
-    const simLtv = (financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent) + 
+    const simLtv = (financials.weightedAvgOneTimeRevenue * (1 - params.paymentProcessingRate/100)) + 
                    (simMonthlyRecurringProfit / (Math.max(0.1, simChurn) / 100));
 
     return {
@@ -57,12 +58,12 @@ const CohortAnalysis: React.FC<CohortAnalysisProps> = ({ projections, financials
       paidChurnRate: simChurn,
       arppu: simArppu,
       cac: simCac,
-      recurringGrossMarginPercent: simRecurringGrossMarginPercent, // Use the new expanded margin
+      grossMarginPercent: simGrossMarginPercent, // Use the new expanded margin
       ltv: simLtv
     } as Financials;
-  }, [financials, isSandbox, simChurn, simArppu, simCac]);
+  }, [financials, isSandbox, simChurn, simArppu, simCac, params.paymentProcessingRate]);
 
-  const cohorts = useMemo(() => generateCohortData(projections, activeFinancials), [projections, activeFinancials]);
+  const cohorts = useMemo(() => generateCohortData(projections, activeFinancials, params.paymentProcessingRate), [projections, activeFinancials, params.paymentProcessingRate]);
 
   // Extract Key Insights
   const representativeCohort = cohorts[0]?.metrics || [];

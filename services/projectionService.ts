@@ -591,7 +591,8 @@ export const generateProjections = (
 
 export const generateCohortData = (
   projections: MonthlyProjection[],
-  financials: Financials
+  financials: Financials,
+  paymentProcessingRate: number
 ): Cohort[] => {
   const cohorts: Cohort[] = [];
   const MAX_COHORT_MONTHS = 12; // Rows to display
@@ -607,36 +608,33 @@ export const generateCohortData = (
     let currentRetention = 100; // %
     let cumulativeGrossProfit = 0;
 
-    // Initial One-Time Profit (Month 0) - Setup Fees
-    // Weighted Avg One Time Revenue * Setup Margin (Not Global Margin)
-    // Setup Margin = 1 - Payment Processing Rate (approx)
-    // Note: We don't have direct access to params here, but we can derive setup profit 
-    // from the LTV calculation structure or just approximate with Global Margin if needed.
-    // However, to be consistent with the LTV fix, we should use the same logic.
-    // Since we don't pass 'params' into this function, we will fall back to using 
-    // the LTV ratio component or stick to Global Margin for the grid visualization 
-    // to avoid breaking the function signature for now. 
-    // Given this is a visualization grid (Cohort Analysis), slight deviation from the Dashboard LTV is acceptable 
-    // compared to breaking the API.
+    // CFO FIX: 
+    // 1. Initial Profit (Day 1) = Setup Fees * (1 - Payment Fees). 
+    // This assumes Setup Fees are pure margin (excluding fixed costs) but subject to transaction fees.
+    const setupMarginPercent = 1 - (paymentProcessingRate / 100);
+    const oneTimeProfit = financials.weightedAvgOneTimeRevenue * setupMarginPercent;
     
-    const oneTimeProfit = financials.weightedAvgOneTimeRevenue * financials.grossMarginPercent;
-    
-    // Month 0 includes Setup Fee Profit + First Month Recurring Profit
     cumulativeGrossProfit += oneTimeProfit;
 
     for (let m = 0; m <= MAX_LIFETIME_MONTHS; m++) {
-      // CFO FIX: Use SaaS-Only Gross Profit Per User (exclude Lifetime dilution)
-      const monthlyRecurringGrossProfit = financials.arppu > 0 
-          ? (financials.arppu * financials.recurringGrossMarginPercent) 
+      // CFO FIX: 
+      // 2. Recurring Profit (M0 onwards) = Blended ARPU * Blended Gross Margin.
+      // We use BLENDED metrics here because Cohorts mix both SaaS and Lifetime users.
+      // - SaaS Users: High Revenue, Medium Cost.
+      // - Lifetime Users: Zero Revenue, Low Cost (but Cost > 0).
+      // Using "Recurring Gross Margin" (SaaS-Only) would be WRONG here because it ignores LTD server costs.
+      // Using "Global Gross Margin" correctly captures the burden of LTD users on the profit pool.
+      const monthlyBlendedGrossProfit = financials.arppu > 0 
+          ? (financials.arppu * financials.grossMarginPercent) 
           : 0;
 
       if (m > 0) {
-        // Apply Churn (SaaS Only Churn)
+        // Apply Churn (Using Paid Churn as best proxy for cohort decay)
         currentRetention = currentRetention * (1 - (financials.paidChurnRate / 100));
-        cumulativeGrossProfit += (currentRetention / 100) * monthlyRecurringGrossProfit;
+        cumulativeGrossProfit += (currentRetention / 100) * monthlyBlendedGrossProfit;
       } else {
-        // Month 0
-        cumulativeGrossProfit += monthlyRecurringGrossProfit;
+        // Month 0: Add the first month of recurring service profit on top of setup profit
+        cumulativeGrossProfit += monthlyBlendedGrossProfit;
       }
 
       metrics.push({
